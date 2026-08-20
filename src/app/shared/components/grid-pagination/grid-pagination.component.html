@@ -1,0 +1,38 @@
+<nav *ngIf="totalItems > pageSize" class="grid-pagination" aria-label="Paginacion de tabla">
+  <p class="grid-pagination__summary">
+    Mostrando {{ startItem }}-{{ endItem }} de {{ totalItems }}
+  </p>
+
+  <div class="grid-pagination__controls">
+    <button
+      type="button"
+      class="grid-pagination__button"
+      [disabled]="currentPage <= 1"
+      (click)="goToPreviousPage()">
+      Anterior
+    </button>
+
+    <ng-container *ngFor="let marker of pageMarkers; trackBy: trackByMarker">
+      <button
+        *ngIf="isPageNumber(marker); else paginationEllipsis"
+        type="button"
+        class="grid-pagination__button"
+        [class.grid-pagination__button--active]="marker === currentPage"
+        (click)="goToPage(marker)">
+        {{ marker }}
+      </button>
+
+      <ng-template #paginationEllipsis>
+        <span class="grid-pagination__ellipsis">...</span>
+      </ng-template>
+    </ng-container>
+
+    <button
+      type="button"
+      class="grid-pagination__button"
+      [disabled]="currentPage >= totalPages"
+      (click)="goToNextPage()">
+      Siguiente
+    </button>
+  </div>
+</nav>

@@ -1,0 +1,57 @@
+.centro-costo-dialog {
+  display: block;
+}
+
+.centro-costo-dialog__content {
+  display: grid;
+  gap: 1rem;
+  min-width: min(28rem, 78vw);
+}
+
+.centro-costo-dialog__description {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.centro-costo-dialog__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.centro-costo-dialog__field span {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.centro-costo-dialog__field input,
+.centro-costo-dialog__field select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.centro-costo-dialog__field input:focus,
+.centro-costo-dialog__field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.centro-costo-dialog__field input:disabled {
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.centro-costo-dialog__error {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-accent);
+  color: var(--accent);
+}

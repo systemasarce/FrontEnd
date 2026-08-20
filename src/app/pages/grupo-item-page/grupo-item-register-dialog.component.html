@@ -1,0 +1,24 @@
+<form class="grupo-item-dialog" [formGroup]="form" (ngSubmit)="guardar()">
+  <h2 mat-dialog-title>Nuevo Grupo de Item</h2>
+
+  <mat-dialog-content class="grupo-item-dialog__content">
+    <p class="grupo-item-dialog__description">
+      Registra un nuevo grupo de item. El estado inicial siempre sera activo.
+    </p>
+
+    <label class="grupo-item-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="grpDes" maxlength="120">
+      <small class="grupo-item-dialog__error" *ngIf="form.controls['grpDes'].touched && (form.controls['grpDes'].hasError('required') || form.controls['grpDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <p *ngIf="errorMessage" class="grupo-item-dialog__error">{{ errorMessage }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

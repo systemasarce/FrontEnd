@@ -1,0 +1,269 @@
+<form class="we-report" [formGroup]="form">
+  <div class="we-report__form-top">
+    <div>
+      <p class="we-report__eyebrow">ADMINISTRACION</p>
+      <h1 class="we-report__title">{{ modoEdicion ? 'Modificar We Report' : 'We Report' }}</h1>
+      <p class="we-report__subtitle">Registra un reporte con el mismo estilo visual del sistema.</p>
+    </div>
+
+    <div class="we-report__form-actions">
+      <button type="button" class="btn-primary" (click)="guardar()" [disabled]="guardando">{{ modoEdicion ? 'Modificar' : 'Agregar' }}</button>
+      <button type="button" class="btn-secondary" (click)="retroceder()">Retroceder</button>
+    </div>
+  </div>
+
+  <section class="we-report-card">
+    <h3>Datos del Reportante</h3>
+
+    <div class="observador-grid">
+      <div class="field">
+        <label>Nombre:</label>
+        <input type="text" [value]="reportanteNombreDisplay" readonly>
+      </div>
+
+      <div class="field">
+        <label>Cargo:</label>
+        <input type="text" [value]="reportanteCargoDisplay" readonly>
+      </div>
+
+      <div class="field">
+        <label>Área:</label>
+        <input type="text" [value]="reportanteAreaDisplay" readonly>
+      </div>
+
+      <div class="field">
+        <label>Email:</label>
+        <input type="text" [value]="reportanteEmailDisplay" readonly>
+      </div>
+    </div>
+
+    <div class="anonymous-row" *ngIf="!(modoEdicion && esAnonimo); else anonimoBloqueadoTpl">
+      <label class="check-inline">
+        <input type="checkbox" formControlName="anonimo" [disabled]="anonimoBloqueadoEnEdicion">
+        <span>Anónimo</span>
+      </label>
+    </div>
+
+    <ng-template #anonimoBloqueadoTpl>
+      <div class="anonymous-row anonymous-row--locked">
+        <span class="anonymous-badge">Anónimo</span>
+      </div>
+    </ng-template>
+
+    <p class="anonymous-note" *ngIf="esAnonimo">Al marcar Anónimo, solo se enviará el valor S/N al backend; los datos del reportante siguen visibles en pantalla.</p>
+  </section>
+
+  <section class="we-report-card">
+    <h3>Datos Generales</h3>
+
+    <div class="form-grid">
+      <div class="field combo-field">
+        <label>Tipo de Reporte:</label>
+        <div class="combo">
+          <button type="button" class="combo__trigger" [class.combo__trigger--placeholder]="!form.get('tipoReporte')?.value" [disabled]="cargandoTiposReporte" (click)="$event.stopPropagation(); toggleCombo('tipoReporte')">
+            <span class="combo__text">{{ tipoReporteDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.tipoReporte" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar por código o nombre..." [value]="comboSearch.tipoReporte" (input)="onSearchChange('tipoReporte', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectTipoReporte(null)">Seleccionar</button>
+              <button type="button" class="combo__option" *ngFor="let tipo of tiposReporteFiltrados; trackBy: trackByTipoReporte" (click)="selectTipoReporte(tipo)">{{ tipo.Reporte_Tipo }}</button>
+              <div class="combo__empty" *ngIf="tiposReporteFiltrados.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field combo-field">
+        <label>Área donde se Detectó:</label>
+        <div class="combo">
+          <button type="button" class="combo__trigger" [class.combo__trigger--placeholder]="!form.get('areaDetectada')?.value" [disabled]="cargandoAreas" (click)="$event.stopPropagation(); toggleCombo('areaDetectada')">
+            <span class="combo__text">{{ areaDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.areaDetectada" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar por código o nombre..." [value]="comboSearch.areaDetectada" (input)="onSearchChange('areaDetectada', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectArea(null)">Seleccionar</button>
+              <button type="button" class="combo__option" *ngFor="let area of areasFiltradas; trackBy: trackByArea" (click)="selectArea(area)">{{ area.Cen_Cos_Des }}</button>
+              <div class="combo__empty" *ngIf="areasFiltradas.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field combo-field">
+        <label>Cliente:</label>
+        <div class="combo">
+          <button type="button" class="combo__trigger" [class.combo__trigger--placeholder]="!form.get('cliente')?.value" [disabled]="cargandoClientes" (click)="$event.stopPropagation(); toggleCombo('cliente')">
+            <span class="combo__text">{{ clienteDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.cliente" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar por código o nombre..." [value]="comboSearch.cliente" (input)="onSearchChange('cliente', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectCliente(null)">Seleccionar</button>
+              <button type="button" class="combo__option" *ngFor="let cliente of clientesFiltrados; trackBy: trackByCliente" (click)="selectCliente(cliente)">{{ cliente.Cliente_Nombre }}</button>
+              <div class="combo__empty" *ngIf="clientesFiltrados.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field combo-field">
+        <label>Subestación:</label>
+        <div class="combo">
+          <button type="button" class="combo__trigger" [class.combo__trigger--placeholder]="!form.get('subestacion')?.value" [disabled]="cargandoSubestaciones" (click)="$event.stopPropagation(); toggleCombo('subestacion')">
+            <span class="combo__text">{{ subestacionDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.subestacion" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar por código o nombre..." [value]="comboSearch.subestacion" (input)="onSearchChange('subestacion', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectSubestacion(null)">Seleccionar</button>
+              <button type="button" class="combo__option" *ngFor="let subestacion of subestacionesFiltradas; trackBy: trackBySubestacion" (click)="selectSubestacion(subestacion)">{{ subestacion.Subestacion_Nombre }}</button>
+              <div class="combo__empty" *ngIf="subestacionesFiltradas.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field field--wide">
+        <label>Descripción del Evento:</label>
+        <textarea formControlName="descripcionEvento" rows="4" placeholder="Descripción del Evento"></textarea>
+      </div>
+
+      <div class="field field--wide upload-field">
+        <label>Foto 1:</label>
+        <div class="upload-actions">
+          <button type="button" class="btn-primary btn-upload" (click)="abrirSelectorArchivo('evento')">Seleccionar archivo</button>
+          <small class="file-hint" *ngIf="fotosEvento.length === 0">No se eligió ningún archivo</small>
+        </div>
+
+        <input #fotoEventoGalleryInput type="file" accept="image/*" multiple class="upload-input" (change)="onFotoEventoChange($event)">
+        <input #fotoEventoCameraInput type="file" accept="image/*" capture="environment" class="upload-input" (change)="onFotoEventoChange($event)">
+
+        <div class="uploaded-list" *ngIf="fotosEvento.length > 0">
+          <div class="uploaded-item" *ngFor="let archivo of fotosEvento; trackBy: trackByArchivoId">
+            <span class="uploaded-item__name">{{ archivo.nombre }}</span>
+            <div class="uploaded-item__actions">
+              <button type="button" class="icon-btn icon-btn--view" (click)="abrirArchivo(archivo)" aria-label="Ver imagen" title="Ver imagen">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button type="button" class="icon-btn icon-btn--delete" (click)="eliminarArchivo('evento', archivo.id)" aria-label="Eliminar imagen" title="Eliminar imagen">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field field--wide">
+        <label>Acciones Inmediatas:</label>
+        <textarea formControlName="accionesInmediatas" rows="4" placeholder="Acciones Inmediatas"></textarea>
+      </div>
+
+      <div class="field field--wide upload-field">
+        <label>Foto 2:</label>
+        <div class="upload-actions">
+          <button type="button" class="btn-primary btn-upload" (click)="abrirSelectorArchivo('acciones')">Seleccionar archivo</button>
+          <small class="file-hint" *ngIf="fotosAcciones.length === 0">No se eligió ningún archivo</small>
+        </div>
+
+        <input #fotoAccionesGalleryInput type="file" accept="image/*" multiple class="upload-input" (change)="onFotoAccionesChange($event)">
+        <input #fotoAccionesCameraInput type="file" accept="image/*" capture="environment" class="upload-input" (change)="onFotoAccionesChange($event)">
+
+        <div class="uploaded-list" *ngIf="fotosAcciones.length > 0">
+          <div class="uploaded-item" *ngFor="let archivo of fotosAcciones; trackBy: trackByArchivoId">
+            <span class="uploaded-item__name">{{ archivo.nombre }}</span>
+            <div class="uploaded-item__actions">
+              <button type="button" class="icon-btn icon-btn--view" (click)="abrirArchivo(archivo)" aria-label="Ver imagen" title="Ver imagen">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button type="button" class="icon-btn icon-btn--delete" (click)="eliminarArchivo('acciones', archivo.id)" aria-label="Eliminar imagen" title="Eliminar imagen">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field field--wide">
+        <label>Acciones Propuestas:</label>
+        <textarea formControlName="accionesPropuestas" rows="4" placeholder="Acciones Propuestas"></textarea>
+      </div>
+
+      <div class="field combo-field">
+        <label>Potencial:</label>
+        <div class="combo">
+          <button type="button" class="combo__trigger" [class.combo__trigger--placeholder]="!form.get('potencial')?.value" (click)="$event.stopPropagation(); toggleCombo('potencial')">
+            <span class="combo__text">{{ potencialDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.potencial" (click)="$event.stopPropagation()">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectPotencial('')">Seleccionar</button>
+              <button type="button" class="combo__option" *ngFor="let item of potencialOptions" (click)="selectPotencial(item)">{{ item }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field combo-field">
+        <label>Aplica Stop Work:</label>
+        <div class="combo">
+          <button type="button" class="combo__trigger" [class.combo__trigger--placeholder]="false" [disabled]="modoEdicion && aplicaStopWorkBloqueadoEnEdicion" (click)="$event.stopPropagation(); toggleCombo('aplicaStopWork')">
+            <span class="combo__text">{{ stopWorkDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.aplicaStopWork" (click)="$event.stopPropagation()">
+            <div class="combo__list">
+              <button type="button" class="combo__option" *ngFor="let item of stopWorkOptions" (click)="selectStopWork(item)">{{ item }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field combo-field" *ngIf="modoEdicion">
+        <label>Estado:</label>
+        <div class="combo">
+          <button type="button" class="combo__trigger" [class.combo__trigger--placeholder]="false" (click)="$event.stopPropagation(); toggleCombo('estado')">
+            <span class="combo__text">{{ estadoDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.estado" (click)="$event.stopPropagation()">
+            <div class="combo__list">
+              <button type="button" class="combo__option" *ngFor="let item of estadoOptions" (click)="form.patchValue({ estado: item.value }); closeCombos()">{{ item.label }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stopwork-note" *ngIf="form.get('aplicaStopWork')?.value === 'SI'">
+      Si marca <strong>SI</strong>: Se redireccionará a llenar el formato Stop Work.
+    </div>
+    <div class="stopwork-note" *ngIf="modoEdicion && aplicaStopWorkBloqueadoEnEdicion">
+      Este We Report ya fue guardado con <strong>SI</strong>, por eso el valor queda bloqueado al editar.
+    </div>
+</section>
+</form>

@@ -1,0 +1,246 @@
+<section class="obra-page">
+  <header class="obra-page__header">
+    <div>
+      <p class="obra-page__eyebrow">Procesos</p>
+      <h2>Obra</h2>
+      <p>Registra y consulta las obras asociadas a clientes, centros de costo y responsables.</p>
+    </div>
+    <button *ngIf="!showEditor" type="button" class="button button--primary" (click)="nuevaObra()">Nueva obra</button>
+  </header>
+
+  <form *ngIf="!showEditor" class="obra-filters" [formGroup]="filtersForm" (ngSubmit)="buscar()">
+    <label class="field">
+      <span>ID obra</span>
+      <input type="text" inputmode="numeric" formControlName="id" placeholder="Todos" (input)="sanitizeId($event)">
+    </label>
+    <label class="field">
+      <span>Centro de costo</span>
+      <mat-form-field appearance="outline" class="obra-select">
+        <mat-select formControlName="centroCosto" (openedChange)="onSelectOpened($event, filtroCentroCostoSearchControl)">
+          <mat-option class="obra-select-search-option">
+            <input matInput class="obra-select-search" placeholder="Buscar centro de costo"
+              [formControl]="filtroCentroCostoSearchControl" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todos los centros</mat-option>
+          <mat-option *ngFor="let item of filteredFiltroCentrosCosto; trackBy: trackByOption" [value]="item.id">{{ item.description }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+    <label class="field">
+      <span>Nombre</span>
+      <input type="text" formControlName="nombre" placeholder="Todas las obras">
+    </label>
+    <label class="field">
+      <span>Ubicación</span>
+      <input type="text" formControlName="ubicacion" placeholder="Todas las ubicaciones">
+    </label>
+    <label class="field">
+      <span>Área</span>
+      <input type="text" formControlName="area" placeholder="Todas las áreas">
+    </label>
+    <label class="field">
+      <span>Cliente</span>
+      <mat-form-field appearance="outline" class="obra-select">
+        <mat-select formControlName="cliente" (openedChange)="onSelectOpened($event, filtroClienteSearchControl)">
+          <mat-option class="obra-select-search-option">
+            <input matInput class="obra-select-search" placeholder="Buscar cliente"
+              [formControl]="filtroClienteSearchControl" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todos los clientes</mat-option>
+          <mat-option *ngFor="let item of filteredFiltroClientes; trackBy: trackByOption" [value]="item.id">{{ item.description }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+    <label class="field">
+      <span>Estado</span>
+      <mat-form-field appearance="outline" class="obra-select">
+        <mat-select formControlName="estado" (openedChange)="onSelectOpened($event, filtroEstadoSearchControl)">
+          <mat-option class="obra-select-search-option">
+            <input matInput class="obra-select-search" placeholder="Buscar estado"
+              [formControl]="filtroEstadoSearchControl" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option value="">Todos los estados</mat-option>
+          <mat-option *ngFor="let estado of filteredEstados" [value]="estado.code">{{ estado.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+    <label class="field">
+      <span>Responsable</span>
+      <mat-form-field appearance="outline" class="obra-select">
+        <mat-select formControlName="responsable" (openedChange)="onSelectOpened($event, filtroResponsableSearchControl)">
+          <mat-option class="obra-select-search-option">
+            <input matInput class="obra-select-search" placeholder="Buscar responsable"
+              [formControl]="filtroResponsableSearchControl" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option value="">Todos los responsables</mat-option>
+          <mat-option *ngFor="let item of filteredFiltroResponsables; trackBy: trackByUsuario" [value]="item.code">{{ item.description }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <div class="obra-filters__actions">
+      <button type="button" class="button button--secondary" (click)="limpiarFiltros()">Limpiar</button>
+      <button type="submit" class="button button--primary" [disabled]="isLoading">{{ isLoading ? 'Buscando...' : 'Buscar' }}</button>
+    </div>
+  </form>
+
+  <section *ngIf="showEditor" class="obra-editor">
+    <div class="obra-editor__heading">
+      <div>
+        <h3>{{ editorTitle }}</h3>
+      </div>
+      <button type="button" class="obra-editor__close" aria-label="Cerrar editor" (click)="cancelarEdicion()">&times;</button>
+    </div>
+
+    <form class="obra-editor__form" [formGroup]="form" (ngSubmit)="guardar()">
+      <label class="field">
+        <span>Centro de costo *</span>
+        <mat-form-field appearance="outline" class="obra-select">
+          <mat-select formControlName="centroCosto" placeholder="Seleccionar centro de costo"
+            (openedChange)="onSelectOpened($event, editorCentroCostoSearchControl)">
+            <mat-option class="obra-select-search-option">
+              <input matInput class="obra-select-search" placeholder="Buscar centro de costo"
+                [formControl]="editorCentroCostoSearchControl" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option *ngFor="let item of filteredEditorCentrosCosto; trackBy: trackByOption" [value]="item.id">{{ item.description }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <small *ngIf="form.controls['centroCosto'].touched && form.controls['centroCosto'].invalid">Selecciona un centro de costo.</small>
+      </label>
+      <label class="field">
+        <span>Nombre de la obra *</span>
+        <input type="text" formControlName="nombre" maxlength="250">
+        <small *ngIf="form.controls['nombre'].touched && form.controls['nombre'].invalid">Ingresa el nombre de la obra.</small>
+      </label>
+      <label class="field">
+        <span>Cliente *</span>
+        <mat-form-field appearance="outline" class="obra-select">
+          <mat-select formControlName="cliente" placeholder="Seleccionar cliente"
+            (openedChange)="onSelectOpened($event, editorClienteSearchControl)">
+            <mat-option class="obra-select-search-option">
+              <input matInput class="obra-select-search" placeholder="Buscar cliente"
+                [formControl]="editorClienteSearchControl" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option *ngFor="let item of filteredEditorClientes; trackBy: trackByOption" [value]="item.id">{{ item.description }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <small *ngIf="form.controls['cliente'].touched && form.controls['cliente'].invalid">Selecciona un cliente.</small>
+        <small *ngIf="!isLoadingCatalogs && !clientes.length">No hay clientes activos disponibles.</small>
+      </label>
+      <label class="field">
+        <span>Responsable *</span>
+        <mat-form-field appearance="outline" class="obra-select">
+          <mat-select formControlName="responsable" placeholder="Seleccionar responsable"
+            (openedChange)="onSelectOpened($event, editorResponsableSearchControl)">
+            <mat-option class="obra-select-search-option">
+              <input matInput class="obra-select-search" placeholder="Buscar responsable"
+                [formControl]="editorResponsableSearchControl" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option *ngFor="let item of filteredEditorResponsables; trackBy: trackByUsuario" [value]="item.code">{{ item.description }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <small *ngIf="form.controls['responsable'].touched && form.controls['responsable'].invalid">Selecciona un responsable.</small>
+      </label>
+      <label class="field">
+        <span>Ubicación</span>
+        <input type="text" formControlName="ubicacion" maxlength="250">
+      </label>
+      <label class="field">
+        <span>Área</span>
+        <input type="text" formControlName="area" maxlength="250">
+      </label>
+      <label class="field">
+        <span>Código de contrato</span>
+        <input type="text" formControlName="codigoContrato" maxlength="255">
+      </label>
+      <label class="field">
+        <span>Fecha de apertura *</span>
+        <input type="date" formControlName="fechaApertura">
+        <small *ngIf="form.controls['fechaApertura'].touched && form.controls['fechaApertura'].invalid">Selecciona la fecha de apertura.</small>
+      </label>
+      <p *ngIf="editorErrorMessage" class="message message--error">{{ editorErrorMessage }}</p>
+      <div class="obra-editor__actions">
+        <button type="button" class="button button--secondary" (click)="cancelarEdicion()" [disabled]="isSaving">Cancelar</button>
+        <button type="submit" class="button button--primary" [disabled]="isSaving || isLoadingCatalogs">
+          {{ isSaving ? 'Guardando...' : (editingObraId === null ? 'Guardar' : 'Actualizar') }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <p *ngIf="!showEditor && errorMessage" class="message message--error">{{ errorMessage }}</p>
+  <p *ngIf="!showEditor && isLoading" class="message">Cargando obras...</p>
+  <p *ngIf="!showEditor && !isLoading && !errorMessage && !obras.length" class="message">No se encontraron obras con los filtros seleccionados.</p>
+
+  <section *ngIf="!showEditor && !isLoading && obras.length" class="obra-grid-card">
+    <div class="table-shell">
+      <table class="obra-table">
+        <thead>
+          <tr>
+            <th>Acciones</th>
+            <th>ID</th>
+            <th>Obra</th>
+            <th>Centro de costo</th>
+            <th>Cliente</th>
+            <th>Responsable</th>
+            <th>Fecha de apertura</th>
+            <th>Estado</th>
+            <th>Fecha de inicio</th>
+            <th>Fecha de fin</th>
+            <th>Fecha de cierre</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let obra of paginatedObras; trackBy: trackByObra">
+            <td>
+              <button type="button" class="table-action" aria-label="Editar obra" [disabled]="isLoadingEditor" (click)="editarObra(obra)">&#9998;</button>
+            </td>
+            <td>{{ obra.id }}</td>
+            <td class="obra-table__name">{{ obra.nombre }}</td>
+            <td>{{ obra.centroCosto }}</td>
+            <td>{{ obra.cliente }}</td>
+            <td>{{ obra.responsable }}</td>
+            <td>{{ obra.fechaApertura }}</td>
+            <td><span class="status-pill" [attr.data-state]="obra.estadoCodigo">{{ obra.estado }}</span></td>
+            <td>
+              <div class="date-update">
+                <input type="date" [(ngModel)]="obra.fechaInicioInput" aria-label="Fecha de inicio">
+                <button type="button" class="date-update__button"
+                  [disabled]="!obra.fechaInicioInput || isSavingDate(obra.id, 'inicio')"
+                  (click)="actualizarFecha(obra, 'inicio')">
+                  {{ isSavingDate(obra.id, 'inicio') ? 'Actualizando...' : 'Actualizar' }}
+                </button>
+              </div>
+            </td>
+            <td>
+              <div class="date-update">
+                <input type="date" [(ngModel)]="obra.fechaFinInput" aria-label="Fecha de fin">
+                <button type="button" class="date-update__button"
+                  [disabled]="!obra.fechaFinInput || isSavingDate(obra.id, 'fin')"
+                  (click)="actualizarFecha(obra, 'fin')">
+                  {{ isSavingDate(obra.id, 'fin') ? 'Actualizando...' : 'Actualizar' }}
+                </button>
+              </div>
+            </td>
+            <td>
+              <div class="date-update">
+                <input type="date" [(ngModel)]="obra.fechaCierreInput" aria-label="Fecha de cierre">
+                <button type="button" class="date-update__button"
+                  [disabled]="!obra.fechaCierreInput || isSavingDate(obra.id, 'cierre')"
+                  (click)="actualizarFecha(obra, 'cierre')">
+                  {{ isSavingDate(obra.id, 'cierre') ? 'Actualizando...' : 'Actualizar' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-grid-pagination
+      [totalItems]="obras.length"
+      [currentPage]="currentPage"
+      [pageSize]="pageSize"
+      (pageChange)="onPageChange($event)">
+    </app-grid-pagination>
+  </section>
+</section>

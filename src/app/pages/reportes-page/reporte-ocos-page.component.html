@@ -1,0 +1,205 @@
+<section class="reporte-panel reporte-ocos" aria-labelledby="reporte-ocos-title">
+  <header class="reporte-panel__header">
+    <div>
+      <a routerLink="/reportes" class="reporte-panel__back" aria-label="Volver a reportes">
+        <span class="reporte-panel__back-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"></path></svg>
+        </span>
+        <span>Volver a reportes</span>
+      </a>
+      <h1 id="reporte-ocos-title">Reporte OC/OS</h1>
+      <p>Consulta el seguimiento de pedidos, órdenes de compra y servicio, importes y datos de pago.</p>
+    </div>
+  </header>
+
+  <section class="reporte-panel__filters reporte-ocos__filters" aria-label="Filtros del reporte OC y OS">
+    <label class="reporte-panel__field">
+      <span>Fecha inicial</span>
+      <mat-form-field appearance="outline">
+        <input matInput [matDatepicker]="fechaInicioPicker" [formControl]="fechaInicioControl">
+        <mat-datepicker-toggle matSuffix [for]="fechaInicioPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fechaInicioPicker></mat-datepicker>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Fecha final</span>
+      <mat-form-field appearance="outline">
+        <input matInput [matDatepicker]="fechaFinPicker" [formControl]="fechaFinControl">
+        <mat-datepicker-toggle matSuffix [for]="fechaFinPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fechaFinPicker></mat-datepicker>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Nro. pedido</span>
+      <mat-form-field appearance="outline">
+        <input matInput type="number" min="1" placeholder="Todos" [formControl]="pedidoControl">
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Nro. orden</span>
+      <mat-form-field appearance="outline">
+        <input matInput type="number" min="1" placeholder="Todas" [formControl]="ordenControl">
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Tipo de pedido</span>
+      <mat-form-field appearance="outline">
+        <mat-select [formControl]="tipoPedidoControl">
+          <mat-option *ngFor="let item of tiposPedido; trackBy: trackByOption" [value]="item.id">
+            {{ item.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Moneda</span>
+      <mat-form-field appearance="outline">
+        <mat-select [formControl]="monedaControl" [disabled]="isLoadingCatalogos">
+          <mat-option [value]="0">Todas las monedas</mat-option>
+          <mat-option *ngFor="let item of monedas; trackBy: trackByOption" [value]="item.id">
+            {{ item.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Solicitante</span>
+      <mat-form-field appearance="outline">
+        <mat-select [formControl]="usuarioControl" [disabled]="isLoadingCatalogos"
+          (openedChange)="onSelectOpened($event, usuarioSearchControl)">
+          <mat-option>
+            <input matInput placeholder="Buscar solicitante" [formControl]="usuarioSearchControl"
+              (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option value="">Todos los solicitantes</mat-option>
+          <mat-option *ngFor="let item of filteredUsuarios; trackBy: trackByUsuario" [value]="item.code">
+            {{ item.code }} - {{ item.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Centro de costo</span>
+      <mat-form-field appearance="outline">
+        <mat-select [formControl]="centroCostoControl" [disabled]="isLoadingCatalogos"
+          (openedChange)="onSelectOpened($event, centroCostoSearchControl)">
+          <mat-option>
+            <input matInput placeholder="Buscar centro de costo" [formControl]="centroCostoSearchControl"
+              (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todos los centros de costo</mat-option>
+          <mat-option *ngFor="let item of filteredCentrosCosto; trackBy: trackByOption" [value]="item.id">
+            {{ item.code ? item.code + ' - ' : '' }}{{ item.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Forma de pago</span>
+      <mat-form-field appearance="outline">
+        <mat-select [formControl]="formaPagoControl" [disabled]="isLoadingCatalogos"
+          (openedChange)="onSelectOpened($event, formaPagoSearchControl)">
+          <mat-option>
+            <input matInput placeholder="Buscar forma de pago" [formControl]="formaPagoSearchControl"
+              (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todas las formas de pago</mat-option>
+          <mat-option *ngFor="let item of filteredFormasPago; trackBy: trackByOption" [value]="item.id">
+            {{ item.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Proveedor</span>
+      <mat-form-field appearance="outline">
+        <mat-select [formControl]="proveedorControl" [disabled]="isLoadingCatalogos"
+          (openedChange)="onSelectOpened($event, proveedorSearchControl)">
+          <mat-option>
+            <input matInput placeholder="Buscar proveedor" [formControl]="proveedorSearchControl"
+              (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todos los proveedores</mat-option>
+          <mat-option *ngFor="let item of filteredProveedores; trackBy: trackByOption" [value]="item.id">
+            {{ item.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+  </section>
+
+  <section class="reporte-ocos__toolbar" aria-label="Acciones del reporte">
+    <div class="reporte-panel__actions">
+      <details class="reporte-ocos__column-selector">
+        <summary>Columnas Excel ({{ selectedExportColumnCount }}/{{ columns.length }})</summary>
+        <div class="reporte-ocos__column-selector-panel">
+          <label class="reporte-ocos__column-option reporte-ocos__column-option--all">
+            <input
+              type="checkbox"
+              [checked]="areAllExportColumnsSelected"
+              [indeterminate]="selectedExportColumnCount > 0 && !areAllExportColumnsSelected"
+              (change)="toggleAllExportColumns($any($event.target).checked)">
+            <span>Seleccionar todas</span>
+          </label>
+          <div class="reporte-ocos__column-options">
+            <label class="reporte-ocos__column-option" *ngFor="let column of columns; trackBy: trackByColumn">
+              <input
+                type="checkbox"
+                [checked]="selectedExportColumnKeys.has(column.key)"
+                (change)="toggleExportColumn(column.key, $any($event.target).checked)">
+              <span>{{ column.label }}</span>
+            </label>
+          </div>
+        </div>
+      </details>
+      <button type="button" class="reporte-panel__export"
+        [disabled]="isLoadingGrid || !rows.length || !selectedExportColumnCount"
+        (click)="exportarExcel()">Exportar a Excel</button>
+      <button type="button" class="reporte-panel__search" [disabled]="isLoadingGrid" (click)="buscar()">
+        {{ isLoadingGrid ? 'Consultando...' : 'Buscar' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="reporte-panel__canvas" aria-label="Resultados del reporte OC y OS">
+    <p *ngIf="errorMessage" class="reporte-panel__message reporte-panel__message--error">{{ errorMessage }}</p>
+    <p *ngIf="!errorMessage && isLoadingGrid" class="reporte-panel__message">Cargando reporte...</p>
+    <p *ngIf="!errorMessage && !isLoadingGrid && !rows.length" class="reporte-panel__message">
+      No se encontraron registros para el reporte.
+    </p>
+
+    <div class="reporte-panel__table-shell" *ngIf="!errorMessage && rows.length">
+      <table class="reporte-panel__table reporte-ocos__table">
+        <thead>
+          <tr>
+            <th *ngFor="let column of columns; trackBy: trackByColumn"
+              [class.reporte-ocos__header--pedido]="column.highlightPedido"
+              [class.reporte-ocos__header--orden]="column.highlightOrden"
+              [class.reporte-ocos__header--pago]="column.highlightPago"
+              [class.reporte-ocos__header--estado]="column.highlightEstado">{{ column.label }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of paginatedRows; let rowIndex = index; trackBy: trackByRow">
+            <td *ngFor="let column of columns; trackBy: trackByColumn" [attr.data-label]="column.label">
+              {{ row[column.key] }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <app-grid-pagination *ngIf="!errorMessage && rows.length" [totalItems]="rows.length"
+      [currentPage]="currentPage" [pageSize]="pageSize" (pageChange)="onPageChange($event)">
+    </app-grid-pagination>
+  </section>
+</section>

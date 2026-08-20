@@ -1,0 +1,36 @@
+<section class="unidad-medida-dialog">
+  <div mat-dialog-content class="unidad-medida-dialog__content" [formGroup]="form">
+    <p class="unidad-medida-dialog__description">
+      Actualiza la descripcion, la abreviatura o el estado del registro seleccionado.
+    </p>
+
+    <label class="unidad-medida-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="uniMedDes" maxlength="120">
+      <small class="unidad-medida-dialog__error" *ngIf="form.controls['uniMedDes'].touched && (form.controls['uniMedDes'].hasError('required') || form.controls['uniMedDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <label class="unidad-medida-dialog__field">
+      <span>Abreviatura</span>
+      <input type="text" formControlName="uniMedAbr" maxlength="15">
+      <small class="unidad-medida-dialog__error" *ngIf="form.controls['uniMedAbr'].touched && (form.controls['uniMedAbr'].hasError('required') || form.controls['uniMedAbr'].hasError('whitespace'))">Campo Abreviatura obligatorio.</small>
+    </label>
+
+    <label class="unidad-medida-dialog__field">
+      <span>Estado</span>
+      <select formControlName="flgEst">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <p *ngIf="errorMessage" class="unidad-medida-dialog__error">{{ errorMessage }}</p>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="button" (click)="guardar()" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+    </button>
+  </div>
+</section>

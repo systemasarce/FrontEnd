@@ -1,0 +1,281 @@
+.audio-dialog {
+  width: 100%;
+  padding: 1.1rem;
+  box-sizing: border-box;
+}
+
+.audio-dialog h2 {
+  margin: 0 0 0.5rem;
+  color: #1f2937;
+  font-size: 1.2rem;
+}
+
+.audio-dialog__help {
+  margin: 0 0 1rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.audio-dialog__error {
+  margin: 0 0 1rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+
+.audio-dialog__cola {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+  font-weight: 700;
+  width: fit-content;
+}
+
+/* ── Tarjeta de grabación (estilo grabadora) ── */
+.recorder-card {
+  background: #1c1c22;
+  border-radius: 1.1rem;
+  padding: 1.1rem 1.2rem 1.35rem;
+  margin: 0 0 1.1rem;
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+}
+
+.recorder-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.recorder-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.recorder-card__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff4d4d;
+  box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.25);
+  animation: recorder-pulse 1.1s ease-in-out infinite;
+}
+
+.recorder-card__dot--pausado {
+  background: #ffb020;
+  box-shadow: 0 0 0 4px rgba(255, 176, 32, 0.22);
+  animation: none;
+}
+
+@keyframes recorder-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.recorder-card__timer {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #e2e2e6;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+}
+
+.recorder-card__wave {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 72px;
+  padding: 0 0.15rem;
+}
+
+.recorder-card__wave--pausado .recorder-card__bar {
+  opacity: 0.45;
+}
+
+.recorder-card__bar {
+  flex: 1 0 auto;
+  width: 3px;
+  min-height: 6%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff9f2e, #ffcf8a);
+  transition: height 0.09s ease;
+}
+
+.recorder-card__wave-empty {
+  color: #8b8b93;
+  font-size: 0.85rem;
+}
+
+.recorder-card__controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+}
+
+.icon-btn--light {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: #fff;
+  color: #1c1c22;
+}
+
+.icon-btn--stop {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+}
+
+.icon-btn:hover {
+  opacity: 0.9;
+}
+
+.icon-btn:active {
+  transform: translateY(1px);
+}
+
+/* ── Previsualización ── */
+.audio-dialog__preview {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.audio-dialog__player {
+  width: 100%;
+  height: 2.75rem;
+}
+
+.audio-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-cancel,
+.icon-btn--action {
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.btn-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.btn-cancel {
+  border: 1px solid #4b5563 !important;
+  background: #4b5563 !important;
+  color: #ffffff !important;
+}
+
+.icon-btn--action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--line-soft);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+}
+
+.icon-btn--save {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.icon-btn--add {
+  border-color: #22c55e;
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.icon-btn--redo:hover {
+  background: var(--surface-accent);
+  border-color: var(--line-strong);
+}
+
+.icon-btn--add:hover {
+  background: rgba(34, 197, 94, 0.16);
+}
+
+.btn-primary:hover,
+.btn-cancel:hover,
+.icon-btn--save:hover {
+  opacity: 0.92;
+}
+
+.icon-btn--action:active,
+.btn-primary:active,
+.btn-cancel:active {
+  transform: translateY(1px);
+}
+
+.btn-primary:disabled,
+.icon-btn--action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .audio-dialog {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .audio-dialog__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .audio-dialog .btn-primary,
+  .audio-dialog .btn-cancel,
+  .audio-dialog .icon-btn--action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .recorder-card__wave {
+    height: 56px;
+  }
+}

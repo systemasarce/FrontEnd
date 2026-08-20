@@ -1,0 +1,97 @@
+<section class="tree-card">
+  <header class="tree-card__header">
+    <div class="tree-card__header-copy">
+      <p class="tree-card__eyebrow">Administracion</p>
+      <h2>Arbol de Grupos</h2>
+      <p class="tree-card__description">
+        Visualiza la estructura completa de grupos, sub grupos y detalles de material registrados.
+      </p>
+    </div>
+
+    <div class="tree-card__toolbar">
+      <div class="tree-card__actions">
+        <button type="button" class="tree-card__close" (click)="cerrar()">
+          Cerrar
+        </button>
+        <button type="button" class="tree-card__add" (click)="registrarGrupo()">
+          + Grupo
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando arbol de grupos...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !grupos.length" class="state-card">
+    No hay grupos para mostrar.
+  </div>
+
+  <div *ngIf="grupos.length" class="tree-shell">
+    <details class="tree-group" *ngFor="let grupo of grupos; trackBy: trackByGrupo">
+      <summary class="tree-group__summary">
+        <div class="tree-group__title">
+          <span class="tree-group__code">{{ grupo.codigo }}</span>
+          <span>{{ grupo.descripcion }}</span>
+        </div>
+        <div class="tree-group__summary-actions">
+          <button type="button" class="tree-add-button" (click)="registrarSubGrupo(grupo); $event.preventDefault(); $event.stopPropagation()">
+            + Sub Grupo
+          </button>
+          <button type="button" class="tree-edit-button" (click)="editarGrupo(grupo); $event.preventDefault(); $event.stopPropagation()">
+            Editar
+          </button>
+          <span class="status-pill" [class.status-pill--inactive]="!grupo.activo">{{ grupo.estado }}</span>
+        </div>
+      </summary>
+
+      <div class="tree-group__content">
+        <div *ngIf="!grupo.subGrupos.length" class="tree-empty">
+          Este grupo no tiene sub grupos registrados.
+        </div>
+
+        <details class="tree-subgroup" *ngFor="let subGrupo of grupo.subGrupos; trackBy: trackBySubGrupo">
+          <summary class="tree-subgroup__summary">
+            <div class="tree-subgroup__title">
+              <span class="tree-subgroup__code">{{ subGrupo.codigo }}</span>
+              <span>{{ subGrupo.descripcion }}</span>
+            </div>
+            <div class="tree-group__summary-actions">
+              <button type="button" class="tree-add-button" (click)="registrarDetalle(grupo, subGrupo); $event.preventDefault(); $event.stopPropagation()">
+                + Detalle
+              </button>
+              <button type="button" class="tree-edit-button" (click)="editarSubGrupo(grupo, subGrupo); $event.preventDefault(); $event.stopPropagation()">
+                Editar
+              </button>
+              <span class="status-pill" [class.status-pill--inactive]="!subGrupo.activo">{{ subGrupo.estado }}</span>
+            </div>
+          </summary>
+
+          <div class="tree-subgroup__content">
+            <div *ngIf="!subGrupo.detalles.length" class="tree-empty">
+              Este sub grupo no tiene detalles de material registrados.
+            </div>
+
+            <div class="tree-detail" *ngFor="let detalle of subGrupo.detalles; trackBy: trackByDetalle">
+              <div class="tree-detail__title">
+                <span class="tree-detail__code">{{ detalle.codigo }}</span>
+                <span>{{ detalle.descripcion }}</span>
+              </div>
+              <div class="tree-group__summary-actions">
+                <button type="button" class="tree-edit-button" (click)="editarDetalle(grupo, subGrupo, detalle)">
+                  Editar
+                </button>
+                <span class="status-pill" [class.status-pill--inactive]="!detalle.activo">{{ detalle.estado }}</span>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </details>
+  </div>
+</section>

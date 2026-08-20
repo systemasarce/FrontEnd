@@ -1,0 +1,103 @@
+<section class="centro-costo-card">
+  <header class="centro-costo-card__header">
+    <div>
+      <p class="centro-costo-card__eyebrow">Administracion</p>
+      <h2>Centro de Costos</h2>
+      <p class="centro-costo-card__description">Administra los centros de costo activos y actualiza su estado desde mantenimiento.</p>
+    </div>
+
+    <div class="centro-costo-card__actions">
+      <button type="button" class="centro-costo-card__create" (click)="registrarCentroCosto()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="centro-costo-filters" [formGroup]="filtersForm" (ngSubmit)="cargarCentrosCosto()">
+    <label class="filter-field">
+      <span>ID</span>
+      <input
+        type="number"
+        formControlName="codigo"
+        min="1"
+        step="1"
+        (input)="sanitizeCodigoInput($event)">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="centro-costo-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="centro-costo-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando centros de costo desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !centrosCosto.length" class="state-card">
+    {{ emptyStateMessage }}
+  </div>
+
+  <div *ngIf="centrosCosto.length" class="table-shell">
+    <table class="centro-costo-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripcion</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let centroCosto of paginatedCentrosCosto; trackBy: trackByCentroCosto">
+          <td>{{ centroCosto.cenCosId ?? '-' }}</td>
+          <td>{{ centroCosto.cenCosDes || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!centroCosto.activo">
+              {{ centroCosto.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar centro de costo"
+              [disabled]="centroCosto.cenCosId === null"
+              (click)="editarCentroCosto(centroCosto)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="centrosCosto.length"
+    [totalItems]="centrosCosto.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

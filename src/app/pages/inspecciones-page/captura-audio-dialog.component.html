@@ -1,0 +1,91 @@
+<div class="audio-dialog">
+  <h2>{{ data.titulo }}</h2>
+
+  <p class="audio-dialog__help" *ngIf="estado === 'idle'">
+    Usa el micrófono para grabar un audio y adjuntarlo al Centro de Monitoreo HSE.
+  </p>
+
+  <p class="audio-dialog__error" *ngIf="errorMensaje">{{ errorMensaje }}</p>
+
+  <div class="audio-dialog__cola" *ngIf="audiosEnCola.length > 0">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+    {{ audiosEnCola.length }} audio{{ audiosEnCola.length === 1 ? '' : 's' }} listo{{ audiosEnCola.length === 1 ? '' : 's' }} para guardar
+  </div>
+
+  <!-- ── Grabando / en pausa: tarjeta oscura con forma de onda, al estilo grabadora ── -->
+  <div class="recorder-card" *ngIf="estado === 'grabando' || estado === 'pausado'">
+    <div class="recorder-card__header">
+      <span class="recorder-card__title">
+        <span class="recorder-card__dot" [class.recorder-card__dot--pausado]="estado === 'pausado'"></span>
+        {{ estado === 'pausado' ? 'En pausa' : 'Grabando' }}
+      </span>
+      <span class="recorder-card__timer">{{ tiempoSegundos | number: '2.0' }}s</span>
+    </div>
+
+    <div class="recorder-card__wave" [class.recorder-card__wave--pausado]="estado === 'pausado'">
+      <span
+        *ngFor="let nivel of waveform"
+        class="recorder-card__bar"
+        [style.height.%]="8 + nivel * 92"
+      ></span>
+      <span class="recorder-card__wave-empty" *ngIf="waveform.length === 0">Escuchando…</span>
+    </div>
+
+    <div class="recorder-card__controls">
+      <button
+        type="button"
+        class="icon-btn icon-btn--light"
+        [attr.aria-label]="estado === 'pausado' ? 'Reanudar grabación' : 'Pausar grabación'"
+        [title]="estado === 'pausado' ? 'Reanudar' : 'Pausar'"
+        (click)="pausarOReanudar()"
+      >
+        <svg *ngIf="estado === 'grabando'" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>
+        <svg *ngIf="estado === 'pausado'" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7Z"></path></svg>
+      </button>
+
+      <button
+        type="button"
+        class="icon-btn icon-btn--stop"
+        aria-label="Detener grabación"
+        title="Detener"
+        (click)="detenerGrabacion()"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Antes de grabar ── -->
+  <div class="audio-dialog__actions" *ngIf="estado === 'idle'">
+    <button type="button" class="btn-primary btn-icon-text" [disabled]="cargando" (click)="iniciarGrabacion()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="12" cy="12" r="7"></circle></svg>
+      Grabar
+    </button>
+    <button type="button" class="btn-cancel" (click)="cancelar()">Cancelar</button>
+  </div>
+
+  <!-- ── Grabación finalizada: previsualización y acciones ── -->
+  <div class="audio-dialog__preview" *ngIf="estado === 'grabado' && previewUrl">
+    <p class="audio-dialog__help">Escucha el audio antes de guardarlo. Si no quedó bien, puedes grabarlo de nuevo.</p>
+    <audio #reproductor class="audio-dialog__player" [src]="previewUrl" controls (loadedmetadata)="onDuracionCargada(reproductor)"></audio>
+  </div>
+
+  <div class="audio-dialog__actions" *ngIf="estado === 'grabado'">
+    <button type="button" class="icon-btn icon-btn--action icon-btn--save" aria-label="Guardar audio" title="Guardar" (click)="guardar()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path><path d="M7 3v5h8"></path></svg>
+      <span>Guardar</span>
+    </button>
+
+    <button type="button" class="icon-btn icon-btn--action icon-btn--redo" aria-label="Grabar de nuevo (no guarda este audio)" title="Grabar de nuevo, sin guardar este audio" (click)="grabarDeNuevo()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
+      <span>Grabar de nuevo</span>
+    </button>
+
+    <button type="button" class="icon-btn icon-btn--action icon-btn--add" aria-label="Agregar otro audio" title="Agregar otro audio" (click)="agregarOtroAudio()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+      <span>Agregar otro audio</span>
+    </button>
+
+    <button type="button" class="btn-cancel" (click)="cancelar()">Cancelar</button>
+  </div>
+</div>

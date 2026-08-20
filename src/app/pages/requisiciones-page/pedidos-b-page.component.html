@@ -1,0 +1,700 @@
+<section class="pedidos-card">
+  <header class="pedidos-card__header">
+    <div>
+      <p class="pedidos-card__eyebrow">Administracion</p>
+      <h2>Pedidos</h2>
+      <p class="pedidos-card__description">
+        Formulario de pedidos y centros de costo dentro del flujo del pedido.
+      </p>
+    </div>
+  </header>
+
+  <section *ngIf="!mostrarEditorPedido && !mostrarDetallePedido" class="listado-shell">
+    <footer class="actions-bar actions-bar--single">
+      <button
+        type="button"
+        class="button button--primary"
+        (click)="iniciarNuevoPedido()">
+        Nuevo
+      </button>
+    </footer>
+
+    <section class="panel panel--listing">
+      <form class="filters-panel" [formGroup]="filtersForm" (ngSubmit)="aplicarFiltros()">
+        <label class="field">
+          <span>Nro. Pedido</span>
+          <input type="number" formControlName="nroRequisicion" min="0">
+        </label>
+
+        <label class="field">
+          <span>Proveedor</span>
+          <input type="text" formControlName="proveedor">
+        </label>
+
+        <label class="field">
+          <span>Estado</span>
+          <select formControlName="estado">
+            <option *ngFor="let estado of estadoOptions" [value]="estado">{{ estado }}</option>
+          </select>
+        </label>
+
+        <label class="field field--compact">
+          <span>Tipo</span>
+          <select formControlName="tipo">
+            <option *ngFor="let option of tipoOptions" [value]="option.codigo">{{ option.descripcion }}</option>
+          </select>
+        </label>
+
+        <label class="field field--compact">
+          <span>Orden de compra/servicio</span>
+          <select formControlName="ordenCompraServicio" (change)="onFiltroOrdenCompraServicioChange()">
+            <option value="Todos">Todos</option>
+            <option value="Con OC/OS">Con OC/OS</option>
+            <option value="Pendientes de Generar">Pendientes de Generar</option>
+          </select>
+        </label>
+
+        <label class="field field--compact">
+          <span>Usuario de registro</span>
+          <select formControlName="usuarioRegistro" (change)="onUsuarioRegistroFiltroChange()">
+            <option value="">Todos los usuarios</option>
+            <option *ngFor="let usuario of usuariosRegistroFiltro; trackBy: trackByUsuarioRegistro" [value]="usuario.codigo">
+              {{ usuario.nombre || usuario.codigo }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Palabras clave en detalle</span>
+          <input type="text" formControlName="palabrasClaveDetalle" placeholder="Buscar en la descripción del ítem">
+        </label>
+
+        <div class="filters-panel__actions">
+          <button type="submit" class="button button--primary">Buscar</button>
+          <button type="button" class="button button--secondary" (click)="limpiarFiltros()">Limpiar</button>
+        </div>
+      </form>
+
+      <div class="table-shell">
+        <table class="requisiciones-table">
+          <thead>
+            <tr>
+              <th>Acciones</th>
+              <th>Codigo</th>
+              <th>Archivo</th>
+              <th>Fecha</th>
+              <th>Moneda</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Tipo</th>
+              <th>Nro Orden Compra/Servicio</th>
+              <th>Codigo Usr</th>
+              <th>Usr Aprobacion</th>
+              <th>Fecha Aprobacion</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <ng-container *ngFor="let item of paginatedRequisiciones; trackBy: trackByRequisicion">
+              <tr
+                class="requisiciones-table__row"
+                [class.requisiciones-table__row--selected]="isPedidoSeleccionado(item)"
+                (click)="seleccionarPedido(item)">
+                <td class="requisiciones-table__actions-cell">
+                  <div class="requisiciones-table__actions">
+                    <button
+                      type="button"
+                      class="row-detail-button row-detail-button--pdf"
+                      title="Generar PDF del pedido"
+                      [disabled]="isLoadingReportePedidoId === item.requisicion"
+                      (click)="abrirReportePedidoFila(item, $event)">
+                      {{ isLoadingReportePedidoId === item.requisicion ? 'Cargando...' : 'PDF' }}
+                    </button>
+
+                    <button
+                      type="button"
+                      class="icon-button icon-button--edit"
+                      title="Previsualizar pedido"
+                      aria-label="Previsualizar pedido"
+                      [disabled]="isActionRowBusy(item)"
+                      (click)="previsualizarPedidoFila(item, $event)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 5c5 0 8.5 4.4 9.8 6.5a1 1 0 0 1 0 1C20.5 14.6 17 19 12 19s-8.5-4.4-9.8-6.5a1 1 0 0 1 0-1C3.5 9.4 7 5 12 5zm0 2c-3.5 0-6.2 2.7-7.7 5 1.5 2.3 4.2 5 7.7 5s6.2-2.7 7.7-5C18.2 9.7 15.5 7 12 7zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/>
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="icon-button icon-button--edit"
+                      title="Modificar pedido"
+                      aria-label="Modificar pedido"
+                      [disabled]="isActionRowBusy(item) || (isPedidoAprobadoFila(item) && !canApprovePedidoFila(item))"
+                      (click)="modificarPedidoFila(item, $event)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z"/>
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="icon-button icon-button--approve"
+                      title="Aprobar pedido"
+                      aria-label="Aprobar pedido"
+                      [disabled]="isActionRowBusy(item) || !canDecidirPedidoFila(item)"
+                      (click)="aprobarPedidoFila(item, $event)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 16.2 4.8 12l-1.4 1.4L9 19.2 21 7.2 19.6 5.8z"/>
+                      </svg>
+                    </button>
+
+                    <button
+                      *ngIf="isPedidoAprobadoFila(item)"
+                      type="button"
+                      class="icon-button icon-button--edit"
+                      title="Revertir pedido"
+                      aria-label="Revertir pedido"
+                      [disabled]="isActionRowBusy(item)"
+                      (click)="revertirPedidoFila(item, $event)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 7h8.5A4.5 4.5 0 1 1 11 11.5H9a6.5 6.5 0 1 0 6.5-6.5H7l2-2-1.4-1.4L3.7 6l3.9 3.9L9 8.5z"/>
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="icon-button icon-button--danger"
+                      title="Rechazar pedido"
+                      aria-label="Rechazar pedido"
+                      [disabled]="isActionRowBusy(item) || !canDecidirPedidoFila(item)"
+                      (click)="rechazarPedidoFila(item, $event)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/>
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="icon-button icon-button--danger"
+                      title="Eliminar pedido"
+                      aria-label="Eliminar pedido"
+                      [disabled]="isActionRowBusy(item) || (isPedidoAprobadoFila(item) && !canAdministrarPedidoAprobado())"
+                      (click)="eliminarPedidoFila(item, $event)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 3.8h6l1 1.5H20v2h-1.2l-.9 10.2A2.4 2.4 0 0 1 15.4 20H8.6a2.4 2.4 0 0 1-2.4-2.5L5.3 7.3H4v-2h4l1-1.5ZM8.2 7.3l.8 9.8c0 .2.2.4.4.4h6.2c.2 0 .4-.2.4-.4l.8-9.8H8.2Zm2.1 1.6h1.5v6.6h-1.5V8.9Zm3.9 0h1.5v6.6h-1.5V8.9Z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+                <td>{{ item.codigo }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="icon-button icon-button--folder"
+                    title="Ver archivos adjuntos"
+                    aria-label="Ver archivos adjuntos"
+                    [disabled]="isLoadingArchivosAdjuntosListado === item.requisicion"
+                    (click)="abrirArchivosPedidoListado(item, $event)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h4.1c.7 0 1.3.3 1.8.8l1.2 1.2h5.9A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-10Zm2.5-.7a.7.7 0 0 0-.7.7v10c0 .4.3.7.7.7h13c.4 0 .7-.3.7-.7v-8c0-.4-.3-.7-.7-.7h-6.6l-1.7-1.7a.8.8 0 0 0-.6-.3H5.5Z"/>
+                    </svg>
+                  </button>
+                </td>
+                <td>{{ item.fecha }}</td>
+                <td>{{ item.moneda }}</td>
+                <td>{{ formatTotal(item.total, item.moneda) }}</td>
+                <td>
+                  <span class="status-badge" [attr.data-state]="item.estado.toLowerCase()">{{ item.estado }}</span>
+                </td>
+                <td>{{ item.tipo }}</td>
+                <td>{{ item.ordenCompraServicio }}</td>
+                <td>{{ item.codigoUsr }}</td>
+                <td>{{ item.usrAprobacion }}</td>
+                <td>{{ item.fechaUsrGa }}</td>
+              </tr>
+            </ng-container>
+
+            <tr *ngIf="isLoadingPedidos">
+              <td colspan="12" class="empty-row">Cargando pedidos registrados...</td>
+            </tr>
+
+            <tr *ngIf="!isLoadingPedidos && errorMessage">
+              <td colspan="12" class="empty-row">{{ errorMessage }}</td>
+            </tr>
+
+            <tr *ngIf="!isLoadingPedidos && !errorMessage && !requisicionesFiltradasPorOrden.length">
+              <td colspan="12" class="empty-row">No se han encontrado pedidos con los filtros seleccionados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-grid-pagination
+        *ngIf="requisicionesFiltradasPorOrden.length"
+        [totalItems]="requisicionesFiltradasPorOrden.length"
+        [currentPage]="currentPedidosPage"
+        [pageSize]="pageSize"
+        (pageChange)="onPedidosPageChange($event)">
+      </app-grid-pagination>
+    </section>
+  </section>
+
+  <section *ngIf="mostrarDetallePedido && detallePedidoSeleccionado" class="pedido-editor pedido-editor--detalle">
+    <header class="pedidos-card__header">
+      <div>
+        <p class="pedidos-card__eyebrow">Detalle</p>
+        <h2>{{ detallePedidoSeleccionado.codigo }}</h2>
+        <p class="pedidos-card__description">
+          Vista de detalle del pedido seleccionado.
+        </p>
+      </div>
+    </header>
+
+    <section class="editor-section">
+      <div class="section-copy">
+        <h3>Items del detalle</h3>
+        <p class="pedidos-card__description">
+          Registra y actualiza los items reales asociados al pedido seleccionado.
+        </p>
+      </div>
+
+      <div class="editor-grid editor-grid--detalle-meta">
+        <label class="field">
+          <span>Cantidad total permitida</span>
+          <input
+            type="text"
+            class="input--readonly"
+            [value]="formatDetalleNumero(detallePedidoCantidadLimite)"
+            readonly
+            disabled
+            tabindex="-1">
+        </label>
+      </div>
+
+      <div class="pedido-detalle-panel__toolbar">
+        <button
+          type="button"
+          class="button button--primary"
+          [disabled]="!canManagePedidoDetalle"
+          (click)="iniciarNuevoPedidoDetalle()">
+          Nuevo
+        </button>
+        <button
+          type="button"
+          class="button button--secondary"
+          (click)="cerrarDetallePedido()">
+          Cerrar
+        </button>
+      </div>
+
+      <p *ngIf="detallePedidoErrorMessage" class="editor-feedback editor-feedback--error">
+        {{ detallePedidoErrorMessage }}
+      </p>
+
+      <div *ngIf="isLoadingDetalleExpandido" class="editor-feedback">
+        Cargando detalle del pedido...
+      </div>
+
+      <div *ngIf="!isLoadingDetalleExpandido && detalleExpandidoError" class="editor-feedback editor-feedback--error">
+        {{ detalleExpandidoError }}
+      </div>
+
+      <div *ngIf="!isLoadingDetalleExpandido && !detalleExpandidoError" class="table-shell">
+        <table class="pedido-detalle-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Codigo Item</th>
+              <th>Descripcion</th>
+              <th>Centro de Costo</th>
+              <th>Unidad Medida</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+              <th class="pedido-detalle-table__action-head"></th>
+              <th class="pedido-detalle-table__action-head"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="let detail of paginatedDetallePedidoExpandido; trackBy: trackByPedidoDetalle"
+              class="pedido-detalle-table__row"
+              [class.pedido-detalle-table__row--selected]="isPedidoDetalleSeleccionado(detail)"
+              (click)="seleccionarPedidoDetalle(detail)">
+              <td>{{ detail.item }}</td>
+              <td>{{ detail.codigoItem }}</td>
+              <td>{{ detail.descripcion }}</td>
+              <td>{{ detail.centroCosto }}</td>
+              <td>{{ detail.unidad }}</td>
+              <td>{{ formatDetalleNumero(detail.cantidad) }}</td>
+              <td>{{ formatDetalleNumero(detail.precioUnitario) }}</td>
+              <td>{{ formatDetalleNumero(detail.subtotal) }}</td>
+              <td class="pedido-detalle-table__action-cell">
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Editar item del detalle"
+                  [disabled]="detail.persistedId === null || isSavingPedidoDetalle"
+                  (click)="editarPedidoDetalle(detail); $event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z"/>
+                  </svg>
+                </button>
+              </td>
+              <td class="pedido-detalle-table__action-cell">
+                <button
+                  type="button"
+                  class="icon-button icon-button--danger"
+                  aria-label="Eliminar item del detalle"
+                  [disabled]="detail.persistedId === null || isSavingPedidoDetalle"
+                  (click)="confirmarEliminarPedidoDetalle(detail); $event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2h4v2H4V6h4l1-2z"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="!getDetallePedidoExpandido().length">
+              <td colspan="10" class="empty-row">No hay items registrados para este pedido.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-grid-pagination
+        *ngIf="getDetallePedidoExpandido().length"
+        [totalItems]="getDetallePedidoExpandido().length"
+        [currentPage]="currentDetalleExpandidoPage"
+        [pageSize]="pageSize"
+        (pageChange)="onDetalleExpandidoPageChange($event)">
+      </app-grid-pagination>
+    </section>
+  </section>
+
+  <section *ngIf="mostrarEditorPedido" class="pedido-editor">
+    <header class="pedidos-card__header">
+      <div>
+        <p class="pedidos-card__eyebrow">{{ isPreviewPedido ? 'Previsualizacion' : isEditingPedido ? 'Edicion' : 'Registro' }}</p>
+        <h2>{{ isPreviewPedido ? 'Previsualización de Pedido' : isEditingPedido ? 'Editar Pedido' : 'Nuevo Pedido' }}</h2>
+      </div>
+    </header>
+
+    <form class="editor-grid editor-grid--header editor-grid--header-b" [formGroup]="cabeceraForm">
+      <div class="field pedidos-b-approval-field">
+        <span>Usuario de Aprobacion</span>
+        <mat-select
+          formControlName="usuarioAprobacionId"
+          [placeholder]="isLoadingApprovalUsers ? 'Cargando usuarios...' : 'Seleccionar'"
+          [disabled]="isLoadingApprovalUsers || isPreviewPedido"
+          (openedChange)="onApprovalUserSelectOpened($event)"
+          (selectionChange)="onApprovalUserSelected($event.value)">
+          <mat-option>
+            <input
+              type="text"
+              class="mat-select-search"
+              placeholder="Buscar por codigo o nombre..."
+              [formControl]="approvalUserSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Seleccionar</mat-option>
+          <mat-option *ngFor="let user of filteredApprovalUsers; trackBy: trackByApprovalUser" [value]="user.id">
+            {{ user.code }} - {{ user.name }}
+          </mat-option>
+        </mat-select>
+        <small class="editor-feedback editor-feedback--error" *ngIf="cabeceraForm.controls['usuarioAprobacion'].touched && (cabeceraForm.controls['usuarioAprobacion'].hasError('required') || cabeceraForm.controls['usuarioAprobacion'].hasError('whitespace'))">Campo Usuario de Aprobacion obligatorio.</small>
+      </div>
+    </form>
+
+    <form class="details-grid" [formGroup]="detalleForm">
+      <section class="editor-section">
+        <div class="section-copy">
+          <h3>Detalle del Pedido</h3>
+        </div>
+
+        <div class="group-row group-row--entrega-b">
+          <label class="field field--wide">
+            <span>Lugar de Entrega</span>
+            <select formControlName="lugarEntrega" [disabled]="isLoadingDireccionesEntrega || isPreviewPedido">
+              <option [ngValue]="''">{{ isLoadingDireccionesEntrega ? 'Cargando direcciones...' : 'Seleccionar' }}</option>
+              <option *ngFor="let direccion of direccionesEntrega; trackBy: trackByDireccionEntrega" [ngValue]="direccion.id">
+                {{ direccion.descripcion }}
+              </option>
+            </select>
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['lugarEntrega'].touched && (detalleForm.controls['lugarEntrega'].hasError('required') || detalleForm.controls['lugarEntrega'].hasError('whitespace'))">Campo Lugar de Entrega obligatorio.</small>
+          </label>
+
+          <label class="field field--wide">
+            <span>Direccion de Entrega</span>
+            <input type="text" formControlName="referencia" [readonly]="isPreviewPedido" [class.input--autofilled-address]="detalleForm.controls['referencia'].disabled">
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['referencia'].touched && (detalleForm.controls['referencia'].hasError('required') || detalleForm.controls['referencia'].hasError('whitespace'))">Campo Direccion de Entrega obligatorio.</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="editor-section">
+        <div class="group-row group-row--meta group-row--meta-b">
+          <label class="field">
+            <span>Tipo de Servicio</span>
+            <select formControlName="oc" [disabled]="isPreviewPedido">
+              <option *ngFor="let option of tipoServicioOptions" [ngValue]="option.codigo">{{ option.descripcion }}</option>
+            </select>
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['oc'].touched && detalleForm.controls['oc'].hasError('required')">Campo Tipo de Servicio obligatorio.</small>
+          </label>
+
+          <label class="field">
+            <span>Moneda</span>
+            <select formControlName="moneda" [disabled]="isPreviewPedido">
+              <option [ngValue]="null">Seleccionar</option>
+              <option *ngFor="let moneda of tipoMoneda" [ngValue]="moneda.codigo">{{ moneda.descripcion }}</option>
+            </select>
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['moneda'].touched && detalleForm.controls['moneda'].hasError('required')">Campo Moneda obligatorio.</small>
+          </label>
+
+          <label class="field pedido-date-field">
+            <span>Fecha Entrega</span>
+            <div class="date-input-shell" (click)="pedidoBFechaEntregaPicker.open()">
+              <input
+                [matDatepicker]="pedidoBFechaEntregaPicker"
+                formControlName="fechaEntrega"
+                readonly
+                [disabled]="isPreviewPedido"
+                (click)="pedidoBFechaEntregaPicker.open()">
+              <button
+                type="button"
+                class="date-input-shell__button"
+                aria-label="Seleccionar fecha de entrega"
+                [disabled]="isPreviewPedido"
+                (click)="pedidoBFechaEntregaPicker.open(); $event.stopPropagation()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v12A2.5 2.5 0 0 1 19.5 21h-15A2.5 2.5 0 0 1 2 18.5v-12A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1Zm12.5 8h-15v8.5a.5.5 0 0 0 .5.5h14a.5.5 0 0 0 .5-.5V10ZM5 6a.5.5 0 0 0-.5.5V8h15V6.5A.5.5 0 0 0 19 6H5Z"/>
+                </svg>
+              </button>
+            </div>
+            <mat-datepicker #pedidoBFechaEntregaPicker></mat-datepicker>
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['fechaEntrega'].touched && detalleForm.controls['fechaEntrega'].hasError('required')">Campo Fecha Entrega obligatorio.</small>
+          </label>
+
+          <label class="field">
+            <span>Referencia</span>
+            <input type="text" formControlName="referenciaGeneral" maxlength="160" [readonly]="isPreviewPedido">
+          </label>
+        </div>
+      </section>
+
+      <section class="editor-section pedido-b-detalle-section">
+        <div class="section-copy pedido-b-detalle-section__header">
+          <h3>Productos</h3>
+          <button
+            type="button"
+            class="button button--primary pedido-b-detalle-section__button"
+            [disabled]="isPreviewPedido"
+            (click)="abrirModalDetallePedidoB()">
+            Agregar producto
+          </button>
+        </div>
+
+        <div class="table-shell">
+          <input
+            #detalleImagenArchivoInput
+            type="file"
+            accept="image/*"
+            style="display:none"
+            (change)="onDetalleImagenSeleccionada($event, 'file')">
+          <input
+            #detalleImagenCamaraInput
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style="display:none"
+            (change)="onDetalleImagenSeleccionada($event, 'camera')">
+          <table class="pedido-detalle-table pedido-b-detalle-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Descripcion Producto</th>
+                <th>Descripcion Unidad</th>
+                <th>Centro de Costo</th>
+                <th>Cantidad</th>
+                <th>Costo Unit.</th>
+                <th>Costo Total</th>
+                <th>Observaciones</th>
+                <th>Comentarios</th>
+                <th>Requisitos</th>
+                <th class="pedido-detalle-table__action-head"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                *ngFor="let detalle of pedidoBDetalles; let index = index; trackBy: trackByPedidoBDetalle"
+                [class.pedido-b-detalle-table__row--delete]="detalle.markedForDelete">
+                <td>{{ index + 1 }}</td>
+                <td>{{ detalle.itemDescription }}</td>
+                <td>{{ detalle.unitDescription }}</td>
+                <td>{{ detalle.centroCostoDescripcion }}</td>
+                <td>{{ formatPedidoBNumero(detalle.quantity) }}</td>
+                <td>{{ formatPedidoBCosto(detalle.unitPrice) }}</td>
+                <td>{{ formatPedidoBCosto(detalle.subtotal) }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="pedido-b-longtext-trigger"
+                    [class.pedido-b-longtext-trigger--empty]="!detalle.observaciones"
+                    [disabled]="detalle.markedForDelete || isPreviewPedido"
+                    (click)="abrirEditorTextoDetallePedidoB(detalle, 'observaciones')">
+                    {{ detalle.observaciones || 'Agregar observacion' }}
+                  </button>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="pedido-b-longtext-trigger"
+                    [class.pedido-b-longtext-trigger--empty]="!detalle.comentarios"
+                    [disabled]="detalle.markedForDelete || isPreviewPedido"
+                    (click)="abrirEditorTextoDetallePedidoB(detalle, 'comentarios')">
+                    {{ detalle.comentarios || 'Agregar comentario' }}
+                  </button>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="pedido-b-longtext-trigger"
+                    [class.pedido-b-longtext-trigger--empty]="!detalle.requisitos"
+                    [disabled]="detalle.markedForDelete || isPreviewPedido"
+                    (click)="abrirEditorTextoDetallePedidoB(detalle, 'requisitos')">
+                    {{ detalle.requisitos || 'Agregar requisito' }}
+                  </button>
+                </td>
+                <td class="pedido-detalle-table__action-cell">
+                  <button
+                    type="button"
+                    class="icon-button icon-button--image"
+                    [class.icon-button--image-attached]="detalle.imageFile || detalle.imagePreviewUrl || detalle.storedImageName"
+                    [title]="getDetalleImagenTooltip(detalle)"
+                    aria-label="Agregar imagen al producto"
+                    [disabled]="detalle.markedForDelete || isPreviewPedido"
+                    (click)="abrirDialogoImagenDetallePedidoB(detalle, detalleImagenCamaraInput, detalleImagenArchivoInput)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M9 3a2 2 0 0 0-1.8 1.1L6.4 6H4a2 2 0 0 0-2 2v8.8A2.2 2.2 0 0 0 4.2 19h15.6a2.2 2.2 0 0 0 2.2-2.2V8a2 2 0 0 0-2-2h-2.4l-.8-1.9A2 2 0 0 0 15 3H9Zm0 2h6l1.1 2.5.1.3H20v8.8a.2.2 0 0 1-.2.2H4.2a.2.2 0 0 1-.2-.2V8h3.8l.1-.3L9 5Zm3 2.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5Z"/>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-button icon-button--edit"
+                    title="Editar producto"
+                    aria-label="Editar producto"
+                    [disabled]="detalle.markedForDelete || isPreviewPedido"
+                    (click)="editarDetallePedidoB(detalle, index)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.8 8.95l-2.75-2.75L4 17.25zm15.9-10.4a1 1 0 0 0 0-1.4l-1.35-1.35a1 1 0 0 0-1.4 0l-1.05 1.05 2.75 2.75 1.05-1.05z"/>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-button"
+                    [class.icon-button--danger]="!detalle.markedForDelete"
+                    [class.icon-button--revert]="detalle.markedForDelete"
+                    [title]="detalle.markedForDelete ? 'Revertir eliminacion del producto' : 'Eliminar producto'"
+                    [attr.aria-label]="detalle.markedForDelete ? 'Revertir eliminacion' : 'Eliminar producto'"
+                    [disabled]="isPreviewPedido"
+                    (click)="toggleEliminarDetallePedidoB(detalle.id)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path *ngIf="!detalle.markedForDelete" d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2h4v2H4V6h4l1-2z"/>
+                      <path *ngIf="detalle.markedForDelete" d="M12 5a7 7 0 1 1-6.32 4H3l4-4 4 4H8.1A5 5 0 1 0 12 7V5z"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="!pedidoBDetalles.length">
+                <td colspan="11" class="empty-row">No hay productos registrados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="editor-section editor-section--attachments editor-section--attachments-b">
+        <div class="attachment-panel">
+          <div class="attachment-panel__fields-row">
+            <label class="field proveedor-referencia-field">
+              <span>Proveedor Referencia</span>
+              <input type="text" formControlName="proveedorReferencia" maxlength="120" [readonly]="isPreviewPedido">
+            </label>
+          </div>
+
+          <label class="field aclaraciones-field">
+            <span>Aclaraciones</span>
+            <textarea formControlName="aclaraciones" rows="4" maxlength="1200" [readonly]="isPreviewPedido"></textarea>
+          </label>
+
+          <div class="attachment-grid">
+            <div class="attachment-grid__header">
+              <h3>Archivo</h3>
+              <input #fileInput type="file" multiple style="display:none" (change)="onFileSelected($event)">
+              <button type="button" class="icon-button attachment-grid__add" aria-label="Adjuntar archivo" [disabled]="isPreviewPedido" (click)="fileInput.click()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="table-shell attachment-grid__table-shell">
+              <table class="attachment-grid__table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let archivo of archivosAdjuntosVista">
+                    <td>{{ archivo.nombre }}</td>
+                    <td class="attachment-grid__actions-cell">
+                      <button type="button" class="icon-button icon-button--edit" aria-label="Ver archivo" (click)="verArchivoAdjunto(archivo)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 5c5 0 8.5 4.4 9.8 6.5a1 1 0 0 1 0 1C20.5 14.6 17 19 12 19s-8.5-4.4-9.8-6.5a1 1 0 0 1 0-1C3.5 9.4 7 5 12 5zm0 2c-3.5 0-6.2 2.7-7.7 5 1.5 2.3 4.2 5 7.7 5s6.2-2.7 7.7-5C18.2 9.7 15.5 7 12 7zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/>
+                        </svg>
+                      </button>
+                      <button type="button" class="icon-button icon-button--danger" aria-label="Quitar archivo" [disabled]="!archivo.local || isPreviewPedido" (click)="archivo.local && quitarArchivo(archivo.index); fileInput.value = ''">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2h4v2H4V6h4l1-2z"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr *ngIf="!archivosAdjuntosVista.length">
+                    <td colspan="2" class="empty-row">No hay archivos adjuntos.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </form>
+
+    <footer class="editor-actions">
+      <p *ngIf="saveErrorMessage" class="editor-feedback editor-feedback--error">{{ saveErrorMessage }}</p>
+      <ng-container *ngIf="!isPreviewPedido; else previewCloseButton">
+        <button
+          type="button"
+          class="button button--primary"
+          [disabled]="isSavingPedido || isLoadingCorrelativo || isLoadingPedidoDetalle"
+          (click)="guardarPedido()">
+          {{ isLoadingPedidoDetalle ? 'Cargando...' : isSavingPedido ? 'Guardando...' : isEditingPedido ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button type="button" class="button button--secondary" (click)="confirmarCancelacionPedido()">
+          Cancelar
+        </button>
+      </ng-container>
+      <ng-template #previewCloseButton>
+        <button type="button" class="button button--secondary" (click)="cerrarVistaPreviaPedido()">
+          Cerrar
+        </button>
+      </ng-template>
+    </footer>
+  </section>
+</section>

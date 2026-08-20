@@ -1,0 +1,35 @@
+<section class="login-shell">
+  <div class="login-card">
+    <div class="login-card__brand">
+      <span class="login-card__logo">AR</span>
+      <div>
+        <p class="login-card__eyebrow">Arce</p>
+        <h2>Iniciar sesion</h2>
+      </div>
+    </div>
+    <p class="login-card__description">Ingresa con tu codigo de usuario y contraseña para acceder a las pantallas del sistema.</p>
+
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
+      <label class="login-field">
+        <span>Codigo de usuario</span>
+          <input type="text" formControlName="userCode" autocomplete="username" />
+          <small class="login-error" *ngIf="loginForm.controls.userCode.touched && (loginForm.controls.userCode.hasError('required') || loginForm.controls.userCode.hasError('whitespace'))">Campo Codigo de usuario obligatorio.</small>
+      </label>
+
+      <label class="login-field">
+        <span>Contraseña</span>
+          <input type="password" formControlName="password" autocomplete="current-password" />
+          <small class="login-error" *ngIf="loginForm.controls.password.touched && (loginForm.controls.password.hasError('required') || loginForm.controls.password.hasError('whitespace'))">Campo Contraseña obligatorio.</small>
+      </label>
+
+      <label class="login-remember">
+        <input type="checkbox" formControlName="rememberCredentials" />
+        <span>Recordar credenciales</span>
+      </label>
+
+      <p *ngIf="loginError" class="login-error">{{ loginError }}</p>
+
+      <button type="submit" class="login-submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Validando...' : 'Entrar al portal' }}</button>
+    </form>
+  </div>
+</section>

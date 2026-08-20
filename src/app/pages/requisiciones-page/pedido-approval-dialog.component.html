@@ -1,0 +1,29 @@
+<form class="pedido-approval-dialog" [formGroup]="form" (ngSubmit)="confirmar()">
+  <h2 mat-dialog-title>Cambiar estado del pedido</h2>
+
+  <mat-dialog-content class="pedido-approval-dialog__content">
+    <label class="pedido-approval-dialog__field">
+      <span>Pedido</span>
+      <input type="text" class="input--readonly" [value]="data.codigo" readonly disabled tabindex="-1">
+    </label>
+
+    <label class="pedido-approval-dialog__field">
+      <span>Estado actual</span>
+      <input type="text" class="input--readonly" [value]="data.estadoActual" readonly disabled tabindex="-1">
+    </label>
+
+    <label class="pedido-approval-dialog__field">
+      <span>Nuevo estado</span>
+      <select formControlName="flgEst">
+        <option value="P">Pendiente</option>
+        <option value="A">Aprobado</option>
+        <option value="C">Cancelado</option>
+      </select>
+    </label>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit">Guardar estado</button>
+  </mat-dialog-actions>
+</form>

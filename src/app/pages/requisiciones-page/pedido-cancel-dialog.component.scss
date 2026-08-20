@@ -1,0 +1,11 @@
+.pedido-cancel__content {
+  display: grid;
+  gap: 1rem;
+  min-width: min(28rem, 78vw);
+}
+
+.pedido-cancel__description {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}

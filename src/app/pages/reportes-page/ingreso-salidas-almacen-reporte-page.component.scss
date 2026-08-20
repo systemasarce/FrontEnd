@@ -1,0 +1,152 @@
+:host {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.reporte-panel {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  gap: 1rem;
+}
+
+.reporte-panel__header {
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.reporte-panel__header h1 {
+  margin-top: 0.3rem;
+  font-size: clamp(1.45rem, 1.8vw, 1.8rem);
+}
+
+.reporte-panel__filters.reporte-panel__filters--movimientos {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.reporte-panel__filters--movimientos .reporte-panel__field,
+.reporte-panel__filters--movimientos .mat-form-field {
+  width: 100%;
+  min-width: 0;
+}
+
+.reporte-panel__filters--movimientos .reporte-panel__actions {
+  grid-column: 1 / -1;
+  gap: 0.65rem;
+}
+
+.reporte-panel__filters--movimientos .reporte-panel__export,
+.reporte-panel__filters--movimientos .reporte-panel__search {
+  min-width: 9.5rem;
+  min-height: 2.9rem;
+  padding: 0.7rem 1rem;
+}
+
+.reporte-panel__canvas {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0.9rem;
+  border-radius: 18px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.reporte-panel__table-shell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior-x: contain;
+}
+
+.reporte-panel__table--movimientos {
+  width: max-content;
+  min-width: 105rem;
+}
+
+.reporte-panel__table--movimientos thead th,
+.reporte-panel__table--movimientos tbody td {
+  padding: 0.7rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+.reporte-panel__table--movimientos thead th {
+  white-space: nowrap;
+}
+
+.reporte-panel__table--movimientos .reporte-panel__tipo-badge {
+  min-width: 0;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+@media screen and (max-width: 1050px) {
+  .reporte-panel__filters.reporte-panel__filters--movimientos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 720px) {
+  .reporte-panel__filters.reporte-panel__filters--movimientos {
+    grid-template-columns: 1fr;
+  }
+
+  .reporte-panel__table-shell {
+    overflow-x: auto;
+    border: 1px solid var(--line-soft);
+    background: #ffffff;
+  }
+
+  .reporte-panel__table--movimientos,
+  .reporte-panel__table--movimientos tbody,
+  .reporte-panel__table--movimientos tr,
+  .reporte-panel__table--movimientos td {
+    display: revert;
+    width: auto;
+  }
+
+  .reporte-panel__table--movimientos {
+    display: table;
+    min-width: 105rem;
+    border-collapse: collapse;
+  }
+
+  .reporte-panel__table--movimientos thead {
+    display: table-header-group;
+  }
+
+  .reporte-panel__table--movimientos tbody {
+    display: table-row-group;
+  }
+
+  .reporte-panel__table--movimientos tr {
+    display: table-row;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .reporte-panel__table--movimientos td {
+    display: table-cell;
+  }
+
+  .reporte-panel__table--movimientos td::before {
+    display: none;
+  }
+}

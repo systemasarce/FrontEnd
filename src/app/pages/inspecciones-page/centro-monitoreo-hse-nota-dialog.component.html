@@ -1,0 +1,130 @@
+<div class="cmhse cmhse--nota">
+  <div class="cmhse__form-top">
+    <div>
+      <p class="cmhse__eyebrow">PROCESOS</p>
+      <h1 class="cmhse__title">Nota de Centro de Monitoreo HSE</h1>
+      <p class="cmhse__subtitle">
+        Marca <strong>Pasó</strong> o <strong>No pasó</strong> para cada pregunta en Audio y Documento.
+      </p>
+    </div>
+
+    <div class="cmhse__form-actions">
+      <button type="button" class="btn-primary" (click)="guardar()" [disabled]="cargandoPreguntas || guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn-secondary" (click)="cerrar()">Cerrar</button>
+    </div>
+  </div>
+
+  <section class="cmhse-card">
+    <h3>Referencia del registro</h3>
+
+    <div class="observador-grid observador-grid--simple">
+      <div class="field">
+        <label>Código:</label>
+        <input type="text" [value]="centroMonitoreo?.Centro_HSE_Cod || '-'" readonly>
+      </div>
+
+      <div class="field">
+        <label>Inspector:</label>
+        <input type="text" [value]="inspectorNombre" readonly>
+      </div>
+    </div>
+  </section>
+
+  <section class="cmhse-card">
+    <div class="section-head">
+      <h3>Preguntas HSE</h3>
+      <div class="section-head__summary" *ngIf="preguntas.length">
+        Audio respondidas: {{ totalRespondidas('audio') }} / {{ preguntas.length }} · Documento respondidas: {{ totalRespondidas('documento') }} / {{ preguntas.length }}
+      </div>
+    </div>
+
+    <div *ngIf="cargandoPreguntas" class="state-box">
+      Cargando preguntas HSE...
+    </div>
+
+    <div *ngIf="!cargandoPreguntas && errorMessage" class="state-box state-box--error">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!cargandoPreguntas && !errorMessage && !preguntas.length" class="state-box">
+      No hay preguntas activas para mostrar.
+    </div>
+
+    <div *ngIf="preguntas.length" class="table-wrapper">
+      <table class="nota-table">
+        <thead>
+          <tr>
+            <th class="col-pregunta">Pregunta</th>
+            <th class="col-opcion">Audio</th>
+            <th class="col-opcion">Documento</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pregunta of preguntas; let i = index">
+            <td class="pregunta-cell">
+              <div class="pregunta-content">
+                <span class="pregunta-index">{{ i + 1 }}.</span>
+                <span class="pregunta-texto">{{ pregunta.preguntaNombre }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="respuesta-group">
+                <button
+                  type="button"
+                  class="respuesta-btn respuesta-btn--ok"
+                  [class.respuesta-btn--active]="pregunta.audio === 'P'"
+                  (click)="establecerRespuesta(pregunta, 'audio', 'P')">
+                  Pasó
+                </button>
+                <button
+                  type="button"
+                  class="respuesta-btn respuesta-btn--bad"
+                  [class.respuesta-btn--active]="pregunta.audio === 'N'"
+                  (click)="establecerRespuesta(pregunta, 'audio', 'N')">
+                  No pasó
+                </button>
+              </div>
+            </td>
+            <td>
+              <div class="respuesta-group">
+                <button
+                  type="button"
+                  class="respuesta-btn respuesta-btn--ok"
+                  [class.respuesta-btn--active]="pregunta.documento === 'P'"
+                  (click)="establecerRespuesta(pregunta, 'documento', 'P')">
+                  Pasó
+                </button>
+                <button
+                  type="button"
+                  class="respuesta-btn respuesta-btn--bad"
+                  [class.respuesta-btn--active]="pregunta.documento === 'N'"
+                  (click)="establecerRespuesta(pregunta, 'documento', 'N')">
+                  No pasó
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="cmhse-card">
+    <h3>Comentario</h3>
+
+    <div class="observador-grid observador-grid--simple">
+      <div class="field field--wide">
+        <label>Comentario:</label>
+        <textarea
+          rows="3"
+          [(ngModel)]="comentario"
+          name="comentario"
+          placeholder="Escriba un comentario (opcional)"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <p *ngIf="saveError" class="save-error">{{ saveError }}</p>
+</div>

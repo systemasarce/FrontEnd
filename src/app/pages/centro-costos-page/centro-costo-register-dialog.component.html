@@ -1,0 +1,20 @@
+<section class="centro-costo-dialog">
+  <div mat-dialog-content class="centro-costo-dialog__content" [formGroup]="form">
+    <p class="centro-costo-dialog__description">Registra un nuevo centro de costo. El estado se asigna como activo por defecto.</p>
+
+    <label class="centro-costo-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="cenCosDes" maxlength="120">
+      <small class="centro-costo-dialog__error" *ngIf="form.controls['cenCosDes'].touched && (form.controls['cenCosDes'].hasError('required') || form.controls['cenCosDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <p *ngIf="errorMessage" class="centro-costo-dialog__error">{{ errorMessage }}</p>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="button" (click)="guardar()" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</section>

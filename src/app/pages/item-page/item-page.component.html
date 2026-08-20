@@ -1,0 +1,141 @@
+<section class="item-card">
+  <header class="item-card__header">
+    <div>
+      <p class="item-card__eyebrow">Administracion</p>
+      <h2>Item</h2>
+      <p class="item-card__description">Administra los items registrados, asigna su grupo y actualiza su estado desde mantenimiento.</p>
+    </div>
+
+    <div class="item-card__actions">
+      <button type="button" class="item-card__create" (click)="registrarItem()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="item-filters" [formGroup]="filtersForm" (ngSubmit)="cargarItems()">
+    <label class="filter-field">
+      <span>Codigo</span>
+      <input type="text" formControlName="codigo">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field">
+      <span>Grupo</span>
+      <mat-select formControlName="grupo" placeholder="Todos" (selectionChange)="onGrupoFiltroChange()">
+        <mat-option [value]="null">Todos</mat-option>
+        <mat-option *ngFor="let grupo of gruposItem; trackBy: trackByGrupo" [value]="grupo.grpId">{{ grupo.grpDes }}</mat-option>
+      </mat-select>
+    </label>
+
+    <label class="filter-field">
+      <span>Sub Grupo</span>
+      <mat-select
+        formControlName="subGrupo"
+        [placeholder]="isLoadingSubGrupos ? 'Cargando...' : 'Todos'"
+        [disabled]="!filtersForm.controls['grupo'].value || isLoadingSubGrupos"
+        (selectionChange)="onSubGrupoFiltroChange()">
+        <mat-option [value]="null">Todos</mat-option>
+        <mat-option *ngFor="let subGrupo of subGruposItem" [value]="subGrupo.id">{{ subGrupo.descripcion }}</mat-option>
+      </mat-select>
+    </label>
+
+    <label class="filter-field">
+      <span>Detalle Material</span>
+      <mat-select
+        formControlName="detalleMaterial"
+        [placeholder]="isLoadingDetallesMaterial ? 'Cargando...' : 'Todos'"
+        [disabled]="!filtersForm.controls['subGrupo'].value || isLoadingDetallesMaterial">
+        <mat-option [value]="null">Todos</mat-option>
+        <mat-option *ngFor="let detalle of detallesMaterial" [value]="detalle.id">{{ detalle.descripcion }}</mat-option>
+      </mat-select>
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="item-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="item-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+
+    <button type="button" class="item-filters__tree" (click)="verArbolDeGrupos()">
+      Arbol de Grupos
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando items desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !items.length" class="state-card">
+    No hay items para mostrar.
+  </div>
+
+  <div *ngIf="items.length" class="table-shell">
+    <table class="item-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Codigo</th>
+          <th>Descripcion</th>
+          <th>Grupo</th>
+          <th>Sub Grupo</th>
+          <th>Detalle de Material</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of paginatedItems; trackBy: trackByItem">
+          <td>{{ item.itmId ?? '-' }}</td>
+          <td>{{ item.itmCod || '-' }}</td>
+          <td>{{ item.itmDes || '-' }}</td>
+          <td>{{ item.grpDes || '-' }}</td>
+          <td>{{ item.subGrpDes || '-' }}</td>
+          <td>{{ item.detMatDes || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!item.activo">
+              {{ item.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar item"
+              [disabled]="item.itmId === null || item.itmGrp === null"
+              (click)="editarItem(item)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="items.length"
+    [totalItems]="items.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

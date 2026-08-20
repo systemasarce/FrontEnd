@@ -1,0 +1,516 @@
+<section class="pedidos-card">
+  <header class="pedidos-card__header">
+    <div>
+      <p class="pedidos-card__eyebrow">Administracion</p>
+      <h2>Pedidos A</h2>
+      <p class="pedidos-card__description">
+        Formulario de pedidos y centros de costo dentro del flujo del pedido.
+      </p>
+    </div>
+  </header>
+
+  <section *ngIf="!mostrarEditorPedido && !mostrarDetallePedido" class="listado-shell">
+    <footer class="actions-bar">
+      <button
+        *ngFor="let action of actionButtons"
+        type="button"
+        class="action-button"
+        [disabled]="isActionDisabled(action)"
+        (click)="ejecutarAccion(action)">
+        {{ action }}
+      </button>
+    </footer>
+
+    <section class="panel panel--listing">
+      <form class="filters-panel" [formGroup]="filtersForm" (ngSubmit)="aplicarFiltros()">
+        <label class="field">
+          <span>Nro. Pedido</span>
+          <input type="number" formControlName="nroRequisicion" min="0">
+        </label>
+
+        <label class="field">
+          <span>Proveedor</span>
+          <input type="text" formControlName="proveedor">
+        </label>
+
+        <label class="field">
+          <span>Estado</span>
+          <select formControlName="estado">
+            <option *ngFor="let estado of estadoOptions" [value]="estado">{{ estado }}</option>
+          </select>
+        </label>
+
+        <label class="field field--compact">
+          <span>Tipo</span>
+          <select formControlName="tipo">
+            <option *ngFor="let option of tipoOptions" [value]="option.codigo">{{ option.descripcion }}</option>
+          </select>
+        </label>
+
+        <div class="filters-panel__actions">
+          <button type="submit" class="button button--primary">Buscar</button>
+          <button type="button" class="button button--secondary" (click)="limpiarFiltros()">Limpiar</button>
+        </div>
+      </form>
+
+      <div class="table-shell">
+        <table class="requisiciones-table">
+          <thead>
+            <tr>
+              <th>Codigo</th>
+              <th>Archivo</th>
+              <th>Fecha</th>
+              <th>Moneda</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Tipo</th>
+              <th>Nro Orden Compra/Servicio</th>
+              <th>Codigo Usr</th>
+              <th>Usr Aprobacion</th>
+              <th>Fecha Aprobacion</th>
+              <th>Reporte</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <ng-container *ngFor="let item of paginatedRequisiciones; trackBy: trackByRequisicion">
+              <tr
+                class="requisiciones-table__row"
+                [class.requisiciones-table__row--selected]="isPedidoSeleccionado(item)"
+                (click)="seleccionarPedido(item)">
+                <td>{{ item.codigo }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="icon-button icon-button--folder"
+                    aria-label="Ver archivos adjuntos"
+                    [disabled]="isLoadingArchivosAdjuntosListado === item.requisicion"
+                    (click)="abrirArchivosPedidoListado(item, $event)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h4.1c.7 0 1.3.3 1.8.8l1.2 1.2h5.9A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-10Zm2.5-.7a.7.7 0 0 0-.7.7v10c0 .4.3.7.7.7h13c.4 0 .7-.3.7-.7v-8c0-.4-.3-.7-.7-.7h-6.6l-1.7-1.7a.8.8 0 0 0-.6-.3H5.5Z"/>
+                    </svg>
+                  </button>
+                </td>
+                <td>{{ item.fecha }}</td>
+                <td>{{ item.moneda }}</td>
+                <td>{{ formatTotal(item.total, item.moneda) }}</td>
+                <td>
+                  <span class="status-badge" [attr.data-state]="item.estado.toLowerCase()">{{ item.estado }}</span>
+                </td>
+                <td>{{ item.tipo }}</td>
+                <td>{{ item.ordenCompraServicio }}</td>
+                <td>{{ item.codigoUsr }}</td>
+                <td>{{ item.usrAprobacion }}</td>
+                <td>{{ item.fechaUsrGa }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="row-detail-button"
+                    [disabled]="isLoadingReportePedidoId === item.requisicion"
+                    (click)="verReportePedido(item); $event.stopPropagation()">
+                    {{ isLoadingReportePedidoId === item.requisicion ? 'Cargando...' : 'Ver' }}
+                  </button>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="row-detail-button"
+                    (click)="toggleDetallePedido(item); $event.stopPropagation()">
+                    Detalle
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
+
+            <tr *ngIf="isLoadingPedidos">
+              <td colspan="13" class="empty-row">Cargando pedidos registrados...</td>
+            </tr>
+
+            <tr *ngIf="!isLoadingPedidos && errorMessage">
+              <td colspan="13" class="empty-row">{{ errorMessage }}</td>
+            </tr>
+
+            <tr *ngIf="!isLoadingPedidos && !errorMessage && !requisiciones.length">
+              <td colspan="13" class="empty-row">No se han encontrado pedidos en la base de datos.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-grid-pagination
+        *ngIf="requisiciones.length"
+        [totalItems]="requisiciones.length"
+        [currentPage]="currentPedidosPage"
+        [pageSize]="pageSize"
+        (pageChange)="onPedidosPageChange($event)">
+      </app-grid-pagination>
+    </section>
+  </section>
+
+  <section *ngIf="mostrarDetallePedido && detallePedidoSeleccionado" class="pedido-editor pedido-editor--detalle">
+    <header class="pedidos-card__header">
+      <div>
+        <p class="pedidos-card__eyebrow">Detalle</p>
+        <h2>{{ detallePedidoSeleccionado.codigo }}</h2>
+        <p class="pedidos-card__description">
+          Vista de detalle del pedido seleccionado.
+        </p>
+      </div>
+    </header>
+
+    <section class="editor-section">
+      <div class="section-copy">
+        <h3>Items del detalle</h3>
+        <p class="pedidos-card__description">
+          Registra y actualiza los items reales asociados al pedido seleccionado.
+        </p>
+      </div>
+
+      <div class="editor-grid editor-grid--detalle-meta">
+        <label class="field">
+          <span>Cantidad total permitida</span>
+          <input
+            type="text"
+            class="input--readonly"
+            [value]="formatDetalleNumero(detallePedidoCantidadLimite)"
+            readonly
+            disabled
+            tabindex="-1">
+        </label>
+      </div>
+
+      <div class="pedido-detalle-panel__toolbar">
+        <button
+          type="button"
+          class="button button--primary"
+          [disabled]="!canManagePedidoDetalle"
+          (click)="iniciarNuevoPedidoDetalle()">
+          Nuevo
+        </button>
+        <button
+          type="button"
+          class="button button--secondary"
+          (click)="cerrarDetallePedido()">
+          Cerrar
+        </button>
+      </div>
+
+      <p *ngIf="detallePedidoErrorMessage" class="editor-feedback editor-feedback--error">
+        {{ detallePedidoErrorMessage }}
+      </p>
+
+      <div *ngIf="isLoadingDetalleExpandido" class="editor-feedback">
+        Cargando detalle del pedido...
+      </div>
+
+      <div *ngIf="!isLoadingDetalleExpandido && detalleExpandidoError" class="editor-feedback editor-feedback--error">
+        {{ detalleExpandidoError }}
+      </div>
+
+      <div *ngIf="!isLoadingDetalleExpandido && !detalleExpandidoError" class="table-shell">
+        <table class="pedido-detalle-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Codigo Item</th>
+              <th>Descripcion</th>
+              <th>Centro de Costo</th>
+              <th>Unidad Medida</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+              <th class="pedido-detalle-table__action-head"></th>
+              <th class="pedido-detalle-table__action-head"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="let detail of paginatedDetallePedidoExpandido; trackBy: trackByPedidoDetalle"
+              class="pedido-detalle-table__row"
+              [class.pedido-detalle-table__row--selected]="isPedidoDetalleSeleccionado(detail)"
+              (click)="seleccionarPedidoDetalle(detail)">
+              <td>{{ detail.item }}</td>
+              <td>{{ detail.codigoItem }}</td>
+              <td>{{ detail.descripcion }}</td>
+              <td>{{ detail.centroCosto }}</td>
+              <td>{{ detail.unidad }}</td>
+              <td>{{ formatDetalleNumero(detail.cantidad) }}</td>
+              <td>{{ formatDetalleNumero(detail.precioUnitario) }}</td>
+              <td>{{ formatDetalleNumero(detail.subtotal) }}</td>
+              <td class="pedido-detalle-table__action-cell">
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Editar item del detalle"
+                  [disabled]="detail.persistedId === null || isSavingPedidoDetalle"
+                  (click)="editarPedidoDetalle(detail); $event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z"/>
+                  </svg>
+                </button>
+              </td>
+              <td class="pedido-detalle-table__action-cell">
+                <button
+                  type="button"
+                  class="icon-button icon-button--danger"
+                  aria-label="Eliminar item del detalle"
+                  [disabled]="detail.persistedId === null || isSavingPedidoDetalle"
+                  (click)="confirmarEliminarPedidoDetalle(detail); $event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2h4v2H4V6h4l1-2z"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="!getDetallePedidoExpandido().length">
+              <td colspan="10" class="empty-row">No hay items registrados para este pedido.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-grid-pagination
+        *ngIf="getDetallePedidoExpandido().length"
+        [totalItems]="getDetallePedidoExpandido().length"
+        [currentPage]="currentDetalleExpandidoPage"
+        [pageSize]="pageSize"
+        (pageChange)="onDetalleExpandidoPageChange($event)">
+      </app-grid-pagination>
+    </section>
+  </section>
+
+  <section *ngIf="mostrarEditorPedido" class="pedido-editor">
+    <form class="editor-grid editor-grid--header" [formGroup]="cabeceraForm">
+      <label class="field">
+        <span>Nro. Pedido</span>
+        <input type="number" formControlName="requisicionCompra" min="0" readonly [attr.placeholder]="isLoadingCorrelativo ? 'Cargando...' : 'Auto'">
+      </label>
+
+      <div class="field">
+        <span>Usuario de Aprobacion</span>
+        <button
+          type="button"
+          class="selector-code-button selector-code-button--wide"
+          [disabled]="isLoadingApprovalUsers"
+          (click)="openApprovalUserDialog()">
+          {{ isLoadingApprovalUsers ? 'Cargando usuarios...' : approvalUserButtonLabel }}
+        </button>
+        <small class="editor-feedback editor-feedback--error" *ngIf="cabeceraForm.controls['usuarioAprobacion'].touched && (cabeceraForm.controls['usuarioAprobacion'].hasError('required') || cabeceraForm.controls['usuarioAprobacion'].hasError('whitespace'))">Campo Usuario de Aprobacion obligatorio.</small>
+      </div>
+    </form>
+
+    <section class="editor-section">
+      <div class="section-copy">
+        <h3>Centro de Costos</h3>
+      </div>
+
+      <form class="table-toolbar" [formGroup]="centroCostoForm">
+        <div class="field">
+          <button
+            type="button"
+            class="selector-code-button selector-code-button--wide selector-code-button--selector selector-code-button--accent"
+            [disabled]="isLoadingCentrosCosto || !centroCostoOptions.length"
+            (click)="openCentroCostoDialog()">
+            {{ isLoadingCentrosCosto ? 'Cargando centros de costo...' : centroCostoButtonLabel }}
+          </button>
+        </div>
+
+        <div class="table-toolbar__actions" *ngIf="editandoCentroCostoId !== null">
+          <button
+            type="button"
+            class="button button--primary"
+            (click)="guardarCantidadCentroCosto(editandoCentroCostoId)">
+            Guardar
+          </button>
+          <button
+            type="button"
+            class="button button--secondary"
+            (click)="cancelarEdicionCentroCosto()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+
+      <div class="table-shell">
+        <table class="costos-table">
+          <thead>
+            <tr>
+              <th>Codigo</th>
+              <th>Costo</th>
+              <th>Cantidad</th>
+              <th class="costos-table__action-head"></th>
+              <th class="costos-table__action-head"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of paginatedCentrosCosto; trackBy: trackByCentroCosto">
+              <td>{{ item.codigo }}</td>
+              <td>{{ item.costo }}</td>
+              <td class="cantidad-cell">
+                <ng-container *ngIf="editandoCentroCostoId === item.id; else cantidadSoloLectura">
+                  <input
+                    type="number"
+                    class="cantidad-input"
+                    min="0"
+                    step="0.001"
+                    [value]="editandoCentroCostoCantidad"
+                    (input)="onCantidadCentroCostoInput($event)"
+                    (keydown.enter)="guardarCantidadCentroCosto(item.id); $event.preventDefault()"
+                    (keydown.escape)="cancelarEdicionCentroCosto()">
+                </ng-container>
+                <ng-template #cantidadSoloLectura>{{ item.cantidad }}</ng-template>
+              </td>
+              <td class="costos-table__action-cell">
+                <button type="button" class="icon-button" aria-label="Editar centro de costo" (click)="editarCentroCosto(item)">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z"/>
+                  </svg>
+                </button>
+              </td>
+              <td class="costos-table__action-cell">
+                <button type="button" class="icon-button icon-button--danger" aria-label="Eliminar centro de costo" (click)="eliminarCentroCosto(item.id)">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2h4v2H4V6h4l1-2z"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="!centrosCosto.length">
+              <td colspan="5" class="empty-row">No hay centros de costo registrados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-grid-pagination
+        *ngIf="centrosCosto.length"
+        [totalItems]="centrosCosto.length"
+        [currentPage]="currentCentroCostoPage"
+        [pageSize]="pageSize"
+        (pageChange)="onCentroCostoPageChange($event)">
+      </app-grid-pagination>
+    </section>
+
+    <form class="details-grid" [formGroup]="detalleForm">
+      <section class="editor-section">
+        <div class="section-copy">
+          <h3>Detalle del Pedido</h3>
+        </div>
+
+        <div class="group-row group-row--gasto">
+          <label class="field field--wide">
+            <span>Lugar de Entrega</span>
+            <input type="text" formControlName="lugarEntrega">
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['lugarEntrega'].touched && (detalleForm.controls['lugarEntrega'].hasError('required') || detalleForm.controls['lugarEntrega'].hasError('whitespace'))">Campo Lugar de Entrega obligatorio.</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="editor-section">
+        <label class="field field--wide">
+          <span>Referencia</span>
+          <input type="text" formControlName="referencia">
+          <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['referencia'].touched && (detalleForm.controls['referencia'].hasError('required') || detalleForm.controls['referencia'].hasError('whitespace'))">Campo Referencia obligatorio.</small>
+        </label>
+      </section>
+
+      <section class="editor-section">
+        <div class="group-row group-row--meta">
+          <label class="field">
+            <span>Tipo de Servicio</span>
+            <select formControlName="oc">
+              <option *ngFor="let option of tipoServicioOptions" [ngValue]="option.codigo">{{ option.descripcion }}</option>
+            </select>
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['oc'].touched && detalleForm.controls['oc'].hasError('required')">Campo Tipo de Servicio obligatorio.</small>
+          </label>
+
+          <label class="field">
+            <span>Moneda</span>
+            <select formControlName="moneda">
+              <option *ngFor="let option of tipoMoneda" [ngValue]="option.codigo">{{ option.descripcion }}</option>
+            </select>
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['moneda'].touched && detalleForm.controls['moneda'].hasError('required')">Campo Moneda obligatorio.</small>
+          </label>
+
+          <label class="field">
+            <span>Fecha Entrega</span>
+            <input type="date" [min]="pedidoFechaEntregaMinima" formControlName="fechaEntrega">
+            <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['fechaEntrega'].touched && detalleForm.controls['fechaEntrega'].hasError('required')">Campo Fecha Entrega obligatorio.</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="editor-section editor-section--attachments">
+        <label class="field field--textarea">
+          <span>Sustento</span>
+          <textarea formControlName="sustento" rows="7"></textarea>
+          <small class="editor-feedback editor-feedback--error" *ngIf="detalleForm.controls['sustento'].touched && (detalleForm.controls['sustento'].hasError('required') || detalleForm.controls['sustento'].hasError('whitespace'))">Campo Sustento obligatorio.</small>
+        </label>
+
+        <div class="attachment-panel">
+          <div class="attachment-grid">
+            <div class="attachment-grid__header">
+              <h3>Archivo</h3>
+              <input #fileInput type="file" multiple style="display:none" (change)="onFileSelected($event)">
+              <button type="button" class="icon-button attachment-grid__add" aria-label="Adjuntar archivo" (click)="fileInput.click()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="table-shell attachment-grid__table-shell">
+              <table class="attachment-grid__table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let archivo of archivosAdjuntosVista">
+                    <td>{{ archivo.nombre }}</td>
+                    <td class="attachment-grid__actions-cell">
+                      <button type="button" class="icon-button icon-button--edit" aria-label="Ver archivo" (click)="verArchivoAdjunto(archivo)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 5c5 0 8.5 4.4 9.8 6.5a1 1 0 0 1 0 1C20.5 14.6 17 19 12 19s-8.5-4.4-9.8-6.5a1 1 0 0 1 0-1C3.5 9.4 7 5 12 5zm0 2c-3.5 0-6.2 2.7-7.7 5 1.5 2.3 4.2 5 7.7 5s6.2-2.7 7.7-5C18.2 9.7 15.5 7 12 7zm0 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/>
+                        </svg>
+                      </button>
+                      <button type="button" class="icon-button icon-button--danger" aria-label="Quitar archivo" [disabled]="!archivo.local" (click)="archivo.local && quitarArchivo(archivo.index); fileInput.value = ''">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2h4v2H4V6h4l1-2z"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr *ngIf="!archivosAdjuntosVista.length">
+                    <td colspan="2" class="empty-row">No hay archivos adjuntos.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </form>
+
+    <footer class="editor-actions">
+      <p *ngIf="saveErrorMessage" class="editor-feedback editor-feedback--error">{{ saveErrorMessage }}</p>
+      <button
+        type="button"
+        class="button button--primary"
+        [disabled]="isSavingPedido || isLoadingCorrelativo || isLoadingPedidoDetalle"
+        (click)="guardarPedido()">
+        {{ isLoadingPedidoDetalle ? 'Cargando...' : isSavingPedido ? 'Guardando...' : isEditingPedido ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button type="button" class="button button--secondary" (click)="confirmarCancelacionPedido()">
+        Cancelar
+      </button>
+    </footer>
+  </section>
+</section>

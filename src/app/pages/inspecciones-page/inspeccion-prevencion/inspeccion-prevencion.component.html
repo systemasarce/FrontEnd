@@ -1,0 +1,228 @@
+<section class="inspeccion">
+  <div class="inspeccion__form-top">
+    <div>
+      <p class="inspeccion__eyebrow">Administración</p>
+      <h2 class="inspeccion__title">
+        {{ modoEdicion ? 'Editar inspección de Prevención' : 'Inspección de Prevención' }}
+      </h2>
+      <p class="inspeccion__subtitle">
+        Registra o edita la inspección de prevención con el mismo estilo visual del sistema.
+      </p>
+    </div>
+
+    <div class="inspeccion__form-actions">
+      <button
+        type="button"
+        class="btn-primary"
+        [disabled]="guardando"
+        (click)="guardar()">
+        {{ guardando ? (modoEdicion ? 'Actualizando...' : 'Agregando...') : (modoEdicion ? 'Actualizar' : 'Agregar') }}
+      </button>
+      <button type="button" class="btn-secondary" (click)="retroceder()">Retroceder</button>
+    </div>
+  </div>
+
+  <!-- Datos del Supervisor -->
+  <section class="inspeccion-card">
+    <h3>Datos del Supervisor</h3>
+    <div class="observador-grid">
+      <div class="field">
+        <label>Supervisor:</label>
+        <input type="text" [value]="supervisor.nombre" readonly>
+      </div>
+      <div class="field">
+        <label>Cargo:</label>
+        <input type="text" [value]="supervisor.cargo" readonly>
+      </div>
+      <div class="field">
+        <label>Área:</label>
+        <input type="text" [value]="supervisor.area" readonly>
+      </div>
+    </div>
+  </section>
+
+  <!-- Datos Generales -->
+  <section class="inspeccion-card" [formGroup]="form">
+    <h3>Datos Generales</h3>
+    <div class="form-grid">
+
+      <!-- Cliente -->
+      <div class="field combo-field">
+        <label>Cliente:</label>
+        <div class="combo">
+          <button
+            type="button"
+            class="combo__trigger"
+            [class.combo__trigger--placeholder]="!clienteSeleccionado"
+            (click)="$event.stopPropagation(); toggleCombo('cliente')">
+            <span>{{ clienteDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.cliente" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar..."
+              [value]="comboSearch.cliente" (input)="onSearchChange('cliente', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectCliente(null)">Seleccione</button>
+              <button type="button" class="combo__option" *ngFor="let c of clientesFiltrados" (click)="selectCliente(c)">
+                {{ c.Cliente_Nombre }}
+              </button>
+              <div class="combo__empty" *ngIf="clientesFiltrados.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subestación -->
+      <div class="field combo-field">
+        <label>Subestación:</label>
+        <div class="combo">
+          <button
+            type="button"
+            class="combo__trigger"
+            [class.combo__trigger--placeholder]="!subestacionSeleccionada && !!clienteSeleccionado"
+            [disabled]="!clienteSeleccionado || cargandoSubestaciones"
+            (click)="$event.stopPropagation(); toggleCombo('subestacion')">
+            <span>{{ subestacionDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.subestacion" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar..."
+              [value]="comboSearch.subestacion" (input)="onSearchChange('subestacion', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectSubestacion(null)">Seleccione</button>
+              <button type="button" class="combo__option" *ngFor="let s of subestacionesFiltradas" (click)="selectSubestacion(s)">
+                {{ s.Subestacion_Nombre }}
+              </button>
+              <div class="combo__empty" *ngIf="subestacionesFiltradas.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subcontrata -->
+      <div class="field combo-field">
+        <label>Subcontrata:</label>
+        <div class="combo">
+          <button
+            type="button"
+            class="combo__trigger"
+            [class.combo__trigger--placeholder]="!subContrataSeleccionada"
+            [disabled]="cargandoSubContratas"
+            (click)="$event.stopPropagation(); toggleCombo('subcontrata')">
+            <span>{{ subContrataDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.subcontrata" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar..."
+              [value]="comboSearch.subcontrata" (input)="onSearchChange('subcontrata', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectSubContrata(null)">Seleccione</button>
+              <button type="button" class="combo__option" *ngFor="let s of subContratasFiltradas" (click)="selectSubContrata(s)">
+                {{ s.SubContrata_Nombre }}
+              </button>
+              <div class="combo__empty" *ngIf="subContratasFiltradas.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jefe Equipo -->
+      <div class="field combo-field">
+        <label>Jefe Equipo:</label>
+        <div class="combo">
+          <button
+            type="button"
+            class="combo__trigger"
+            [class.combo__trigger--placeholder]="!jefeSeleccionado"
+            [disabled]="cargandoJefes"
+            (click)="$event.stopPropagation(); toggleCombo('jefe')">
+            <span>{{ jefeDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.jefe" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar por nombre..."
+              [value]="comboSearch.jefe" (input)="onSearchChange('jefe', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectJefe(null)">Seleccione</button>
+              <button type="button" class="combo__option" *ngFor="let j of jefesFiltrados" (click)="selectJefe(j)">
+                {{ j.Usr_Nom }}
+              </button>
+              <div class="combo__empty" *ngIf="jefesFiltrados.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Área Jefe Equipo (readonly, cargada con SP_Mostrar_Jefe) -->
+      <div class="field">
+        <label>Área Jefe Equipo:</label>
+        <input type="text" [value]="jefeArea" readonly placeholder="Se carga al seleccionar jefe">
+      </div>
+
+      <!-- DNI Jefe Equipo (readonly, cargada con SP_Mostrar_Jefe) -->
+      <div class="field">
+        <label>DNI Jefe Equipo:</label>
+        <input type="text" [value]="jefeDni" readonly placeholder="Se carga al seleccionar jefe">
+      </div>
+
+      <!-- Actividad o Tarea -->
+      <div class="field">
+        <label>Actividad o Tarea:</label>
+        <select formControlName="actividadTarea">
+          <option value="">Seleccione</option>
+          <option value="Actividad">Actividad</option>
+          <option value="Tarea">Tarea</option>
+        </select>
+      </div>
+
+      <!-- Orden de Trabajo -->
+      <div class="field field--wide">
+        <label>Orden de Trabajo:</label>
+        <input type="text" formControlName="ordenTrabajo" placeholder="Orden de Trabajo">
+      </div>
+
+      <!-- Procedimiento de Trabajo -->
+      <div class="field field--wide">
+        <label>Procedimiento de Trabajo:</label>
+        <input type="text" formControlName="procedimientoTrabajo" placeholder="Procedimiento de Trabajo">
+      </div>
+
+      <!-- Tipo Inspección (desde BD: Ins_Tipo_Inspeccion) -->
+      <div class="field combo-field">
+        <label>Tipo Inspección:</label>
+        <div class="combo">
+          <button
+            type="button"
+            class="combo__trigger"
+            [class.combo__trigger--placeholder]="!tipoInspeccionSeleccionado"
+            [disabled]="cargandoTipos"
+            (click)="$event.stopPropagation(); toggleCombo('tipoInspeccion')">
+            <span>{{ tipoInspeccionDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+          <div class="combo__panel" *ngIf="comboOpen.tipoInspeccion" (click)="$event.stopPropagation()">
+            <input type="text" class="combo__search" placeholder="Buscar..."
+              [value]="comboSearch.tipoInspeccion" (input)="onSearchChange('tipoInspeccion', $event)">
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectTipoInspeccion(null)">Seleccione</button>
+              <button type="button" class="combo__option" *ngFor="let t of tiposInspeccionFiltrados" (click)="selectTipoInspeccion(t)">
+                {{ t.Tipo_Nombre }}
+              </button>
+              <div class="combo__empty" *ngIf="tiposInspeccionFiltrados.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado (solo en edición) -->
+      <div class="field" *ngIf="modoEdicion">
+        <label>Estado:</label>
+        <select formControlName="estado">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </div>
+
+    </div>
+  </section>
+</section>

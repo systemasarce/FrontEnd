@@ -1,0 +1,102 @@
+<section class="sub-grupo-item-card">
+  <header class="sub-grupo-item-card__header">
+    <div>
+      <p class="sub-grupo-item-card__eyebrow">Administracion</p>
+      <h2>Sub Grupo de Item</h2>
+      <p class="sub-grupo-item-card__description">Administra los sub grupos de item disponibles para clasificar y mantener items.</p>
+    </div>
+
+    <div class="sub-grupo-item-card__actions">
+      <button type="button" class="sub-grupo-item-card__create" (click)="registrarSubGrupoItem()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="sub-grupo-item-filters" [formGroup]="filtersForm" (ngSubmit)="cargarSubGrupoItem()">
+    <label class="filter-field">
+      <span>Cod. Sub Grupo</span>
+      <input type="text" formControlName="codigo">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="sub-grupo-item-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="sub-grupo-item-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando sub grupos de item desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !subGruposItem.length" class="state-card">
+    {{ emptyStateMessage }}
+  </div>
+
+  <div *ngIf="subGruposItem.length" class="table-shell">
+    <table class="sub-grupo-item-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cod. Sub Grupo</th>
+          <th>Descripcion</th>
+          <th>Grupo</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let subGrupoItem of paginatedSubGruposItem; trackBy: trackBySubGrupoItem">
+          <td>{{ subGrupoItem.subGrpId ?? '-' }}</td>
+          <td>{{ subGrupoItem.subGrpCod || '-' }}</td>
+          <td>{{ subGrupoItem.subGrpDes || '-' }}</td>
+          <td>{{ subGrupoItem.grpDes || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!subGrupoItem.activo">
+              {{ subGrupoItem.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar sub grupo de item"
+              [disabled]="subGrupoItem.subGrpId === null"
+              (click)="editarSubGrupoItem(subGrupoItem)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="subGruposItem.length"
+    [totalItems]="subGruposItem.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

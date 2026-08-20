@@ -1,0 +1,275 @@
+<section class="asignacion-card">
+  <header class="asignacion-card__header">
+    <div>
+      <p class="asignacion-card__eyebrow">Procesos</p>
+      <h2>Asignacion</h2>
+      <p class="asignacion-card__description">Gestiona la asignacion de usuarios por centro de costo.</p>
+    </div>
+  </header>
+
+  <section *ngIf="!mostrarEditorAsignacion" class="asignacion-listado">
+    <footer class="asignacion-actions asignacion-actions--single">
+      <button type="button" class="button button--primary" (click)="nuevaAsignacion()">Nuevo</button>
+    </footer>
+
+    <form class="asignacion-filtros" [formGroup]="filtrosForm" (ngSubmit)="buscarAsignaciones()">
+      <label class="asignacion-field">
+        <span>ID asignación</span>
+        <input type="number" min="1" formControlName="asignacionId" placeholder="Todos">
+      </label>
+
+      <label class="asignacion-field">
+        <span>Fecha inicial</span>
+        <input type="date" formControlName="fechaInicio">
+      </label>
+
+      <label class="asignacion-field">
+        <span>Fecha final</span>
+        <input type="date" formControlName="fechaFin">
+      </label>
+
+      <label class="asignacion-field">
+        <span>Usuario asignado</span>
+        <select formControlName="usuarioAsignado" [disabled]="isLoadingOptions">
+          <option value="">Todos los usuarios</option>
+          <option *ngFor="let usuario of usuarios" [value]="usuario.codigo">
+            {{ usuario.codigo }} - {{ usuario.nombre }}
+          </option>
+        </select>
+      </label>
+
+      <label class="asignacion-field">
+        <span>Registrado por</span>
+        <select formControlName="usuarioRegistro" [disabled]="isLoadingOptions">
+          <option value="">Todos los usuarios</option>
+          <option *ngFor="let usuario of usuarios" [value]="usuario.codigo">
+            {{ usuario.codigo }} - {{ usuario.nombre }}
+          </option>
+        </select>
+      </label>
+
+      <label class="asignacion-field">
+        <span>Estado</span>
+        <select formControlName="estado">
+          <option value="">Todos</option>
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </label>
+
+      <label class="asignacion-field">
+        <span>Centro de costo</span>
+        <select formControlName="centroCosto" [disabled]="isLoadingOptions">
+          <option [ngValue]="0">Todos los centros de costo</option>
+          <option *ngFor="let centro of centrosCosto" [ngValue]="centro.id">
+            {{ centro.id }} - {{ centro.descripcion }}
+          </option>
+        </select>
+      </label>
+
+      <div class="asignacion-actions asignacion-filtros__actions">
+        <button type="button" class="button button--secondary" [disabled]="isLoadingAsignaciones"
+          (click)="limpiarFiltrosAsignacion()">Limpiar</button>
+        <button type="submit" class="button button--primary" [disabled]="isLoadingAsignaciones">
+          {{ isLoadingAsignaciones ? 'Buscando...' : 'Buscar' }}
+        </button>
+      </div>
+    </form>
+
+    <p *ngIf="listErrorMessage" class="asignacion-feedback asignacion-feedback--error">
+      {{ listErrorMessage }}
+    </p>
+    <p *ngIf="listInfoMessage" class="asignacion-feedback asignacion-feedback--success">
+      {{ listInfoMessage }}
+    </p>
+
+    <section class="asignacion-panel">
+      <p *ngIf="isLoadingAsignaciones" class="asignacion-feedback">Cargando asignaciones...</p>
+      <div class="asignacion-table-wrap" *ngIf="!isLoadingAsignaciones && asignaciones.length; else sinAsignaciones">
+        <table class="asignacion-table">
+          <thead><tr><th>Id</th><th>Fecha</th><th>Usuario asignado</th><th>Centro de costo</th><th>Registrado por</th><th>Acciones</th></tr></thead>
+          <tbody><tr *ngFor="let asignacion of asignaciones">
+            <td>{{ asignacion['Asg_Id'] || asignacion['asg_Id'] }}</td>
+            <td>{{ formatFecha(asignacion['Asg_Fec'] || asignacion['asg_Fec']) }}</td>
+            <td>{{ asignacion['Usr_Asignacion'] || asignacion['usr_Asignacion'] || asignacion['Asg_Usr'] || asignacion['asg_Usr'] }}</td>
+            <td>{{ asignacion['Cen_Cos_Des'] || asignacion['cen_Cos_Des'] || asignacion['cenCosDes'] || '-' }}</td>
+            <td>{{ asignacion['Usr_Registro'] || asignacion['usr_Registro'] || asignacion['Usr_Reg'] || asignacion['usr_Reg'] }}</td>
+            <td><div class="asignacion-actions">
+              <button
+                type="button"
+                class="asignacion-icon-button asignacion-edit-button"
+                (click)="editarAsignacion(asignacion)"
+                title="Editar"
+                aria-label="Editar asignación">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="asignacion-icon-button asignacion-delete-button"
+                [disabled]="isDeletingAsignacion"
+                (click)="eliminarAsignacion(asignacion)"
+                title="Eliminar"
+                aria-label="Eliminar asignación">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 21a2 2 0 0 1-2-2V6h14v13a2 2 0 0 1-2 2H7zm10-13H7v11h10V8zm-7 2h2v7h-2v-7zm4 0h2v7h-2v-7zM9 3h6l1 1h4v2H4V4h4l1-1z"/>
+                </svg>
+              </button>
+            </div></td>
+          </tr></tbody>
+        </table>
+      </div>
+      <ng-template #sinAsignaciones>
+        <p *ngIf="!isLoadingAsignaciones" class="asignacion-empty">No se encontraron asignaciones registradas.</p>
+      </ng-template>
+    </section>
+  </section>
+
+  <section *ngIf="mostrarEditorAsignacion" class="asignacion-editor">
+    <header class="asignacion-editor__header">
+      <div>
+        <p class="asignacion-card__eyebrow">Registro</p>
+        <h3>{{ editandoAsignacionId ? 'Editar asignación' : 'Nueva asignación' }}</h3>
+        <p class="asignacion-card__description">Selecciona la fecha, el usuario y el centro de costo que se le asignara.</p>
+      </div>
+    </header>
+
+    <form class="asignacion-form" [formGroup]="form" (ngSubmit)="guardar()">
+      <p *ngIf="isLoadingOptions || isLoadingEdit" class="asignacion-feedback">
+        {{ isLoadingEdit ? 'Cargando datos de la asignación...' : 'Cargando datos...' }}
+      </p>
+
+      <div class="asignacion-form__grid" *ngIf="!isLoadingOptions && !isLoadingEdit">
+        <label class="asignacion-field">
+          <span>Fecha</span>
+          <input type="date" formControlName="fecha">
+          <small *ngIf="form.controls['fecha'].touched && form.controls['fecha'].hasError('required')">La fecha es obligatoria.</small>
+        </label>
+
+        <label class="asignacion-field">
+          <span>Usuario</span>
+          <select formControlName="usuario" (change)="onUsuarioChange()">
+            <option value="">Seleccionar usuario</option>
+            <option *ngFor="let usuario of usuarios" [value]="usuario.codigo">{{ usuario.codigo }} - {{ usuario.nombre }}</option>
+          </select>
+          <small *ngIf="form.controls['usuario'].touched && form.controls['usuario'].hasError('required')">El usuario es obligatorio.</small>
+        </label>
+
+        <label class="asignacion-field asignacion-field--wide">
+          <span>Centro de costo</span>
+          <select formControlName="centroCosto">
+            <option value="">{{ isLoadingCentroCosto ? 'Cargando centro de costo...' : 'Seleccionar centro de costo' }}</option>
+            <option *ngFor="let centro of centrosCosto" [value]="centro.id">{{ centro.id }} - {{ centro.descripcion }}</option>
+          </select>
+          <small *ngIf="form.controls['centroCosto'].touched && form.controls['centroCosto'].hasError('required')">El centro de costo es obligatorio.</small>
+          <small *ngIf="centroCostoMessage" class="asignacion-field__warning">
+            {{ centroCostoMessage }}
+          </small>
+        </label>
+      </div>
+
+      <section class="asignacion-materiales" *ngIf="!isLoadingOptions && !isLoadingEdit">
+        <header class="asignacion-materiales__header">
+          <div>
+            <h4>Materiales</h4>
+            <p>Selecciona los materiales activos que se asignaran al usuario.</p>
+          </div>
+        </header>
+
+        <div class="asignacion-materiales__list" formArrayName="materiales">
+          <div
+            *ngFor="let row of materialRows; let i = index"
+            class="asignacion-material-row"
+            [class.asignacion-material-row--marked-for-delete]="row.controls['markedForDelete'].value"
+            [formGroupName]="i">
+            <div class="asignacion-field asignacion-material-row__selector">
+              <span>Material</span>
+              <mat-form-field appearance="outline" class="asignacion-material-select">
+                <mat-select
+                  formControlName="materialId"
+                  placeholder="Seleccionar material"
+                  (selectionChange)="onMaterialChange(i)"
+                  (openedChange)="onMaterialSelectOpened(row, $event)">
+                  <mat-option class="asignacion-material-search-option">
+                    <input
+                      type="text"
+                      class="asignacion-material-search"
+                      placeholder="Buscar por codigo o descripcion..."
+                      [formControl]="$any(row.controls['materialSearch'])"
+                      (click)="$event.stopPropagation()"
+                      (keydown)="$event.stopPropagation()">
+                  </mat-option>
+                  <mat-option [value]="0">Seleccionar material</mat-option>
+                  <mat-option *ngFor="let material of getMaterialesFiltrados(row)" [value]="material.id">
+                    {{ material.id }} - {{ material.descripcion }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <small *ngIf="row.controls['materialId'].touched && row.controls['materialId'].invalid">El material es obligatorio.</small>
+            </div>
+
+            <label class="asignacion-field asignacion-material-row__unidad">
+              <span>Unidad de medida</span>
+              <select formControlName="unidadId">
+                <option [ngValue]="0">Seleccionar unidad</option>
+                <option *ngIf="row.controls['unidadId'].value" [ngValue]="row.controls['unidadId'].value">
+                  {{ row.controls['unidadDescripcion'].value }}
+                </option>
+              </select>
+            </label>
+
+            <label class="asignacion-field">
+              <span>Disponible</span>
+              <input type="number" formControlName="disponible" readonly>
+            </label>
+
+            <label class="asignacion-field">
+              <span>Reservado</span>
+              <input type="number" formControlName="reservado" readonly>
+            </label>
+
+            <label class="asignacion-field asignacion-material-row__cantidad">
+              <span>Cantidad solicitada</span>
+              <input type="number" formControlName="cantidad" min="0.001" step="0.001">
+              <small *ngIf="row.controls['cantidad'].touched && row.controls['cantidad'].invalid">Ingresa una cantidad mayor que cero.</small>
+            </label>
+
+            <label class="asignacion-field asignacion-material-row__serie">
+              <span>Serie</span>
+              <input type="text" formControlName="serie" maxlength="100" placeholder="Ingresar serie">
+            </label>
+
+            <label class="asignacion-field asignacion-material-row__observaciones">
+              <span>Observaciones</span>
+              <input type="text" formControlName="observaciones" maxlength="500" placeholder="Ingresar observaciones">
+            </label>
+
+            <button
+              type="button"
+              class="button asignacion-material-row__remove"
+              [class.asignacion-material-row__remove--restore]="row.controls['markedForDelete'].value"
+              [attr.aria-label]="row.controls['markedForDelete'].value ? 'Deshacer eliminación del material' : 'Quitar material'"
+              [title]="row.controls['markedForDelete'].value ? 'Deshacer eliminación' : 'Marcar para eliminar'"
+              [disabled]="!puedeQuitarMaterial(row)"
+              (click)="quitarMaterial(i)">
+              {{ row.controls['markedForDelete'].value ? 'Deshacer' : 'Quitar' }}
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="button asignacion-materiales__add" (click)="agregarMaterial()" aria-label="Agregar material">+</button>
+      </section>
+
+      <p *ngIf="errorMessage" class="asignacion-feedback asignacion-feedback--error">{{ errorMessage }}</p>
+      <p *ngIf="successMessage" class="asignacion-feedback asignacion-feedback--success">{{ successMessage }}</p>
+
+      <footer class="asignacion-actions">
+        <button type="button" class="button button--secondary" (click)="cerrarEditor()" [disabled]="isSaving">Cancelar</button>
+        <button type="submit" class="button button--primary" [disabled]="isSaving || isLoadingOptions || isLoadingEdit">
+          {{ isSaving ? 'Guardando...' : (editandoAsignacionId ? 'Actualizar' : 'Guardar') }}
+        </button>
+      </footer>
+    </form>
+  </section>
+</section>

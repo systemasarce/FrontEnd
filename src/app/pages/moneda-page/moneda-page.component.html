@@ -1,0 +1,105 @@
+<section class="moneda-card">
+  <header class="moneda-card__header">
+    <div>
+      <p class="moneda-card__eyebrow">Administracion</p>
+      <h2>Moneda</h2>
+      <p class="moneda-card__description">Administra las monedas activas y actualiza su estado desde mantenimiento.</p>
+    </div>
+
+    <div class="moneda-card__actions">
+      <button type="button" class="moneda-card__create" (click)="registrarMoneda()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="moneda-filters" [formGroup]="filtersForm" (ngSubmit)="cargarMonedas()">
+    <label class="filter-field">
+      <span>ID</span>
+      <input
+        type="number"
+        formControlName="codigo"
+        min="1"
+        step="1"
+        (input)="sanitizeCodigoInput($event)">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="moneda-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="moneda-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando monedas desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !monedas.length" class="state-card">
+    {{ emptyStateMessage }}
+  </div>
+
+  <div *ngIf="monedas.length" class="table-shell">
+    <table class="moneda-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripcion</th>
+          <th>Abreviatura</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let moneda of paginatedMonedas; trackBy: trackByMoneda">
+          <td>{{ moneda.monId ?? '-' }}</td>
+          <td>{{ moneda.monDes || '-' }}</td>
+          <td>{{ moneda.monAbr || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!moneda.activo">
+              {{ moneda.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar moneda"
+              [disabled]="moneda.monId === null"
+              (click)="editarMoneda(moneda)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="monedas.length"
+    [totalItems]="monedas.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

@@ -1,0 +1,63 @@
+.elegir-edicion-dialog__content {
+  padding-top: 0.25rem;
+
+  p {
+    margin: 0 0 1.1rem;
+    color: #4b5563;
+  }
+}
+
+.elegir-edicion-dialog__opciones {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.elegir-edicion-dialog__opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 9.5rem;
+  padding: 1.1rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.85rem;
+  background: #ffffff;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.elegir-edicion-dialog__opcion:hover {
+  border-color: #4b5563;
+  background: #f9fafb;
+  transform: translateY(-1px);
+}
+
+.elegir-edicion-dialog__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.elegir-edicion-dialog__icono--cuadrado {
+  border-radius: 0.6rem;
+}
+
+.elegir-edicion-dialog__icono--circular {
+  border-radius: 50%;
+}
+
+.elegir-edicion-dialog__texto {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
+.elegir-edicion-dialog__actions {
+  margin-top: 0.5rem;
+}

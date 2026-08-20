@@ -1,0 +1,736 @@
+<section class="orden-compra-page">
+  <section class="orden-compra-card">
+    <header class="orden-compra-card__header">
+      <div>
+        <p class="orden-compra-card__eyebrow">Operacion</p>
+        <h2>{{ paginaTitulo }}</h2>
+        <p class="orden-compra-card__description">
+          {{ paginaDescripcion }}
+        </p>
+      </div>
+
+    </header>
+
+    <section *ngIf="!mostrarEditor" class="panel panel--listing">
+      <form class="filters-panel" [formGroup]="filtersForm" (ngSubmit)="aplicarFiltros()">
+        <div class="filters-panel__top">
+          <label class="field field--list-mode">
+            <span>Listado</span>
+            <select formControlName="modoListado" (change)="onListadoModoChange()">
+              <option *ngFor="let option of listadoOptions" [value]="option.codigo">{{ option.descripcion }}</option>
+            </select>
+          </label>
+
+          <button type="button" class="button button--primary orden-compra-listing-new" (click)="ejecutarAccion('Nuevo')">
+            Nuevo
+          </button>
+        </div>
+
+        <div class="filters-panel__generated" *ngIf="isListadoGenerados">
+          <label class="field">
+            <span>{{ numeroOrdenLabel }}</span>
+            <input type="number" formControlName="ordenCompraId" min="1" step="1">
+          </label>
+
+          <label class="field">
+            <span>Proveedor</span>
+            <input type="text" formControlName="proveedor">
+          </label>
+
+          <label class="field">
+            <span>Estado</span>
+            <select formControlName="estado">
+              <option value="A">Activo</option>
+              <option value="I">Inactivo</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Palabras clave en detalle</span>
+            <input type="text" formControlName="palabrasClaveDetalle" placeholder="Buscar en los ítems">
+          </label>
+
+          <label class="field">
+            <span>Usuario de registro</span>
+            <select formControlName="usuarioRegistro" (change)="onUsuarioRegistroFiltroChange()">
+              <option value="">Todos los usuarios</option>
+              <option *ngFor="let usuario of usuariosRegistroFiltro; trackBy: trackByUsuarioRegistro" [value]="usuario.codigo">
+                {{ usuario.nombre || usuario.codigo }}
+              </option>
+            </select>
+          </label>
+
+          <div class="filters-panel__actions">
+            <button type="submit" class="button button--primary" [disabled]="isLoadingOrdenesCompra">
+              {{ isLoadingOrdenesCompra ? 'Buscando...' : 'Buscar' }}
+            </button>
+            <button type="button" class="button button--secondary" (click)="limpiarFiltros()">
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <p *ngIf="errorMessage" class="editor-feedback editor-feedback--error">{{ errorMessage }}</p>
+
+      <div class="table-shell" *ngIf="isListadoGenerados; else pedidosPendientesTable">
+        <table class="orden-compra-table">
+          <thead>
+            <tr>
+              <th>Acciones</th>
+              <th *ngIf="isOrdenServicio">Conformidad</th>
+              <th>{{ numeroOrdenLabel }}</th>
+              <th>Correlativo</th>
+              <th>Archivo</th>
+              <th>Usr. Reg.</th>
+              <th>Usr. Aprobacion</th>
+              <th>Proveedor</th>
+              <th>Forma de Pago</th>
+              <th>Total</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngIf="isLoadingOrdenesCompra">
+              <td [attr.colspan]="isOrdenServicio ? 11 : 10" class="empty-row">Cargando ordenes de compra registradas...</td>
+            </tr>
+
+            <tr *ngIf="!isLoadingOrdenesCompra && !errorMessage && !ordenesCompraFiltradasPorUsuario.length">
+              <td [attr.colspan]="isOrdenServicio ? 11 : 10" class="empty-row">No se encontraron ordenes de compra.</td>
+            </tr>
+
+            <tr
+              *ngFor="let item of paginatedOrdenesCompra; trackBy: trackByOrdenCompra"
+              class="orden-compra-table__row"
+              [class.orden-compra-table__row--selected]="isOrdenCompraSeleccionada(item)"
+              (click)="seleccionarOrdenCompra(item)">
+              <td class="orden-compra-table__actions-cell">
+                <div class="orden-compra-table__actions">
+                  <button
+                    type="button"
+                    class="row-detail-button row-detail-button--pdf"
+                    [disabled]="isLoadingReporteOrdenCompraId === item.id"
+                    (click)="verReporteOrdenCompra(item); $event.stopPropagation()">
+                    {{ isLoadingReporteOrdenCompraId === item.id ? 'PDF...' : 'PDF' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-button icon-button--edit"
+                    aria-label="Editar orden de compra"
+                    [disabled]="!item.canEdit || isAnulandoOrdenCompra(item)"
+                    (click)="editarOrdenCompraDesdeFila(item); $event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z"/>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-button icon-button--danger"
+                    title="Anular orden de compra"
+                    aria-label="Anular orden de compra"
+                    [disabled]="!canAnularOrdenCompra(item)"
+                    (click)="anularOrdenCompraFila(item, $event)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M9 3.8h6l1 1.5H20v2h-1.2l-.9 10.2A2.4 2.4 0 0 1 15.4 20H8.6a2.4 2.4 0 0 1-2.4-2.5L5.3 7.3H4v-2h4l1-1.5ZM8.2 7.3l.8 9.8c0 .2.2.4.4.4h6.2c.2 0 .4-.2.4-.4l.8-9.8H8.2Zm2.1 1.6h1.5v6.6h-1.5V8.9Zm3.9 0h1.5v6.6h-1.5V8.9Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+              <td *ngIf="isOrdenServicio">
+                <div class="conformidad-actions">
+                  <button
+                    type="button"
+                    class="button button--secondary button--compact conformidad-actions__button"
+                    [class.conformidad-actions__button--completed]="item.conformidadRegistro"
+                    [disabled]="!puedeConfirmarConformidadRegistro(item)"
+                    [title]="'Usuario registro: ' + item.usuarioRegistro"
+                    (click)="confirmarConformidadRegistro(item, $event)">
+                    Reg.
+                  </button>
+                  <button
+                    type="button"
+                    class="button button--secondary button--compact conformidad-actions__button"
+                    [class.conformidad-actions__button--completed]="item.conformidadAprobacion"
+                    [disabled]="!puedeConfirmarConformidadAprobacion(item)"
+                    [title]="'Usuario aprobacion: ' + item.usuarioAprobacionPedido"
+                    (click)="confirmarConformidadAprobacion(item, $event)">
+                    Apr.
+                  </button>
+                </div>
+              </td>
+              <td>{{ item.ordenCompraId ?? '-' }}</td>
+              <td>{{ item.correlativo }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="icon-button icon-button--folder"
+                  aria-label="Ver archivos adjuntos"
+                  [disabled]="isLoadingArchivosOrdenCompraListado === item.id"
+                  (click)="abrirArchivosOrdenCompraListado(item, $event)">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h4.1c.7 0 1.3.3 1.8.8l1.2 1.2h5.9A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-10Zm2.5-.7a.7.7 0 0 0-.7.7v10c0 .4.3.7.7.7h13c.4 0 .7-.3.7-.7v-8c0-.4-.3-.7-.7-.7h-6.6l-1.7-1.7a.8.8 0 0 0-.6-.3H5.5Z"/>
+                  </svg>
+                </button>
+              </td>
+              <td>{{ item.usuarioRegistro }}</td>
+              <td>{{ item.usuarioAprobacionPedido }}</td>
+              <td>{{ item.proveedor }}</td>
+              <td>{{ item.formaPago }}</td>
+              <td>{{ formatCurrency(item.total) }}</td>
+              <td>{{ item.estado }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-grid-pagination
+        *ngIf="isListadoGenerados && ordenesCompraFiltradasPorUsuario.length"
+        [totalItems]="ordenesCompraFiltradasPorUsuario.length"
+        [currentPage]="currentOrdenesCompraPage"
+        [pageSize]="pageSize"
+        (pageChange)="onOrdenesCompraPageChange($event)">
+      </app-grid-pagination>
+
+      <ng-template #pedidosPendientesTable>
+        <div class="table-shell">
+          <table class="orden-compra-table">
+            <thead>
+              <tr>
+                <th aria-label="Generar orden de compra"></th>
+                <th>Nro. Pedido</th>
+                <th>Proveedor</th>
+                <th>Tipo de Servicio</th>
+                <th>Total</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngIf="isLoadingOrdenesCompra">
+                <td colspan="6" class="empty-row">Cargando pedidos pendientes...</td>
+              </tr>
+
+              <tr *ngIf="!isLoadingOrdenesCompra && !errorMessage && !pedidosPendientes.length">
+                <td colspan="6" class="empty-row">No se encontraron pedidos pendientes.</td>
+              </tr>
+
+              <tr *ngFor="let item of paginatedPedidosPendientes">
+                <td>
+                  <button
+                    type="button"
+                    class="button button--primary button--compact"
+                    (click)="generarOrdenCompraDesdePedido(item)">
+                    Generar
+                  </button>
+                </td>
+                <td>{{ item.pedidoId || '-' }}</td>
+                <td>{{ item.proveedor }}</td>
+                <td>{{ item.tipoServicio }}</td>
+                <td>{{ formatCurrency(item.total) }}</td>
+                <td>{{ item.estado }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <app-grid-pagination
+          *ngIf="pedidosPendientes.length"
+          [totalItems]="pedidosPendientes.length"
+          [currentPage]="currentPedidosPendientesPage"
+          [pageSize]="pageSize"
+          (pageChange)="onPedidosPendientesPageChange($event)">
+        </app-grid-pagination>
+      </ng-template>
+    </section>
+
+    <section *ngIf="mostrarEditor" class="orden-compra-editor">
+      <header class="editor-header">
+        <div>
+          <p class="orden-compra-card__eyebrow">Edicion</p>
+          <h3>{{ isEditingOrdenCompra ? 'Actualizar orden de compra' : 'Nueva orden de compra' }}</h3>
+          <p class="orden-compra-card__description">
+            Selecciona los items del pedido que deben incluirse en la orden de compra.
+          </p>
+        </div>
+      </header>
+
+      <section class="editor-section">
+        <div class="section-copy">
+          <p class="orden-compra-card__eyebrow">Formulario</p>
+          <h3>Datos de Proveedor</h3>
+        </div>
+
+        <form class="editor-grid editor-grid--provider" [formGroup]="form">
+          <div class="field field--provider-selector">
+            <span>Proveedor</span>
+            <button
+              type="button"
+              class="selector-code-button selector-code-button--wide selector-code-button--selector selector-code-button--accent"
+              [disabled]="isLoadingProveedores"
+              (click)="openProveedorDialog()">
+              {{ isLoadingProveedores ? 'Cargando proveedores...' : proveedorButtonLabel }}
+            </button>
+          </div>
+
+          <label class="field">
+            <span>Telefono</span>
+            <input type="text" formControlName="telefono" class="input--readonly input--autofilled-provider" readonly>
+          </label>
+
+          <label class="field field--provider-wide">
+            <span>Direccion</span>
+            <input type="text" formControlName="direccion" class="input--readonly input--autofilled-provider" readonly>
+          </label>
+
+          <label class="field">
+            <span>Contacto</span>
+            <input type="text" formControlName="contacto">
+          </label>
+
+          <label class="field field--provider-wide">
+            <span>RUC</span>
+            <input type="text" formControlName="ruc" class="input--readonly input--autofilled-provider" readonly>
+          </label>
+
+          <div class="field field--provider-selector">
+            <span>Forma de Pago</span>
+            <mat-select
+              class="forma-pago-select"
+              formControlName="formaPagoId"
+              placeholder="Seleccionar forma de pago"
+              [disabled]="isLoadingFormasPago"
+              (selectionChange)="onFormaPagoChange($any($event).value)"
+              (openedChange)="formaPagoSearch = ''">
+              <mat-option class="select-search-option">
+                <input
+                  type="text"
+                  class="select-search-input"
+                  placeholder="Buscar forma de pago"
+                  [value]="formaPagoSearch"
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()"
+                  (input)="formaPagoSearch = $any($event.target).value">
+              </mat-option>
+              <mat-option [value]="0">Seleccionar forma de pago</mat-option>
+              <mat-option *ngFor="let formaPago of filteredFormasPago" [value]="formaPago.code">
+                {{ formaPago.description }}
+              </mat-option>
+            </mat-select>
+          </div>
+
+          <div class="field field--provider-currency">
+            <span>Moneda</span>
+            <mat-select
+              class="moneda-select"
+              formControlName="monedaId"
+              placeholder="Seleccionar moneda"
+              [disabled]="isLoadingMonedas">
+              <mat-option [value]="0">Seleccionar moneda</mat-option>
+              <mat-option *ngFor="let moneda of monedas" [value]="moneda.id">
+                {{ moneda.descripcion }}{{ moneda.abreviacion ? ' (' + moneda.abreviacion + ')' : '' }}
+              </mat-option>
+            </mat-select>
+          </div>
+
+          <div class="field field--provider-selector">
+            <span>Banco</span>
+            <mat-select
+              class="moneda-select"
+              formControlName="proveedorBancoId"
+              placeholder="Seleccionar banco"
+              [disabled]="isLoadingProveedorBancos || !form.controls['proveedorId'].value">
+              <mat-option [value]="0">
+                {{ isLoadingProveedorBancos ? 'Cargando bancos...' : 'Seleccionar banco' }}
+              </mat-option>
+              <mat-option *ngFor="let banco of proveedorBancos" [value]="banco.id">
+                {{ banco.bankName }}{{ banco.accountNumber ? ' - ' + banco.accountNumber : '' }}
+              </mat-option>
+            </mat-select>
+          </div>
+
+          <label class="field field--full">
+            <span>Descripcion general</span>
+            <input type="text" formControlName="descripcionGeneral">
+          </label>
+
+          <label class="field">
+            <span>Fecha de atencion</span>
+            <input type="date" formControlName="fechaAtencion" (click)="openFechaAtencionPicker($event)">
+          </label>
+
+          <div class="field">
+            <span>Periodo de gasto</span>
+            <mat-select class="moneda-select" formControlName="periodoGasto" placeholder="Seleccionar periodo">
+              <mat-option [value]="0">Seleccionar periodo</mat-option>
+              <mat-option *ngFor="let periodo of periodoGastoOptions" [value]="periodo.value">
+                {{ periodo.label }}
+              </mat-option>
+            </mat-select>
+          </div>
+
+          <label class="field field--full">
+            <span>Direccion de envio</span>
+            <input type="text" formControlName="direccionEnvio">
+          </label>
+        </form>
+      </section>
+
+      <section class="editor-section">
+        <div class="section-copy">
+          <h3>Detalle del Pedido</h3>
+          <p>Se lista el detalle registrado del pedido ingresado para revisar los items que se estan atendiendo.</p>
+        </div>
+
+        <div class="pedido-centro-costo-toolbar" [formGroup]="form">
+          <div class="pedido-campos-principales">
+            <div class="pedido-numero-row">
+              <label class="field">
+                <span>Nro. Pedido</span>
+                <input
+                  type="number"
+                  formControlName="pedidoIdAtencion"
+                  min="1"
+                  step="1"
+                  (keydown.enter)="onPedidoIdEnter($event)">
+              </label>
+
+              <div class="pedido-centro-costo-toolbar__actions">
+                <button
+                  type="button"
+                  class="button button--primary"
+                  [disabled]="isLoadingPedidoCentrosCosto || isLoadingPedidoDetalle"
+                  (click)="cargarCentrosCostoDesdePedido()">
+                  {{ isLoadingPedidoCentrosCosto || isLoadingPedidoDetalle ? 'Cargando...' : 'Cargar' }}
+                </button>
+                <button
+                  type="button"
+                  class="icon-button pedido-archivos-button"
+                  aria-label="Ver archivos adjuntos del pedido"
+                  [disabled]="isLoadingPedidoCentrosCosto || isLoadingPedidoDetalle || isLoadingPedidoArchivosAdjuntos"
+                  (click)="abrirArchivosPedido()">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h4.1c.7 0 1.3.3 1.8.8l1.2 1.2h5.9A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-10Zm2.5-.7a.7.7 0 0 0-.7.7v10c0 .4.3.7.7.7h13c.4 0 .7-.3.7-.7v-8c0-.4-.3-.7-.7-.7h-6.6l-1.7-1.7a.8.8 0 0 0-.6-.3H5.5Z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <label class="field">
+              <span>Descuento</span>
+              <input
+                type="text"
+                inputmode="decimal"
+                formControlName="descuento"
+                (input)="onDescuentoInput($event)">
+              <span class="checkbox-control pedido-descuento-checkbox">
+                <input
+                  type="checkbox"
+                  formControlName="descuentoPorcentaje"
+                  (change)="onDescuentoTipoChange($event)">
+                <span>Descuento en %</span>
+              </span>
+            </label>
+          </div>
+
+          <label class="field pedido-referencia-field">
+            <span>Referencia</span>
+            <input
+              type="text"
+              formControlName="pedidoReferenciaGeneral">
+          </label>
+        </div>
+
+        <p *ngIf="detallePedidoErrorMessage" class="editor-feedback editor-feedback--error">
+          {{ detallePedidoErrorMessage }}
+        </p>
+
+        <div class="table-shell">
+          <table class="detalle-pedido-table">
+            <thead>
+              <tr>
+                <th class="detalle-pedido-table__select-head">
+                  <div class="centros-costo-table__select-label">
+                    <input
+                      type="checkbox"
+                      [checked]="estanTodosLosDetallesSeleccionados"
+                      [disabled]="!pedidoDetalles.length"
+                      (change)="toggleTodosLosDetallesPedido()">
+                  </div>
+                </th>
+                <th>Descripcion Item</th>
+                <th>Unidad de Medida</th>
+                <th>Centro de Costo</th>
+                <th>Cantidad</th>
+                <th>Costo Unit.</th>
+                <th>Desc. %</th>
+                <th>Descuento</th>
+                <th>Costo Unit. con Descuento</th>
+                <th>Subtotal</th>
+                <th>Observacion</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngIf="isLoadingPedidoDetalle">
+                <td colspan="12" class="empty-row">Cargando detalle del pedido...</td>
+              </tr>
+
+              <tr *ngIf="!isLoadingPedidoDetalle && !pedidoDetalles.length">
+                <td colspan="12" class="empty-row">Ingresa un numero de pedido para listar su detalle.</td>
+              </tr>
+
+              <tr
+                *ngFor="let item of paginatedPedidoDetalles; trackBy: trackByDetallePedido"
+                [class.detalle-pedido-table__row--checked]="item.selected"
+                [class.detalle-pedido-table__row--pending-delete]="isDetallePendienteDesasignacion(item)">
+                <td>
+                  <input
+                    type="checkbox"
+                    [checked]="item.selected"
+                    (change)="toggleDetallePedido(item)">
+                </td>
+                <td>{{ item.itemDescripcion }}</td>
+                <td>{{ item.unidadDescripcion }}</td>
+                <td>{{ item.centroCostoDescripcion }}</td>
+                <td>
+                  <input
+                    type="number"
+                    class="detalle-pedido-table__input detalle-pedido-table__input--amount"
+                    min="0"
+                    step="0.01"
+                    [value]="item.cantidad"
+                    (input)="actualizarCantidadDetallePedido(item, $event)">
+                  <!-- {{ formatCurrency(item.cantidad) }} -->
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    class="detalle-pedido-table__input detalle-pedido-table__input--amount"
+                    min="0"
+                    step="0.0001"
+                    [value]="item.costoUnitario"
+                    (input)="actualizarCostoUnitarioDetallePedido(item, $event)">
+                </td>
+                <td class="detalle-pedido-table__discount-check">
+                  <input
+                    type="checkbox"
+                    [checked]="item.descuentoPorcentaje"
+                    aria-label="Aplicar descuento porcentual"
+                    (change)="actualizarTipoDescuentoDetallePedido(item, $event)">
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    class="detalle-pedido-table__input detalle-pedido-table__input--discount"
+                    [value]="item.descuento"
+                    (input)="actualizarDescuentoDetallePedido(item, $event)">
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    class="detalle-pedido-table__input detalle-pedido-table__input--amount"
+                    [value]="item.costoUnitarioConDescuento"
+                    aria-label="Costo unitario con descuento"
+                    readonly>
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    class="detalle-pedido-table__input detalle-pedido-table__input--amount"
+                    min="0"
+                    step="0.0001"
+                    [value]="item.subtotal"
+                    (input)="actualizarSubtotalDetallePedido(item, $event)">
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="detalle-pedido-table__input"
+                    [value]="item.observacion"
+                    (input)="actualizarObservacionDetallePedido(item, $any($event.target).value)">
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="icon-button icon-button--danger"
+                    aria-label="Quitar detalle del pedido"
+                    [disabled]="!isEditingOrdenCompra"
+                    [title]="isDetallePendienteDesasignacion(item) ? 'Deshacer desasignacion pendiente' : 'Marcar para desasignar'"
+                    (click)="quitarDetallePedido(item)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v8h-2V9zm4 0h2v8h-2V9zM7 9h2v8H7V9zm1 11a2 2 0 0 1-2-2V8h12v10a2 2 0 0 1-2 2H8z"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+
+            <tfoot *ngIf="pedidoDetalles.length" class="detalle-pedido-table__footer">
+              <tr>
+                <td colspan="4" class="detalle-pedido-table__footer-label">Totales</td>
+                <td class="detalle-pedido-table__footer-value">{{ formatCurrency(totalCantidadDetallePedido) }}</td>
+                <td class="detalle-pedido-table__footer-value">{{ formatCurrencyWithPrecision(totalCostoUnitarioDetallePedido, 4) }}</td>
+                <td colspan="2"></td>
+                <td class="detalle-pedido-table__footer-value">{{ formatCurrencyWithPrecision(totalCostoUnitarioConDescuentoDetallePedido, 4) }}</td>
+                <td class="detalle-pedido-table__footer-value">{{ formatCurrencyWithPrecision(totalSubtotalDetallePedido, 4) }}</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <app-grid-pagination
+          *ngIf="pedidoDetalles.length"
+          [totalItems]="pedidoDetalles.length"
+          [currentPage]="currentDetallePedidoPage"
+          [pageSize]="pageSize"
+          (pageChange)="onDetallePedidoPageChange($event)">
+        </app-grid-pagination>
+
+        <form class="totals-grid" [formGroup]="form">
+          <label class="field field--checkbox">
+            <span class="checkbox-control">
+              <input
+                type="checkbox"
+                formControlName="usarIgv18"
+                (change)="onIgv18Change($event)">
+              <span>IGV 18%</span>
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Porcentaje IGV</span>
+            <input
+              type="text"
+              formControlName="porcentajeIgv"
+              inputmode="decimal"
+              [readonly]="form.controls['usarIgv18'].value"
+              [class.input--readonly]="form.controls['usarIgv18'].value"
+              (input)="onPorcentajeIgvInput($event)">
+          </label>
+
+          <label class="field">
+            <span>IGV</span>
+            <input type="number" formControlName="igv" min="0" step="0.0001" class="input--readonly" readonly>
+          </label>
+
+          <div class="field">
+            <span>Detraccion</span>
+            <mat-select
+              class="detraccion-select"
+              formControlName="detraccionId"
+              placeholder="Seleccionar detraccion"
+              [disabled]="isLoadingDetracciones"
+              (selectionChange)="onDetraccionChange()"
+              (openedChange)="detraccionSearch = ''">
+              <mat-option class="detraccion-search-option">
+                <input
+                  type="text"
+                  class="detraccion-search-input"
+                  placeholder="Buscar detraccion"
+                  [value]="detraccionSearch"
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()"
+                  (input)="onDetraccionSearchInput($event)">
+              </mat-option>
+              <mat-option [value]="null">Sin detraccion</mat-option>
+              <mat-option *ngFor="let detraccion of filteredDetracciones" [value]="detraccion.id">
+                {{ detraccion.label }}
+              </mat-option>
+            </mat-select>
+          </div>
+
+          <label class="field">
+            <span>Monto Detraccion</span>
+            <input type="number" formControlName="montoDetraccion" min="0" step="0.01">
+          </label>
+
+          <label class="field">
+            <span>Total</span>
+            <input type="number" formControlName="total" min="0" step="0.01">
+          </label>
+        </form>
+      </section>
+
+      <form class="editor-grid" [formGroup]="form">
+        <div class="editor-attachments-layout field--full">
+          <label class="field">
+            <span>Observacion</span>
+            <textarea formControlName="observacion"></textarea>
+          </label>
+
+          <div class="attachment-panel attachment-panel--orden-compra">
+            <div class="attachment-grid attachment-grid--orden-compra">
+              <div class="attachment-grid__header">
+                <h3>Archivo</h3>
+                <input #ordenCompraFileInput type="file" multiple style="display:none" (change)="onOrdenCompraFileSelected($event)">
+                <button
+                  type="button"
+                  class="icon-button attachment-grid__add"
+                  aria-label="Adjuntar archivo"
+                  (click)="ordenCompraFileInput.click()">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="table-shell attachment-grid__table-shell">
+                <table class="attachment-grid__table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let archivo of ordenCompraArchivosAdjuntosVista">
+                      <td>{{ archivo.nombre }}</td>
+                      <td class="attachment-grid__actions-cell">
+                        <button
+                          type="button"
+                          class="icon-button icon-button--edit"
+                          aria-label="Ver archivo"
+                          (click)="verOrdenCompraArchivoAdjunto(archivo)">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 5c5 0 8.8 4.1 10 7-1.2 2.9-5 7-10 7S3.2 14.9 2 12c1.2-2.9 5-7 10-7zm0 2C8.4 7 5.5 9.6 4.2 12 5.5 14.4 8.4 17 12 17s6.5-2.6 7.8-5C18.5 9.6 15.6 7 12 7zm0 2.5A2.5 2.5 0 1 1 12 14a2.5 2.5 0 0 1 0-5z"/>
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="icon-button icon-button--danger"
+                          aria-label="Quitar archivo"
+                          (click)="quitarOrdenCompraArchivoAdjunto(archivo, ordenCompraFileInput)">
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2h4v2H4V6h4l1-2z"/>
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr *ngIf="!ordenCompraArchivosAdjuntosVista.length">
+                      <td colspan="2" class="empty-row">No hay archivos adjuntos.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="editor-actions">
+        <p *ngIf="saveErrorMessage" class="editor-feedback editor-feedback--error">{{ saveErrorMessage }}</p>
+        <button type="button" class="button button--primary" [disabled]="isSavingOrdenCompra" (click)="guardarOrdenCompra()">
+          {{ isSavingOrdenCompra ? 'Guardando...' : isEditingOrdenCompra ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button type="button" class="button button--secondary" [disabled]="isSavingOrdenCompra" (click)="cancelarEdicion()">
+          Cancelar
+        </button>
+      </div>
+    </section>
+  </section>
+</section>

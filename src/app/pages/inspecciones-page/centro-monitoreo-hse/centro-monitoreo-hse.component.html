@@ -1,0 +1,197 @@
+<div class="cmhse-wrapper">
+  <div class="cmhse-ubicacion-overlay" *ngIf="!modoEdicion && ubicacionBloqueada">
+    <div class="cmhse-ubicacion-overlay__card">
+      <ng-container *ngIf="ubicacionEstado === 'buscando'">
+        <div class="cmhse-ubicacion-overlay__spinner"></div>
+        <h3>Obteniendo tu ubicación...</h3>
+        <p>Se te pedirá permiso para acceder a tu ubicación. Acéptalo para continuar.</p>
+      </ng-container>
+
+      <ng-container *ngIf="ubicacionEstado === 'denegada'">
+        <h3>Ubicación obligatoria</h3>
+        <p>{{ ubicacionMensaje }}</p>
+        <button type="button" class="btn-primary" (click)="solicitarUbicacion()">Reintentar</button>
+      </ng-container>
+    </div>
+  </div>
+
+  <form class="cmhse" [formGroup]="form">
+  <div class="cmhse__form-top">
+    <div>
+      <p class="cmhse__eyebrow">PROCESOS</p>
+      <h1 class="cmhse__title">{{ modoEdicion ? 'Modificar Centro de Monitoreo HSE' : 'Centro de Monitoreo HSE' }}</h1>
+      <p class="cmhse__subtitle">
+        Registra documentos y audio con el mismo estilo visual del sistema.
+      </p>
+    </div>
+
+    <div class="cmhse__form-actions">
+      <button type="button" class="btn-primary" (click)="guardar()" [disabled]="guardando || (!modoEdicion && ubicacionBloqueada)">
+        {{ guardando ? (modoEdicion ? 'Actualizando...' : 'Agregando...') : (modoEdicion ? 'Actualizar' : 'Agregar') }}
+      </button>
+      <button *ngIf="modoEdicion && centroMonitoreoId" type="button" class="btn-secondary" (click)="descargarPdf()" [disabled]="guardando" title="Descargar PDF">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <path d="M14 2v6h6"></path>
+          <path d="M8 13h8"></path>
+          <path d="M8 17h8"></path>
+          <path d="M11 9H8"></path>
+        </svg>
+        PDF
+      </button>
+      <button type="button" class="btn-secondary" (click)="retroceder()">Retroceder</button>
+    </div>
+  </div>
+
+  <section class="cmhse-card">
+    <h3>Datos Generales</h3>
+
+    <div class="observador-grid">
+      <div class="field">
+        <label>Supervisor:</label>
+        <input type="text" [value]="supervisorDisplay" readonly>
+      </div>
+
+      <div class="field combo-field">
+        <label>Cliente:</label>
+        <div class="combo">
+          <button
+            type="button"
+            class="combo__trigger"
+            [class.combo__trigger--placeholder]="!clienteSeleccionado"
+            [disabled]="cargandoClientes"
+            (click)="$event.stopPropagation(); toggleCombo('cliente')">
+            <span>{{ clienteDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+
+          <div class="combo__panel" *ngIf="comboOpen.cliente" (click)="$event.stopPropagation()">
+            <input
+              type="text"
+              class="combo__search"
+              placeholder="Buscar cliente..."
+              [value]="comboSearch.cliente"
+              (input)="onSearchChange('cliente', $event)">
+
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectCliente(null)">
+                Seleccione
+              </button>
+
+              <button
+                type="button"
+                class="combo__option"
+                *ngFor="let cliente of clientesFiltrados; trackBy: clienteTrackBy"
+                (click)="selectCliente(cliente)">
+                {{ cliente.Cliente_Nombre }}
+              </button>
+
+              <div class="combo__empty" *ngIf="clientesFiltrados.length === 0">
+                No hay resultados
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <small class="field__hint" *ngIf="cargandoClientes">Cargando clientes...</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="cmhse-card">
+    <h3>Documentos</h3>
+
+    <div class="upload-actions">
+      <button type="button" class="btn-primary btn-upload" (click)="abrirSelectorDocumentos()">Seleccionar documentos</button>
+      <small class="file-hint" *ngIf="documentos.length === 0">No se eligió ningún archivo</small>
+    </div>
+
+    <input #documentosInput type="file" class="upload-input"
+           accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.rtf,.zip,.rar,.png,.jpg,.jpeg,.gif,.bmp,.webp,application/*,text/*,image/*"
+           multiple (change)="onDocumentosChange($event)">
+
+    <input #documentosCameraInput type="file" class="upload-input" accept="image/*" capture="environment" (change)="onDocumentosCameraChange($event)">
+
+    <div class="uploaded-list" *ngIf="documentos.length > 0">
+      <div class="uploaded-item" *ngFor="let archivo of documentos; trackBy: trackByArchivoId">
+        <span class="uploaded-item__name">{{ archivo.nombre }}</span>
+        <div class="uploaded-item__actions">
+          <button type="button" class="icon-btn icon-btn--view" (click)="abrirArchivo(archivo)" aria-label="Ver documento" title="Ver documento">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+          <button type="button" class="icon-btn icon-btn--delete" (click)="eliminarArchivo('documento', archivo.id)" aria-label="Eliminar documento" title="Eliminar documento">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6"></path>
+              <path d="M14 11v6"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cmhse-card">
+    <h3>Audio</h3>
+
+    <div class="upload-actions">
+      <button type="button" class="btn-primary btn-upload" (click)="abrirSelectorAudio()">Agregar audio</button>
+      <small class="file-hint" *ngIf="audios.length === 0">No se eligió ningún audio</small>
+    </div>
+
+    <input #audioInput type="file" class="upload-input" accept="audio/*" multiple (change)="onAudioChange($event)">
+
+    <div class="uploaded-list" *ngIf="audios.length > 0">
+      <div class="uploaded-item" *ngFor="let archivo of audios; trackBy: trackByArchivoId">
+        <span class="uploaded-item__name">{{ archivo.nombre }}</span>
+        <div class="uploaded-item__actions">
+          <button type="button" class="icon-btn icon-btn--view" (click)="previewAudio(archivo)" aria-label="Reproducir audio" title="Reproducir audio">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+          <button type="button" class="icon-btn icon-btn--delete" (click)="eliminarArchivo('audio', archivo.id)" aria-label="Eliminar audio" title="Eliminar audio">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6"></path>
+              <path d="M14 11v6"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="audio-preview" *ngIf="audioPreviewUrl">
+      <audio class="audio-preview__player" [src]="audioPreviewUrl" controls autoplay></audio>
+      <button type="button" class="icon-btn icon-btn--delete audio-preview__close" (click)="cerrarVistaPreviaAudio()" aria-label="Cerrar reproductor" title="Cerrar reproductor">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"></path>
+          <path d="M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <section class="cmhse-card" *ngIf="modoEdicion">
+    <h3>Estado</h3>
+
+    <div class="observador-grid estado-grid">
+      <div class="field">
+        <label for="estadoCentroMonitoreo">Estado:</label>
+        <select id="estadoCentroMonitoreo" formControlName="estado" class="estado-select">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </div>
+    </div>
+  </section>
+  </form>
+</div>

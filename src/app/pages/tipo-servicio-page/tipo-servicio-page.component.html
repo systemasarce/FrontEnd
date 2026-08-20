@@ -1,0 +1,103 @@
+<section class="tipo-servicio-card">
+  <header class="tipo-servicio-card__header">
+    <div>
+      <p class="tipo-servicio-card__eyebrow">Administracion</p>
+      <h2>Tipo de Servicio</h2>
+      <p class="tipo-servicio-card__description">Administra los tipos de servicio activos y actualiza su estado desde mantenimiento.</p>
+    </div>
+
+    <div class="tipo-servicio-card__actions">
+      <button type="button" class="tipo-servicio-card__create" (click)="registrarTipoServicio()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="tipo-servicio-filters" [formGroup]="filtersForm" (ngSubmit)="cargarTiposServicio()">
+    <label class="filter-field">
+      <span>ID</span>
+      <input
+        type="number"
+        formControlName="codigo"
+        min="1"
+        step="1"
+        (input)="sanitizeCodigoInput($event)">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="tipo-servicio-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="tipo-servicio-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando tipos de servicio desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !tiposServicio.length" class="state-card">
+    No hay tipos de servicio para mostrar.
+  </div>
+
+  <div *ngIf="tiposServicio.length" class="table-shell">
+    <table class="tipo-servicio-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripcion</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let tipoServicio of paginatedTiposServicio; trackBy: trackByTipoServicio">
+          <td>{{ tipoServicio.tipSerId ?? '-' }}</td>
+          <td>{{ tipoServicio.tipSerDes || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!tipoServicio.activo">
+              {{ tipoServicio.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar tipo de servicio"
+              [disabled]="tipoServicio.tipSerId === null"
+              (click)="editarTipoServicio(tipoServicio)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="tiposServicio.length"
+    [totalItems]="tiposServicio.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

@@ -1,0 +1,37 @@
+<form class="item-dialog" [formGroup]="form" (ngSubmit)="guardar()">
+  <h2 mat-dialog-title>Modificar Item</h2>
+  <mat-dialog-content class="item-dialog__content">
+    <p class="item-dialog__description">Actualiza la descripcion, clasificacion o estado del item.</p>
+    <label class="item-dialog__field"><span>Grupo</span><mat-select formControlName="itmGrp" placeholder="Seleccionar grupo" [disabled]="isLoadingGroups" (selectionChange)="onGrupoChange()"><mat-option *ngFor="let item of grupos" [value]="item.id">{{item.descripcion}}</mat-option></mat-select></label>
+    <label class="item-dialog__field"><span>Sub Grupo</span><mat-select formControlName="itmSubGrp" [placeholder]="isLoadingSubGroups?'Cargando sub grupos...':'Seleccionar sub grupo'" [disabled]="!form.controls['itmGrp'].value||isLoadingSubGroups" (selectionChange)="onSubGrupoChange()"><mat-option *ngFor="let item of subGrupos" [value]="item.id">{{item.descripcion}}</mat-option></mat-select></label>
+    <label class="item-dialog__field"><span>Detalle de Material</span><mat-select formControlName="itmDetMat" [placeholder]="isLoadingDetalles?'Cargando detalles...':'Seleccionar detalle de material'" [disabled]="!form.controls['itmSubGrp'].value||isLoadingDetalles"><mat-option *ngFor="let item of detallesMaterial" [value]="item.id">{{item.descripcion}}</mat-option></mat-select></label>
+    <label class="item-dialog__field"><span>Descripcion</span><input type="text" formControlName="itmDes" maxlength="120"></label>
+    <label class="item-dialog__field"><span>Unidad de Medida</span>
+      <mat-select
+        formControlName="uniMedId"
+        [placeholder]="isLoadingUnidades ? 'Cargando unidades...' : 'Seleccionar unidad de medida'"
+        [disabled]="isLoadingUnidades"
+        (openedChange)="onUnidadSelectOpened($event)">
+        <mat-option>
+          <input
+            type="text"
+            class="mat-select-search"
+            placeholder="Buscar unidad..."
+            [formControl]="unidadSearchControl"
+            (click)="$event.stopPropagation()"
+            (keydown)="$event.stopPropagation()">
+        </mat-option>
+        <mat-option *ngFor="let unidad of filteredUnidadesMedida; trackBy: trackByOption" [value]="unidad.id">
+          {{ unidad.descripcion }}
+        </mat-option>
+        <mat-option *ngIf="!filteredUnidadesMedida.length" disabled>No hay unidades activas.</mat-option>
+      </mat-select>
+    </label>
+    <label class="item-dialog__field"><span>Estado</span><select formControlName="flgEst"><option value="A">Activo</option><option value="I">Inactivo</option></select></label>
+    <p *ngIf="errorMessage" class="item-dialog__error">{{errorMessage}}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end" class="item-dialog__actions">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cerrar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSaving||isLoadingGroups||isLoadingSubGroups||isLoadingDetalles||isLoadingUnidades">{{isSaving?'Confirmando...':'Confirmar'}}</button>
+  </mat-dialog-actions>
+</form>

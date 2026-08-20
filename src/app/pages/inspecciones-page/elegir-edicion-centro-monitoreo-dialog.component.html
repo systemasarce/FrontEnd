@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>Editar Centro de Monitoreo HSE</h2>
+
+<div mat-dialog-content class="elegir-edicion-dialog__content">
+  <p>¿Qué deseas editar?</p>
+
+  <div class="elegir-edicion-dialog__opciones">
+    <button type="button" class="elegir-edicion-dialog__opcion" (click)="elegirCentroMonitoreo()">
+      <span class="elegir-edicion-dialog__icono elegir-edicion-dialog__icono--cuadrado">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 20h4.5L18.9 9.6a1.5 1.5 0 0 0 0-2.12l-2.38-2.38a1.5 1.5 0 0 0-2.12 0L4 14.5V20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M13.5 6.5 17.5 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="elegir-edicion-dialog__texto">Centro de Monitoreo</span>
+    </button>
+
+    <button type="button" class="elegir-edicion-dialog__opcion" (click)="elegirPuntaje()">
+      <span class="elegir-edicion-dialog__icono elegir-edicion-dialog__icono--circular">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 12.5 11 14.5 15.5 9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+      </span>
+      <span class="elegir-edicion-dialog__texto">Puntaje</span>
+    </button>
+  </div>
+</div>
+
+<div mat-dialog-actions align="end" class="elegir-edicion-dialog__actions">
+  <button mat-stroked-button type="button" (click)="cancelar()">Cancelar</button>
+</div>

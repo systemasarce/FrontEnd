@@ -1,0 +1,407 @@
+<section class="cotizaciones-card">
+  <header class="cotizaciones-card__header">
+    <div>
+      <p class="cotizaciones-card__eyebrow">Administración</p>
+      <h2>Cotizaciones - TJH2B</h2>
+      <p class="cotizaciones-card__description">
+        Gestiona las cotizaciones con panel de registro, edición, listado y filtros.
+      </p>
+    </div>
+  </header>
+
+  <section *ngIf="mostrarPanel" class="panel panel--editor">
+    <header class="editor-header">
+      <div>
+        <p class="cotizaciones-card__eyebrow">Registro</p>
+        <h3>{{ editando ? 'Editar cotización' : 'Nueva cotización' }}</h3>
+        <p class="cotizaciones-card__description">
+          {{ editando ? 'Actualiza los datos de la cotización seleccionada.' : 'Registra una nueva cotización con cliente, servicio, fechas y documentos PDF.' }}
+        </p>
+      </div>
+    </header>
+
+    <form class="editor-form" [formGroup]="form" (ngSubmit)="guardar()">
+      <div class="editor-grid">
+        <label class="field">
+          <span>Número de cotización</span>
+          <input type="text" formControlName="Cotizacion_Numero" placeholder="Ingrese número">
+        </label>
+        <div class="field combo-field">
+          <span>Cliente</span>
+          <div class="combo">
+            <button
+              type="button"
+              class="combo__trigger"
+              [class.combo__trigger--placeholder]="!clienteSeleccionado"
+              [attr.aria-expanded]="clienteComboOpen"
+              (click)="$event.stopPropagation(); toggleClienteCombo()">
+              <span>{{ clienteDisplay }}</span>
+              <i class="combo__caret"></i>
+            </button>
+
+            <div class="combo__panel" *ngIf="clienteComboOpen" (click)="$event.stopPropagation()">
+              <input
+                type="text"
+                class="combo__search"
+                placeholder="Buscar por código o nombre..."
+                [value]="clienteComboSearch"
+                (input)="onClienteSearchChange($event)">
+
+              <div class="combo__list">
+                <button type="button" class="combo__option combo__option--empty" (click)="seleccionarCliente(null)">
+                  Seleccionar
+                </button>
+
+                <button
+                  type="button"
+                  class="combo__option"
+                  *ngFor="let cliente of clientesFiltrados"
+                  (click)="seleccionarCliente(cliente)">
+                  {{ cliente.Cliente_Nombre }}
+                </button>
+
+                <div class="combo__empty" *ngIf="clientesFiltrados.length === 0">
+                  No hay resultados
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Número de Servicio</span>
+          <input type="text" formControlName="Cotizacion_Servicio" placeholder="Ingrese número de servicio">
+        </label>
+
+        <label class="field">
+          <span>Fecha inicio</span>
+          <div class="date-input-shell" (click)="cotizacionFechaIniPicker.open()">
+            <input
+              [matDatepicker]="cotizacionFechaIniPicker"
+              formControlName="Cotizacion_FechaIni"
+              readonly
+              (click)="cotizacionFechaIniPicker.open()">
+            <button
+              type="button"
+              class="date-input-shell__button"
+              aria-label="Seleccionar fecha de inicio"
+              (click)="cotizacionFechaIniPicker.open(); $event.stopPropagation()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v12A2.5 2.5 0 0 1 19.5 21h-15A2.5 2.5 0 0 1 2 18.5v-12A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1Zm12.5 8h-15v8.5a.5.5 0 0 0 .5.5h14a.5.5 0 0 0 .5-.5V10ZM5 6a.5.5 0 0 0-.5.5V8h15V6.5A.5.5 0 0 0 19 6H5Z"/>
+              </svg>
+            </button>
+          </div>
+          <mat-datepicker #cotizacionFechaIniPicker></mat-datepicker>
+        </label>
+
+        <label class="field">
+          <span>Fecha fin</span>
+          <div class="date-input-shell" (click)="cotizacionFechaFinPicker.open()">
+            <input
+              [matDatepicker]="cotizacionFechaFinPicker"
+              formControlName="Cotizacion_FechaFin"
+              readonly
+              (click)="cotizacionFechaFinPicker.open()">
+            <button
+              type="button"
+              class="date-input-shell__button"
+              aria-label="Seleccionar fecha de fin"
+              (click)="cotizacionFechaFinPicker.open(); $event.stopPropagation()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v12A2.5 2.5 0 0 1 19.5 21h-15A2.5 2.5 0 0 1 2 18.5v-12A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1Zm12.5 8h-15v8.5a.5.5 0 0 0 .5.5h14a.5.5 0 0 0 .5-.5V10ZM5 6a.5.5 0 0 0-.5.5V8h15V6.5A.5.5 0 0 0 19 6H5Z"/>
+              </svg>
+            </button>
+          </div>
+          <mat-datepicker #cotizacionFechaFinPicker></mat-datepicker>
+        </label>
+
+        <div class="field field--full field--document-upload">
+          <span>Documento adjunto</span>
+          <div class="document-upload">
+            <div>
+              <p class="document-upload__eyebrow">ARCHIVOS PDF</p>
+              <p class="document-upload__help">
+                Sube uno o varios documentos PDF. Cada archivo aparece en la lista para visualizarlo o eliminarlo antes de guardar.
+              </p>
+            </div>
+
+            <input #pdfInput type="file" accept="application/pdf,.pdf" multiple hidden (change)="onArchivosChange($event)">
+            <button type="button" class="button button--primary button--compact" (click)="pdfInput.click()">
+              Seleccionar archivos
+            </button>
+          </div>
+
+          <div class="document-upload__summary">
+            {{ archivosPdf.length ? (archivosPdf.length + ' archivo(s) seleccionado(s)') : 'No se eligió ningún archivo' }}
+          </div>
+
+          <div *ngIf="archivosPdf.length" class="pdf-list">
+            <article class="pdf-item" *ngFor="let adjunto of archivosPdf; trackBy: trackByArchivo">
+              <div class="pdf-item__info">
+                <span class="pdf-item__badge">PDF</span>
+                <div class="pdf-item__text">
+                  <p class="pdf-item__name">{{ adjunto.nombre }}</p>
+                  <p class="pdf-item__meta">{{ adjunto.esArchivoLocal ? 'Nuevo' : 'Actual' }}</p>
+                </div>
+              </div>
+
+              <div class="pdf-item__actions">
+                <button
+                  type="button"
+                  class="action-button action-button--preview"
+                  aria-label="Previsualizar PDF"
+                  (click)="verArchivo(adjunto)">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button action-button--delete"
+                  aria-label="Eliminar archivo de la lista"
+                  (click)="eliminarArchivo(adjunto)">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                    <path d="M10 11v6"></path>
+                    <path d="M14 11v6"></path>
+                  </svg>
+                </button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <label class="field field--full" *ngIf="editando">
+          <span>Estado de cotización</span>
+          <div class="custom-select-wrap">
+            <select class="custom-select" formControlName="Cotizacion_Estado">
+              <option value="P">Pendiente</option>
+              <option value="F">Finalizado</option>
+            </select>
+            <span class="custom-select-arrow"></span>
+          </div>
+        </label>
+
+        <label class="field field--full" *ngIf="editando">
+          <span>Estado</span>
+          <div class="custom-select-wrap">
+            <select class="custom-select" formControlName="Estado">
+              <option value="A">Activo</option>
+              <option value="I">Inactivo</option>
+            </select>
+            <span class="custom-select-arrow"></span>
+          </div>
+        </label>
+      </div>
+
+      <p *ngIf="cargandoClientes" class="editor-feedback">Cargando clientes TJH2B...</p>
+      <p *ngIf="errorMessage" class="editor-feedback editor-feedback--error">{{ errorMessage }}</p>
+
+      <footer class="editor-actions">
+        <button type="button" class="button button--secondary" (click)="confirmarCancelacionCotizacion()">
+          Cancelar
+        </button>
+        <button type="submit" class="button button--primary" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : (editando ? 'Actualizar' : 'Guardar') }}
+        </button>
+      </footer>
+    </form>
+  </section>
+
+  <section *ngIf="!mostrarPanel" class="listado-shell">
+    <footer class="actions-bar actions-bar--single">
+      <button type="button" class="button button--primary" (click)="abrirNuevo()">
+        Nuevo
+      </button>
+    </footer>
+
+  <section class="panel panel--listing">
+    <!-- FILTROS: Grid de 4 columnas, con fecha+botones agrupados -->
+    <form class="filters-panel" [formGroup]="filtrosForm" (ngSubmit)="aplicarFiltros()">
+      <!-- Número de cotización -->
+      <label class="field">
+        <span>Número de cotización</span>
+        <input type="text" formControlName="Numero" placeholder="Buscar por número de cotización">
+      </label>
+
+      <!-- Cliente -->
+      <label class="field">
+        <span>Cliente</span>
+        <input type="text" formControlName="ClienteNombre" placeholder="Buscar por cliente">
+      </label>
+
+      <!-- Número de Servicio -->
+      <label class="field">
+        <span>Número de Servicio</span>
+        <input type="text" formControlName="Servicio" placeholder="Buscar por número de servicio">
+      </label>
+
+      <!-- Estado de cotización -->
+      <label class="field estado-field">
+        <span>Estado de cotización</span>
+        <div class="custom-select-wrap">
+          <select class="custom-select" formControlName="EstadoCotizacion">
+            <option value="">Todos</option>
+            <option value="P">Pendiente</option>
+            <option value="F">Finalizado</option>
+          </select>
+          <span class="custom-select-arrow"></span>
+        </div>
+      </label>
+
+      <!-- Estado (Activo/Inactivo) -->
+      <label class="field estado-field">
+        <span>Estado</span>
+        <div class="custom-select-wrap">
+          <select class="custom-select" formControlName="Estado">
+            <option value="A">Activo</option>
+            <option value="I">Inactivo</option>
+          </select>
+          <span class="custom-select-arrow"></span>
+        </div>
+      </label>
+
+      <!-- Contenedor Fecha + Botones (Grid de 2 columnas) -->
+      <div class="fecha-acciones-wrapper">
+        <!-- Campo Fecha -->
+        <label class="field fecha-field">
+          <span>Fecha</span>
+          <div class="fecha-inline">
+            <div class="custom-select-wrap fecha-inline__select">
+              <select
+                class="custom-select"
+                formControlName="FechaFiltroTipo"
+                (change)="onFechaFiltroTipoChange()">
+                <option value="">Seleccionar</option>
+                <option value="FECHA_INICIO">Fecha inicio</option>
+                <option value="FECHA_FIN">Fecha fin</option>
+              </select>
+              <span class="custom-select-arrow"></span>
+            </div>
+
+            <div
+              class="date-input-shell fecha-inline__input"
+              [class.fecha-inline__input--hidden]="!mostrarFechaFiltro"
+              (click)="cotizacionFechaFiltroPicker.open()">
+              <input
+                [matDatepicker]="cotizacionFechaFiltroPicker"
+                formControlName="FechaFiltroValor"
+                readonly
+                [attr.aria-label]="etiquetaFechaFiltro"
+                (click)="cotizacionFechaFiltroPicker.open()">
+              <button
+                type="button"
+                class="date-input-shell__button"
+                aria-label="Seleccionar fecha del filtro"
+                (click)="cotizacionFechaFiltroPicker.open(); $event.stopPropagation()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1.5A2.5 2.5 0 0 1 22 6.5v12A2.5 2.5 0 0 1 19.5 21h-15A2.5 2.5 0 0 1 2 18.5v-12A2.5 2.5 0 0 1 4.5 4H6V3a1 1 0 0 1 1-1Zm12.5 8h-15v8.5a.5.5 0 0 0 .5.5h14a.5.5 0 0 0 .5-.5V10ZM5 6a.5.5 0 0 0-.5.5V8h15V6.5A.5.5 0 0 0 19 6H5Z"/>
+                </svg>
+              </button>
+            </div>
+            <mat-datepicker #cotizacionFechaFiltroPicker></mat-datepicker>
+          </div>
+        </label>
+
+        <!-- Botones de acción -->
+        <div class="filters-panel__actions">
+          <button type="submit" class="button button--primary">Buscar</button>
+          <button type="button" class="button button--secondary" (click)="limpiarFiltros()">Limpiar</button>
+        </div>
+      </div>
+    </form>
+
+    <p *ngIf="errorMessage" class="editor-feedback editor-feedback--error">{{ errorMessage }}</p>
+
+    <div *ngIf="cargando" class="state-card">
+      Cargando cotizaciones desde la API...
+    </div>
+
+    <div class="table-shell">
+      <table class="cotizaciones-table">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Num. Cotización</th>
+            <th>Cliente</th>
+            <th>Num. Servicio</th>
+            <th>Fecha Inicial</th>
+            <th>Fecha Final</th>
+            <th>Estado Cotización</th>
+            <th>Estado</th>
+            <th>Archivos</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of cotizaciones; trackBy: trackByCotizacion">
+            <td>{{ item.id ?? '-' }}</td>
+            <td>{{ item.numero || '-' }}</td>
+            <td>{{ item.clienteNombre || '-' }}</td>
+            <td>{{ item.servicio || '-' }}</td>
+            <td>{{ formatearFechaTabla(item.fechaIni) }}</td>
+            <td>{{ formatearFechaTabla(item.fechaFin) }}</td>
+            <td>
+              <span
+                class="estado-badge"
+                [class.estado-badge--pendiente]="formatCotizacionEstado(item.cotizacionEstado || '') === 'Pendiente'"
+                [class.estado-badge--finalizado]="formatCotizacionEstado(item.cotizacionEstado || '') === 'Finalizado'">
+                {{ formatCotizacionEstado(item.cotizacionEstado || '') }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="estado-badge"
+                [class.estado-badge--activo]="formatEstado(item.estado) === 'Activo'"
+                [class.estado-badge--inactivo]="formatEstado(item.estado) === 'Inactivo'">
+                {{ formatEstado(item.estado) }}
+              </span>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="action-button"
+                *ngIf="item.documentoPdf; else sinArchivo"
+                aria-label="Ver documento de la cotización"
+                [disabled]="abriendoArchivoId === item.id"
+                (click)="verArchivoDeFila(item)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
+                </svg>
+              </button>
+              <ng-template #sinArchivo>-</ng-template>
+            </td>
+            <td class="td-acciones">
+              <button type="button" class="action-button" aria-label="Editar cotización" (click)="editarCotizacion(item)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                </svg>
+              </button>
+              <button type="button" class="action-button action-button--delete" aria-label="Eliminar cotización" [disabled]="guardando" (click)="eliminarCotizacion(item)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                </svg>
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="!cargando && !cotizaciones.length" class="tabla-mensaje-fila">
+            <td colspan="10" class="state-message">
+              No se pudo cargar la información de Cotizaciones TJH2B.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  </section>
+</section>

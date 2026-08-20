@@ -1,0 +1,141 @@
+import { Component, Inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+
+import { ActualizarDireccionEntregaRequest, ApiService } from 'src/app/Services/api.services';
+import { AuthService } from 'src/app/features/auth/services/auth.service';
+import { GlobalVariable } from 'src/app/VarGlobals';
+import { noWhitespaceValidator } from 'src/app/shared/validators/form-validators';
+import { DireccionEntregaRow } from './direccion-entrega-page.component';
+
+interface DireccionEntregaEditData {
+  direccionEntrega: DireccionEntregaRow;
+}
+
+@Component({
+  selector: 'app-direccion-entrega-edit-dialog',
+  templateUrl: './direccion-entrega-edit-dialog.component.html',
+  styleUrls: ['./direccion-entrega-dialog.component.scss']
+})
+export class DireccionEntregaEditDialogComponent {
+  readonly form: FormGroup;
+  isSaving = false;
+  errorMessage = '';
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public readonly data: DireccionEntregaEditData,
+    private readonly dialogRef: MatDialogRef<DireccionEntregaEditDialogComponent>,
+    private readonly formBuilder: FormBuilder,
+    private readonly apiService: ApiService,
+    private readonly authService: AuthService
+  ) {
+    this.form = this.formBuilder.group({
+      dirDes: [data.direccionEntrega.dirDes, [Validators.required, noWhitespaceValidator(), Validators.maxLength(250)]],
+      dirUbi: [data.direccionEntrega.dirUbi, [Validators.required, noWhitespaceValidator(), Validators.maxLength(250)]],
+      flgEst: [data.direccionEntrega.flgEst || 'A', Validators.required]
+    });
+  }
+
+  guardar(): void {
+    if (this.form.invalid || this.isSaving || this.data.direccionEntrega.dirId === null) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isSaving = true;
+    this.errorMessage = '';
+
+    const payload: ActualizarDireccionEntregaRequest = {
+      Dir_Id: this.data.direccionEntrega.dirId,
+      Dir_Des: String(this.form.controls['dirDes'].value || '').trim(),
+      Dir_Ubi: String(this.form.controls['dirUbi'].value || '').trim(),
+      Flg_Est: String(this.form.controls['flgEst'].value || 'A'),
+      Usr_Mod: this.getCurrentOperator()
+    };
+
+    this.apiService.actualizarDireccionEntrega(payload).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.dialogRef.close(true);
+      },
+      error: (error: unknown) => {
+        console.error('Error actualizando direccion de entrega:', error);
+        this.errorMessage = this.getErrorMessage(error, 'actualizar');
+        this.isSaving = false;
+      }
+    });
+  }
+
+  cerrar(): void {
+    if (!this.isSaving) {
+      this.dialogRef.close(false);
+    }
+  }
+
+  private getCurrentOperator(): string {
+    const globalUser = this.normalizeOperator(GlobalVariable.vusu?.trim() ?? '');
+
+    if (globalUser) {
+      return globalUser;
+    }
+
+    const currentUser = this.normalizeOperator(this.authService.getCurrentUser().trim());
+
+    if (currentUser) {
+      return currentUser;
+    }
+
+    return 'sistemas';
+  }
+
+  private normalizeOperator(value: string): string {
+    if (!value || value.includes('@')) {
+      return '';
+    }
+
+    return value;
+  }
+
+  private getErrorMessage(error: unknown, action: string): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return `No se pudo ${action} la direccion de entrega. Intenta nuevamente.`;
+    }
+
+    if (typeof error.error === 'string' && error.error.trim()) {
+      return error.error;
+    }
+
+    if (this.isErrorBody(error.error)) {
+      if (this.isValidationErrors(error.error.errors)) {
+        const messages = Object.values(error.error.errors).flat();
+
+        if (messages.length) {
+          return messages.join(' ');
+        }
+      }
+
+      if (typeof error.error.message === 'string' && error.error.message.trim()) {
+        return error.error.message;
+      }
+
+      if (typeof error.error.title === 'string' && error.error.title.trim()) {
+        return error.error.title;
+      }
+    }
+
+    return `No se pudo ${action} la direccion de entrega. Codigo HTTP: ${error.status}.`;
+  }
+
+  private isErrorBody(value: unknown): value is { message?: unknown; title?: unknown; errors?: unknown } {
+    return typeof value === 'object' && value !== null;
+  }
+
+  private isValidationErrors(value: unknown): value is Record<string, string[]> {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+
+    return Object.values(value).every((messages) => Array.isArray(messages));
+  }
+}

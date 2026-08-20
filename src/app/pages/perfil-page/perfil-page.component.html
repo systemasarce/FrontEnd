@@ -1,0 +1,93 @@
+<section class="perfil-card">
+  <header class="perfil-card__header">
+    <div>
+      <p class="perfil-card__eyebrow">Administracion</p>
+      <h2>Perfil</h2>
+      <p class="perfil-card__description">Administra los perfiles disponibles para controlar el acceso a las ventanas del sistema.</p>
+    </div>
+
+    <div class="perfil-card__actions">
+      <button type="button" class="perfil-card__create" (click)="registrarPerfil()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="perfil-filters" [formGroup]="filtersForm" (ngSubmit)="cargarPerfiles()">
+    <label class="filter-field">
+      <span>Codigo</span>
+      <input type="text" formControlName="codigo">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="perfil-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="perfil-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando perfiles desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !perfiles.length" class="state-card">
+    {{ emptyStateMessage }}
+  </div>
+
+  <div *ngIf="perfiles.length" class="table-shell">
+    <table class="perfil-table">
+      <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Descripcion</th>
+          <th>Estado</th>
+          <th>Accesos</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let perfil of paginatedPerfiles; trackBy: trackByPerfil">
+          <td>{{ perfil.prfCod || '-' }}</td>
+          <td>{{ perfil.prfDes || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!perfil.activo">
+              {{ perfil.estado }}
+            </span>
+          </td>
+          <td>
+            <button type="button" class="access-button" (click)="abrirAccesosPerfil(perfil)">
+              Accesos
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="perfiles.length"
+    [totalItems]="perfiles.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

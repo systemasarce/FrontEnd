@@ -1,0 +1,10 @@
+<div class="foto-dialog">
+  <h2>{{ data.titulo }}</h2>
+  <p>{{ data.mensaje }}</p>
+
+  <div class="foto-dialog__actions">
+    <button type="button" class="btn-primary" (click)="elegir('camera')">{{ data.textoOpcionCamara || 'Tomar foto' }}</button>
+    <button type="button" class="btn-secondary" (click)="elegir('gallery')">{{ data.textoOpcionArchivo || 'Seleccionar imagen' }}</button>
+    <button type="button" class="btn-cancel" (click)="cancelar()">Cancelar</button>
+  </div>
+</div>

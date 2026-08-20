@@ -1,0 +1,24 @@
+<form class="forma-pago-dialog" [formGroup]="form" (ngSubmit)="guardar()">
+  <h2 mat-dialog-title>Nueva Forma de Pago</h2>
+
+  <mat-dialog-content class="forma-pago-dialog__content">
+    <p class="forma-pago-dialog__description">
+      Registra una nueva forma de pago. El estado inicial siempre sera activo.
+    </p>
+
+    <label class="forma-pago-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="forPagDes" maxlength="120">
+      <small class="forma-pago-dialog__error" *ngIf="form.controls['forPagDes'].touched && (form.controls['forPagDes'].hasError('required') || form.controls['forPagDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <p *ngIf="errorMessage" class="forma-pago-dialog__error">{{ errorMessage }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

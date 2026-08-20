@@ -1,0 +1,105 @@
+<section class="detraccion-card">
+  <header class="detraccion-card__header">
+    <div>
+      <p class="detraccion-card__eyebrow">Administracion</p>
+      <h2>Detracciones</h2>
+      <p class="detraccion-card__description">Administra los porcentajes de detraccion activos y actualiza su estado desde mantenimiento.</p>
+    </div>
+
+    <div class="detraccion-card__actions">
+      <button type="button" class="detraccion-card__create" (click)="registrarDetraccion()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="detraccion-filters" [formGroup]="filtersForm" (ngSubmit)="cargarDetracciones()">
+    <label class="filter-field">
+      <span>ID</span>
+      <input
+        type="number"
+        formControlName="codigo"
+        min="1"
+        step="1"
+        (input)="sanitizeCodigoInput($event)">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="detraccion-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="detraccion-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando detracciones desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !detracciones.length" class="state-card">
+    {{ emptyStateMessage }}
+  </div>
+
+  <div *ngIf="detracciones.length" class="table-shell">
+    <table class="detraccion-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripcion</th>
+          <th>Porcentaje</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let detraccion of paginatedDetracciones; trackBy: trackByDetraccion">
+          <td>{{ detraccion.detId ?? '-' }}</td>
+          <td>{{ detraccion.detDes || '-' }}</td>
+          <td>{{ formatPorcentaje(detraccion.detPor) }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!detraccion.activo">
+              {{ detraccion.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar detraccion"
+              [disabled]="detraccion.detId === null"
+              (click)="editarDetraccion(detraccion)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="detracciones.length"
+    [totalItems]="detracciones.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

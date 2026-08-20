@@ -1,0 +1,261 @@
+.tree-card {
+  display: grid;
+  gap: 1.35rem;
+  padding: 1.5rem;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
+}
+
+.tree-card__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tree-card__header-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-card__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.tree-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.tree-card__eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tree-card__header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.8rem;
+}
+
+.tree-card__description {
+  max-width: 52rem;
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.tree-card__close,
+.tree-card__add {
+  min-height: 2.1rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tree-add-button,
+.tree-edit-button {
+  min-height: 2.1rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tree-card__add {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.tree-card__close {
+  border: 1px solid var(--line-soft);
+  background: #ffffff;
+  color: var(--text-primary);
+}
+
+.tree-card__close:disabled,
+.tree-card__add:disabled,
+.tree-add-button:disabled,
+.tree-edit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tree-add-button,
+.tree-edit-button {
+  min-height: 2.1rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--line-soft);
+  background: #ffffff;
+  color: var(--text-primary);
+}
+
+.state-card {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.state-card--error {
+  border-color: var(--line-strong);
+  background: var(--surface-accent);
+  color: var(--accent);
+}
+
+.tree-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.tree-group,
+.tree-subgroup {
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.tree-group__summary,
+.tree-subgroup__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.tree-group__summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tree-group__summary::-webkit-details-marker,
+.tree-subgroup__summary::-webkit-details-marker {
+  display: none;
+}
+
+.tree-group__summary {
+  background: #f9fbfc;
+}
+
+.tree-subgroup__summary {
+  background: #fffaf3;
+}
+
+.tree-group__title,
+.tree-subgroup__title,
+.tree-detail__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-width: 0;
+  color: var(--text-primary);
+}
+
+.tree-group__code,
+.tree-subgroup__code,
+.tree-detail__code {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.85rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--accent-strong);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.tree-group__content,
+.tree-subgroup__content {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem 1.1rem;
+}
+
+.tree-subgroup {
+  margin-left: 1.2rem;
+}
+
+.tree-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: #ffffff;
+  margin-left: 1.2rem;
+}
+
+.tree-empty {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5rem;
+  min-height: 2rem;
+  padding: 0.15rem 0.75rem;
+  border-radius: 999px;
+  background: #ecfdf3;
+  color: #166534;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.status-pill--inactive {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 720px) {
+  .tree-card__header,
+  .tree-group__summary,
+  .tree-subgroup__summary,
+  .tree-detail {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .tree-card__header-copy {
+    width: 100%;
+  }
+
+  .tree-card__actions,
+  .tree-group__summary-actions {
+    justify-content: start;
+  }
+
+  .tree-subgroup,
+  .tree-detail {
+    margin-left: 0;
+  }
+}

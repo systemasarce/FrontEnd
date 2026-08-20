@@ -1,0 +1,36 @@
+<section class="banco-dialog">
+  <div mat-dialog-content class="banco-dialog__content" [formGroup]="form">
+    <p class="banco-dialog__description">
+      Actualiza la descripcion, la abreviatura o el estado del registro seleccionado.
+    </p>
+
+    <label class="banco-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="banDes" maxlength="120">
+      <small class="banco-dialog__error" *ngIf="form.controls['banDes'].touched && (form.controls['banDes'].hasError('required') || form.controls['banDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <label class="banco-dialog__field">
+      <span>Abreviatura</span>
+      <input type="text" formControlName="banAbr" maxlength="15">
+      <small class="banco-dialog__error" *ngIf="form.controls['banAbr'].touched && (form.controls['banAbr'].hasError('required') || form.controls['banAbr'].hasError('whitespace'))">Campo Abreviatura obligatorio.</small>
+    </label>
+
+    <label class="banco-dialog__field">
+      <span>Estado</span>
+      <select formControlName="flgEst">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <p *ngIf="errorMessage" class="banco-dialog__error">{{ errorMessage }}</p>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="button" (click)="guardar()" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+    </button>
+  </div>
+</section>

@@ -1,0 +1,41 @@
+<div class="dialog-card">
+  <header class="dialog-card__header">
+    <div>
+      <p class="dialog-card__eyebrow">Administracion</p>
+      <h2>{{ esEdicion ? 'Editar Tarea' : 'Nueva Tarea' }}</h2>
+      <p class="dialog-card__description">
+        {{ esEdicion ? 'Actualiza el nombre y estado de la tarea.' : 'Registra una nueva tarea con nombre. El estado se crea activo por defecto.' }}
+      </p>
+    </div>
+
+    <button type="button" class="dialog-card__close" (click)="cerrar()" aria-label="Cerrar">&times;</button>
+  </header>
+
+  <p *ngIf="cargandoDatosTarea" class="dialog-loading">Cargando información de la tarea...</p>
+
+  <form class="dialog-form" [formGroup]="form" (ngSubmit)="guardar()">
+    <div class="dialog-grid">
+      <label class="field field--full">
+        <span>Nombre</span>
+        <input type="text" formControlName="nombre" placeholder="Ingrese Nombre">
+      </label>
+
+      <label class="field field--full" *ngIf="esEdicion">
+        <span>Estado</span>
+        <select formControlName="estado">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </label>
+    </div>
+
+    <p *ngIf="saveError" class="dialog-error">{{ saveError }}</p>
+
+    <footer class="dialog-actions">
+      <button type="button" class="btn btn-secondary" (click)="cerrar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="guardando || cargandoDatosTarea">
+        {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
+      </button>
+    </footer>
+  </form>
+</div>

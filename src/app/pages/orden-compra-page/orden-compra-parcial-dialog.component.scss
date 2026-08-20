@@ -1,0 +1,21 @@
+.orden-compra-parcial-dialog__content {
+  display: grid;
+  gap: 0.75rem;
+  min-width: min(28rem, 100%);
+}
+
+.orden-compra-parcial-dialog__content p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.orden-compra-parcial-dialog__content small {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.orden-compra-parcial-dialog__actions {
+  gap: 0.75rem;
+}

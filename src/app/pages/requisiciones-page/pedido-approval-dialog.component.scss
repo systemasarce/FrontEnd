@@ -1,0 +1,46 @@
+.pedido-approval-dialog {
+  display: block;
+}
+
+.pedido-approval-dialog__content {
+  display: grid;
+  gap: 1rem;
+  min-width: min(28rem, 78vw);
+}
+
+.pedido-approval-dialog__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pedido-approval-dialog__field span {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.pedido-approval-dialog__field input,
+.pedido-approval-dialog__field select {
+  width: 100%;
+  min-height: 2.85rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.pedido-approval-dialog__field input:focus,
+.pedido-approval-dialog__field select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.input--readonly {
+  background: #eef1f4 !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--line-soft) !important;
+  opacity: 1;
+  -webkit-text-fill-color: var(--text-secondary);
+}

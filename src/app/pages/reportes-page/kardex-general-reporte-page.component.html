@@ -1,0 +1,127 @@
+<section class="reporte-panel" aria-labelledby="kardex-general-title">
+  <header class="reporte-panel__header">
+    <div>
+      <a routerLink="/reportes" class="reporte-panel__back" aria-label="Volver a reportes">
+        <span class="reporte-panel__back-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 5l-7 7 7 7"></path>
+          </svg>
+        </span>
+        <span>Volver a reportes</span>
+      </a>
+      <h1 id="kardex-general-title">Kardex General</h1>
+      <p>Consulta los movimientos del kardex general y filtra por item cuando lo necesites.</p>
+    </div>
+  </header>
+
+  <section class="reporte-panel__filters" aria-label="Filtros de kardex general">
+    <label class="reporte-panel__field">
+      <span>Item</span>
+      <mat-form-field appearance="outline">
+        <mat-select
+          [formControl]="itemIdControl"
+          [disabled]="isLoadingItems"
+          (openedChange)="onItemSelectOpened($event)">
+          <mat-option>
+            <input
+              matInput
+              placeholder="Buscar item"
+              [formControl]="itemSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option *ngFor="let item of filteredItems; trackBy: trackByItem" [value]="item.id">
+            {{ item.code }} - {{ item.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <div class="reporte-panel__actions">
+      <button
+        type="button"
+        class="reporte-panel__export"
+        [disabled]="isLoadingGrid || !kardexRows.length"
+        (click)="exportarExcel()">
+        Exportar a Excel
+      </button>
+
+      <button
+        type="button"
+        class="reporte-panel__search"
+        [disabled]="isLoadingGrid"
+        (click)="buscar()">
+        {{ isLoadingGrid ? 'Consultando...' : 'Buscar' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="reporte-panel__canvas" aria-label="Resultados de Kardex General">
+    <p *ngIf="errorMessage" class="reporte-panel__message reporte-panel__message--error">{{ errorMessage }}</p>
+    <p *ngIf="!errorMessage && isLoadingGrid" class="reporte-panel__message">Cargando kardex general...</p>
+    <p *ngIf="!errorMessage && !isLoadingGrid && !kardexRows.length" class="reporte-panel__message">
+      No se encontraron movimientos para el filtro seleccionado.
+    </p>
+
+    <ng-container *ngIf="!errorMessage && kardexRows.length">
+      <div
+        #scrollSuperior
+        class="reporte-panel__top-scroll"
+        aria-label="Desplazamiento horizontal superior de la grilla"
+        (scroll)="sincronizarScrollHorizontal(scrollSuperior, scrollTabla)">
+        <div
+          #scrollSuperiorContent
+          class="reporte-panel__top-scroll-content"
+          aria-hidden="true"></div>
+      </div>
+
+      <div
+        #scrollTabla
+        class="reporte-panel__table-shell"
+        (scroll)="sincronizarScrollHorizontal(scrollTabla, scrollSuperior)">
+      <table #tablaKardex class="reporte-panel__table">
+        <thead>
+          <tr>
+            <th>Mov. ID</th>
+            <th>Fecha</th>
+            <th>Cod. Item</th>
+            <th>Descripcion Item</th>
+            <th>Tipo Movimiento</th>
+            <th>Serie</th>
+            <th>Guia remitente</th>
+            <th>Solicitante</th>
+            <th>Centro de Costo</th>
+            <th>Cantidad</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            *ngFor="let row of kardexRows; trackBy: trackByRow"
+            [class.reporte-panel__row--total]="row.isTotal"
+            [class.reporte-panel__row--subtitle]="row.isSubtitle">
+            <td data-label="Mov. ID">{{ row.movimientoId ?? '-' }}</td>
+            <td data-label="Fecha">{{ formatFechaDetalle(row.fechaDetalle) }}</td>
+            <td data-label="Cod. Item">{{ row.itemCode }}</td>
+            <td data-label="Descripcion Item">{{ row.itemDescription }}</td>
+            <td data-label="Tipo Movimiento">{{ row.tipoIngreso }}</td>
+            <td data-label="Serie">{{ row.serie }}</td>
+            <td data-label="Guia remitente">{{ row.guiaRemitente }}</td>
+            <td data-label="Solicitante">{{ row.usuarioNombre }}</td>
+            <td data-label="Centro de Costo">{{ row.centroCosto }}</td>
+            <td data-label="Cantidad" class="reporte-panel__quantity">{{ formatCantidad(row.cantidad) }}</td>
+            <td data-label="Tipo">
+              <span
+                class="reporte-panel__tipo-badge"
+                [class]="resolveTipoClass(row.fechaAprobacion, row.isTotal)">
+                {{ resolveTipoLabel(row.fechaAprobacion) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </ng-container>
+  </section>
+</section>

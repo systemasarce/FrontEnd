@@ -1,0 +1,105 @@
+<section class="banco-card">
+  <header class="banco-card__header">
+    <div>
+      <p class="banco-card__eyebrow">Administracion</p>
+      <h2>Bancos</h2>
+      <p class="banco-card__description">Administra los bancos activos y actualiza su estado desde mantenimiento.</p>
+    </div>
+
+    <div class="banco-card__actions">
+      <button type="button" class="banco-card__create" (click)="registrarBanco()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="banco-filters" [formGroup]="filtersForm" (ngSubmit)="cargarBancos()">
+    <label class="filter-field">
+      <span>ID</span>
+      <input
+        type="number"
+        formControlName="codigo"
+        min="1"
+        step="1"
+        (input)="sanitizeCodigoInput($event)">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="banco-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="banco-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando bancos desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !bancos.length" class="state-card">
+    {{ emptyStateMessage }}
+  </div>
+
+  <div *ngIf="bancos.length" class="table-shell">
+    <table class="banco-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripcion</th>
+          <th>Abreviatura</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let banco of paginatedBancos; trackBy: trackByBanco">
+          <td>{{ banco.banId ?? '-' }}</td>
+          <td>{{ banco.banDes || '-' }}</td>
+          <td>{{ banco.banAbr || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!banco.activo">
+              {{ banco.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar banco"
+              [disabled]="banco.banId === null"
+              (click)="editarBanco(banco)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="bancos.length"
+    [totalItems]="bancos.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

@@ -1,0 +1,685 @@
+<section class="almacen-page">
+  <section class="almacen-card">
+    <header class="almacen-card__header">
+      <div>
+        <p class="almacen-card__eyebrow">Operacion</p>
+        <h2>Almacen</h2>
+        <p class="almacen-card__description">
+          Control de ingresos a almacen con filtros por movimiento, tipo y estados de aprobacion.
+        </p>
+      </div>
+    </header>
+
+    <section *ngIf="!showIngresoDirectoForm && !showIngresoOrdenForm" class="panel panel--listing">
+      <form class="filters-panel" [formGroup]="filtersForm" (ngSubmit)="aplicarFiltros()">
+        <mat-form-field appearance="outline" class="field field--mat field--listado">
+          <mat-label>Listado</mat-label>
+          <mat-select [formControl]="listadoControl" (selectionChange)="onListadoChange()">
+            <mat-option *ngFor="let option of listadoOptions" [value]="option.codigo">
+              {{ option.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <label *ngIf="isListadoIngresado || isListadoSalida" class="field field--search field--general-search">
+          <span>Buscar en la grilla</span>
+          <input
+            type="text"
+            [value]="globalSearch"
+            placeholder="Escribe para filtrar..."
+            (input)="onGlobalSearchChange(($any($event.target).value || '').toString())">
+        </label>
+
+        <div *ngIf="isListadoIngresado || isListadoSalida" class="filters-panel__filters">
+          <label class="field">
+            <span>Nro. Movimiento</span>
+            <input type="number" formControlName="movimientoId" min="0" step="1">
+          </label>
+
+          <mat-form-field appearance="outline" class="field field--mat">
+            <mat-label>Tipo de Ingreso</mat-label>
+            <mat-select formControlName="tipoIngreso">
+              <mat-option *ngFor="let option of tipoIngresoOptions" [value]="option.codigo">
+                {{ option.descripcion }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field field--mat">
+            <mat-label>Estado</mat-label>
+            <mat-select formControlName="estado">
+              <mat-option *ngFor="let option of estadoOptions" [value]="option.codigo">
+                {{ option.descripcion }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="filters-panel__actions">
+            <button type="submit" class="button button--primary" [disabled]="isLoadingAlmacen">
+              {{ isLoadingAlmacen ? 'Buscando...' : 'Buscar' }}
+            </button>
+            <button type="button" class="button button--secondary" (click)="limpiarFiltros()">
+            Limpiar
+          </button>
+        </div>
+        </div>
+      </form>
+
+      <div class="list-toolbar">
+        <div class="list-toolbar__actions">
+          <button
+            *ngIf="isListadoSalida"
+            type="button"
+            class="button button--primary"
+            (click)="abrirSalidaManual()">
+            Generar Consumo
+          </button>
+          <button
+            *ngIf="isListadoSalida"
+            type="button"
+            class="button button--secondary"
+            [disabled]="isExportingSalidas"
+            (click)="abrirReporteSalidas()">
+            {{ isExportingSalidas ? 'Generando reporte...' : 'Exportar Salidas' }}
+          </button>
+          <button
+            *ngFor="let action of actionButtons"
+            type="button"
+            class="button button--primary"
+            (click)="ejecutarAccion(action)">
+            {{ action }}
+          </button>
+        </div>
+      </div>
+
+      <p *ngIf="errorMessage" class="editor-feedback editor-feedback--error">{{ errorMessage }}</p>
+
+      <div *ngIf="isListadoIngresado || isListadoSalida" class="table-shell">
+        <table class="almacen-table">
+          <thead>
+            <tr>
+              <th *ngIf="isListadoSalida">Acciones</th>
+              <th>Nro. Movimiento</th>
+              <th>Tipo de Ingreso</th>
+              <th>Centro de Costo</th>
+              <th>Almacen</th>
+              <th>Fecha Registro</th>
+              <th>Registrado Por</th>
+              <th *ngIf="isListadoSalida">Solicitante</th>
+              <th *ngIf="isListadoIngresado">Estado Aprobacion</th>
+              <th *ngIf="isListadoSalida">Estado Consumo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngIf="isLoadingAlmacen">
+              <td [attr.colspan]="isListadoSalida ? 10 : 8" class="empty-row">Cargando ingresos de almacen...</td>
+            </tr>
+
+            <tr *ngIf="!isLoadingAlmacen && !errorMessage && !filteredAlmacenes.length">
+              <td [attr.colspan]="isListadoSalida ? 10 : 8" class="empty-row">No se encontraron movimientos de almacen.</td>
+            </tr>
+
+            <tr *ngFor="let item of paginatedAlmacenes; trackBy: trackByAlmacen" class="almacen-table__row">
+              <td *ngIf="isListadoSalida">
+                <div class="table-action-group">
+                  <button
+                    type="button"
+                    class="button button--primary button--table-action"
+                    [disabled]="!esEstadoConsumoPendiente(item)"
+                    (click)="aprobarConsumoSalida(item)">
+                    Despachar
+                  </button>
+                  <button
+                    type="button"
+                    class="button button--secondary button--table-action"
+                    [disabled]="!esEstadoConsumoPendiente(item)"
+                    (click)="rechazarConsumoSalida(item)">
+                    Rechazar
+                  </button>
+                </div>
+              </td>
+              <td>{{ item.movimientoId }}</td>
+              <td>{{ item.tipoIngreso }}</td>
+              <td>{{ item.centroCosto }}</td>
+              <td>{{ item.almacen }}</td>
+              <td>{{ item.fechaRegistro }}</td>
+              <td>{{ item.registradoPor }}</td>
+              <td *ngIf="isListadoSalida">{{ item.solicitante }}</td>
+              <td *ngIf="isListadoIngresado">
+                <span class="status-badge" [attr.data-state]="item.estadoAprobacion.toLowerCase()">{{ item.estadoAprobacion }}</span>
+              </td>
+              <td *ngIf="isListadoSalida">
+                <span class="status-badge" [attr.data-state]="item.estadoConsumo.toLowerCase()">{{ item.estadoConsumo }}</span>
+              </td>
+              <td>
+                <div class="table-action-group">
+                  <button
+                    type="button"
+                    class="table-action"
+                    aria-label="Editar movimiento"
+                    [disabled]="!puedeEditarMovimiento(item)"
+                    (click)="editarMovimiento(item)">
+                    &#9998;
+                  </button>
+                  <button
+                    *ngIf="isListadoSalida"
+                    type="button"
+                    class="table-action button--danger"
+                    aria-label="Anular movimiento"
+                    title="Anular movimiento"
+                    [disabled]="!esEstadoConsumoDespachado(item)"
+                    (click)="anularConsumoSalida(item)">
+                    &#10006;
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="isListadoPendiente" class="table-shell">
+        <table class="almacen-table">
+          <thead>
+              <tr>
+                <th></th>
+                <th>Nro. O/C</th>
+                <th>Tipo</th>
+                <th>Proveedor</th>
+                <th>Forma de Pago</th>
+              <th>Total</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngIf="isLoadingAlmacen">
+              <td colspan="7" class="empty-row">Cargando ordenes de compra pendientes...</td>
+            </tr>
+
+            <tr *ngIf="!isLoadingAlmacen && !errorMessage && !ordenesCompraPendientesAlmacen.length">
+              <td colspan="7" class="empty-row">No se encontraron ordenes de compra pendientes para almacen.</td>
+            </tr>
+
+            <tr *ngFor="let item of paginatedOrdenesCompraPendientesAlmacen; trackBy: trackByOrdenCompraPendienteAlmacen" class="almacen-table__row">
+              <td>
+                <button type="button" class="button button--primary button--table-action" (click)="abrirIngresoOrden(item)">
+                  Ingresar
+                </button>
+              </td>
+              <td>{{ item.ordenCompraId }}</td>
+              <td>{{ item.tipo }}</td>
+              <td>{{ item.proveedor }}</td>
+              <td>{{ item.formaPago }}</td>
+              <td>{{ item.total | number:'1.2-2' }}</td>
+              <td>
+                <span class="status-badge" [attr.data-state]="item.estado.toLowerCase()">{{ item.estado }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-grid-pagination
+        *ngIf="(isListadoIngresado || isListadoSalida) && filteredAlmacenes.length"
+        [totalItems]="filteredAlmacenes.length"
+        [currentPage]="currentPage"
+        [pageSize]="pageSize"
+        (pageChange)="onPageChange($event)">
+      </app-grid-pagination>
+
+      <app-grid-pagination
+        *ngIf="isListadoPendiente && ordenesCompraPendientesAlmacen.length"
+        [totalItems]="ordenesCompraPendientesAlmacen.length"
+        [currentPage]="currentPage"
+        [pageSize]="pageSize"
+        (pageChange)="onPageChange($event)">
+      </app-grid-pagination>
+    </section>
+
+    <section *ngIf="showIngresoOrdenForm && ingresoOrdenSeleccionada" class="almacen-editor">
+      <header class="editor-header">
+        <div>
+          <p class="almacen-card__eyebrow">Registro</p>
+          <h3>Ingreso por orden</h3>
+          <p class="almacen-card__description">
+            Registra el ingreso a almacen asociado a la orden seleccionada.
+          </p>
+        </div>
+      </header>
+
+      <section class="order-summary-grid">
+        <div class="order-summary-field">
+          <span>N° Orden</span>
+          <strong>{{ ingresoOrdenSeleccionada.numeroOrden }}</strong>
+        </div>
+        <div class="order-summary-field">
+          <span>Codigo Pedido</span>
+          <strong>{{ ingresoOrdenSeleccionada.pedidoCodigo }}</strong>
+        </div>
+        <div class="order-summary-field">
+          <span>Fecha</span>
+          <strong>{{ ingresoOrdenSeleccionada.fecha }}</strong>
+        </div>
+        <mat-form-field
+          *ngIf="mostrarGuiaRemitenteIngresoOrden"
+          appearance="outline"
+          class="field field--mat order-summary-select order-summary-guide">
+          <mat-label>Guia remitente</mat-label>
+          <input
+            matInput
+            type="text"
+            autocomplete="off"
+            [formControl]="ingresoOrdenGuiaRemitenteControl">
+        </mat-form-field>
+        <div class="order-summary-field order-summary-field--wide">
+          <span>Proveedor</span>
+          <strong>{{ formatProveedorIngresoOrden(ingresoOrdenSeleccionada) }}</strong>
+        </div>
+        <div class="order-summary-field">
+          <span>RUC</span>
+          <strong>{{ ingresoOrdenSeleccionada.proveedorRuc }}</strong>
+        </div>
+        <mat-form-field appearance="outline" class="field field--mat order-summary-select">
+          <mat-label>Ubicacion</mat-label>
+          <mat-select
+            [value]="ingresoOrdenUbicacionId"
+            (selectionChange)="setIngresoOrdenUbicacion($event.value)">
+            <mat-option [value]="0">Seleccionar ubicacion</mat-option>
+            <mat-option *ngFor="let option of ubicacionIngresoOrdenOptions" [value]="option.codigo">
+              {{ option.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </section>
+
+      <section *ngIf="!esIngresoOrdenServicio" class="editor-section">
+        <div class="section-copy section-copy--inline">
+          <h3>Productos Pendientes de Ingreso</h3>
+          <p>{{ ingresoOrdenDetalles.length }} productos</p>
+        </div>
+
+        <div class="table-shell">
+          <table class="almacen-table almacen-table--ingreso-detalle">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    class="table-checkbox"
+                    [checked]="areAllIngresoOrdenDetallesSelected"
+                    (change)="setSeleccionTodosIngresoOrdenDetalles($any($event.target).checked)">
+                </th>
+                <th>#</th>
+                <th>Codigo</th>
+                <th>Producto</th>
+                <th>Unidad</th>
+                <th>Centro(s) de Costo</th>
+                <th>Compra</th>
+                <th>Ingresado</th>
+                <th>Serie</th>
+                <th>Costo unitario</th>
+                <th>Cantidad a Ingresar</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngIf="isLoadingEditor">
+                <td colspan="11" class="empty-row">Cargando productos pendientes de ingreso...</td>
+              </tr>
+
+              <tr *ngIf="!isLoadingEditor && !ingresoOrdenDetalles.length">
+                <td colspan="11" class="empty-row">No se encontraron productos pendientes de ingreso.</td>
+              </tr>
+
+              <tr *ngFor="let item of ingresoOrdenDetalles; trackBy: trackByIngresoOrdenDetalle" class="almacen-table__row">
+                <td>
+                  <input
+                    type="checkbox"
+                    class="table-checkbox"
+                    [checked]="item.seleccionado"
+                    (change)="setSeleccionIngresoDetalle(item, $any($event.target).checked)">
+                </td>
+                <td>{{ item.id }}</td>
+                <td>{{ item.itemCodigo }}</td>
+                <td class="text-cell">{{ item.itemDescripcion }}</td>
+                <td>{{ item.unidad }}</td>
+                <td>
+                  <span class="cost-center-pill">{{ item.centroCosto }}</span>
+                </td>
+                <td>
+                  <span class="quantity-badge quantity-badge--purchase">{{ item.compra | number:'1.2-2' }}</span>
+                </td>
+                <td>
+                  <span class="quantity-badge quantity-badge--entered">{{ item.ingresado | number:'1.2-2' }}</span>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="table-input table-input--text"
+                    maxlength="100"
+                    placeholder="Serie"
+                    [value]="item.serie"
+                    (input)="setSerieIngresoDetalle(item, $any($event.target).value)">
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    class="table-input"
+                    min="0"
+                    step="0.0001"
+                    placeholder="0.00"
+                    [value]="item.costoUnitario ?? ''"
+                    (input)="setCostoUnitarioIngresoDetalle(item, $any($event.target).value)">
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    class="table-input"
+                    min="0"
+                    [max]="getCantidadMaximaIngreso(item)"
+                    step="0.001"
+                    [value]="item.cantidadIngresar ?? ''"
+                    (input)="setCantidadIngresoDetalle(item, $any($event.target).value)">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="editor-actions">
+        <p *ngIf="isLoadingEditor" class="editor-feedback">Cargando cabecera del ingreso...</p>
+        <p *ngIf="saveErrorMessage" class="editor-feedback editor-feedback--error">{{ saveErrorMessage }}</p>
+        <button
+          type="button"
+          class="button button--primary"
+          [disabled]="isLoadingEditor || isSavingIngreso"
+          (click)="guardarIngresoOrden()">
+          {{ isSavingIngreso ? 'Guardando...' : 'Guardar' }}
+        </button>
+        <button type="button" class="button button--secondary" (click)="cancelarIngresoOrden()">
+          Cancelar
+        </button>
+      </div>
+    </section>
+
+    <section *ngIf="showIngresoDirectoForm" class="almacen-editor">
+      <header class="editor-header">
+        <div>
+          <p class="almacen-card__eyebrow">{{ editorEyebrow }}</p>
+          <h3>{{ editorTitle }}</h3>
+          <p class="almacen-card__description">
+            {{ editorDescription }}
+          </p>
+        </div>
+      </header>
+
+      <p *ngIf="isLoadingEditor" class="editor-feedback">Cargando ingreso seleccionado...</p>
+
+      <form class="editor-grid" [formGroup]="ingresoDirectoForm">
+        <mat-form-field appearance="outline" class="field field--mat">
+          <mat-label>Ubicacion</mat-label>
+          <mat-select formControlName="ubicacion">
+            <mat-option *ngFor="let option of ubicacionOptions" [value]="option.codigo">
+              {{ option.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field field--mat">
+          <mat-label>Solicitante</mat-label>
+          <mat-select formControlName="solicitanteId" (openedChange)="onSolicitanteSelectOpened($event)">
+            <mat-option>
+              <input
+                type="text"
+                class="mat-select-search"
+                placeholder="Buscar solicitante..."
+                [formControl]="solicitanteSearchControl"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option *ngFor="let option of filteredSolicitanteOptions; trackBy: trackBySolicitante" [value]="option.code">
+              {{ formatSolicitanteLabel(option) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="outline"
+          class="field field--mat"
+          [class.field--full]="!isSalidaMode">
+          <mat-label>Centro de Costos (Solicitante)</mat-label>
+          <mat-select formControlName="centroCostoSolicitanteId" (openedChange)="onCentroCostoSelectOpened($event)">
+            <mat-option>
+              <input
+                type="text"
+                class="mat-select-search"
+                placeholder="Buscar centro de costo..."
+                [formControl]="centroCostoSearchControl"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option *ngFor="let option of filteredCentroCostoOptions; trackBy: trackByCentroCosto" [value]="option.id">
+              {{ option.code }} - {{ option.description }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field *ngIf="isSalidaMode" appearance="outline" class="field--mat">
+          <mat-label>Serie</mat-label>
+          <input matInput type="text" formControlName="serie" maxlength="100" placeholder="Ingresar serie">
+        </mat-form-field>
+      </form>
+
+      <section class="editor-section">
+        <div class="section-copy">
+          <h3>Materiales utilizados</h3>
+          <p>{{ materialsSectionDescription }}</p>
+        </div>
+
+        <form *ngIf="!isSalidaMode" class="editor-grid editor-grid--materials" [formGroup]="ingresoDirectoForm">
+          <mat-form-field appearance="outline" class="field field--mat">
+            <mat-label>Material</mat-label>
+            <mat-select
+              formControlName="materialId"
+              [disabled]="!itemOptions.length || isLoadingCatalogos"
+              (selectionChange)="onMaterialChange($event.value)"
+              (openedChange)="onMaterialSelectOpened($event)">
+              <mat-option>
+                <input
+                  type="text"
+                  class="mat-select-search"
+                  placeholder="Buscar material..."
+                  [formControl]="materialSearchControl"
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()">
+              </mat-option>
+              <mat-option [value]="0">Seleccionar material</mat-option>
+              <mat-option *ngFor="let option of filteredMaterialOptions" [value]="option.id">
+                {{ option.description }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field field--mat">
+            <mat-label>Unidad</mat-label>
+            <mat-select
+              formControlName="unidadId"
+              [disabled]="!unidadOptions.length || isLoadingCatalogos"
+              (selectionChange)="onUnidadChange($event.value)"
+              (openedChange)="onUnidadSelectOpened($event)">
+              <mat-option>
+                <input
+                  type="text"
+                  class="mat-select-search"
+                  placeholder="Buscar unidad..."
+                  [formControl]="unidadSearchControl"
+                  (click)="$event.stopPropagation()"
+                  (keydown)="$event.stopPropagation()">
+              </mat-option>
+              <mat-option [value]="0">Seleccionar unidad</mat-option>
+              <mat-option *ngFor="let option of filteredUnidadOptions" [value]="option.id">
+                {{ option.description }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field *ngIf="!isSalidaMode" appearance="outline" class="field field--mat field--full">
+            <mat-label>Proveedor</mat-label>
+            <mat-select formControlName="proveedorId" (openedChange)="onProveedorSelectOpened($event)">
+              <mat-option>
+                <input
+                  type="text"
+                  class="mat-select-search"
+                  placeholder="Buscar proveedor..."
+                  [formControl]="proveedorSearchControl"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()">
+              </mat-option>
+              <mat-option [value]="0">Sin proveedor</mat-option>
+              <mat-option *ngFor="let option of filteredProveedorOptions" [value]="option.code">
+                {{ option.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <label class="field">
+            <span>Serie</span>
+            <input type="text" formControlName="serie" maxlength="100" placeholder="Ingresar serie">
+          </label>
+
+          <label class="field">
+            <span>Costo unitario</span>
+            <input type="number" formControlName="costoUnitario" min="0" step="0.0001" placeholder="0.0000">
+          </label>
+
+          <label class="field">
+            <span>Cantidad</span>
+            <input type="number" formControlName="cantidad" min="0" step="0.001">
+          </label>
+
+          <label *ngIf="!isSalidaMode" class="field">
+            <span>Numero de Documento</span>
+            <input type="text" formControlName="documentoNumero">
+          </label>
+
+          <mat-form-field appearance="outline" class="field field--mat field--date-picker" (click)="fechaPicker.open()">
+            <mat-label>Fecha</mat-label>
+            <input matInput [matDatepicker]="fechaPicker" formControlName="fecha" readonly>
+            <mat-datepicker-toggle matSuffix [for]="fechaPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fechaPicker></mat-datepicker>
+          </mat-form-field>
+        </form>
+
+        <div *ngIf="isSalidaMode" class="salida-materials-list">
+          <form
+            *ngFor="let row of salidaMaterialRows; let i = index"
+            class="editor-grid editor-grid--materials salida-material-row"
+            [formGroup]="row">
+            <mat-form-field appearance="outline" class="field field--mat">
+              <mat-label>Material</mat-label>
+              <mat-select
+                formControlName="materialId"
+                [disabled]="!itemOptions.length || isLoadingCatalogos"
+                (selectionChange)="onSalidaMaterialChange(i, $event.value)"
+                (openedChange)="onMaterialSelectOpened($event)">
+                <mat-option>
+                  <input
+                    type="text"
+                    class="mat-select-search"
+                    placeholder="Buscar material..."
+                    [formControl]="materialSearchControl"
+                    (click)="$event.stopPropagation()"
+                    (keydown)="$event.stopPropagation()">
+                </mat-option>
+                <mat-option [value]="0">Seleccionar material</mat-option>
+                <mat-option *ngFor="let option of filteredMaterialOptions" [value]="option.id">
+                  {{ option.description }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field field--mat">
+              <mat-label>Unidad</mat-label>
+              <mat-select
+                formControlName="unidadId"
+                [disabled]="!unidadOptions.length || isLoadingCatalogos"
+                (selectionChange)="onSalidaUnidadChange(i, $event.value)"
+                (openedChange)="onUnidadSelectOpened($event)">
+                <mat-option>
+                  <input
+                    type="text"
+                    class="mat-select-search"
+                    placeholder="Buscar unidad..."
+                    [formControl]="unidadSearchControl"
+                    (click)="$event.stopPropagation()"
+                    (keydown)="$event.stopPropagation()">
+                </mat-option>
+                <mat-option [value]="0">Seleccionar unidad</mat-option>
+                <mat-option *ngFor="let option of filteredUnidadOptions" [value]="option.id">
+                  {{ option.description }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="salida-stock-grid">
+              <label class="field">
+                <span>Disponible</span>
+                <input type="number" formControlName="stockDisponible" class="input--readonly" readonly>
+              </label>
+
+              <label class="field">
+                <span>Reservado</span>
+                <input type="number" formControlName="stockReservado" class="input--readonly" readonly>
+              </label>
+
+              <label class="field">
+                <span>Stock Total</span>
+                <input type="number" formControlName="stockTotal" class="input--readonly" readonly>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Cantidad</span>
+              <input type="number" formControlName="cantidad" min="0" step="0.001">
+            </label>
+
+            <mat-form-field appearance="outline" class="field field--mat field--date-picker" (click)="salidaFechaPicker.open()">
+              <mat-label>Fecha</mat-label>
+              <input matInput [matDatepicker]="salidaFechaPicker" formControlName="fecha" readonly>
+              <mat-datepicker-toggle matSuffix [for]="salidaFechaPicker"></mat-datepicker-toggle>
+              <mat-datepicker #salidaFechaPicker></mat-datepicker>
+            </mat-form-field>
+
+            <div class="salida-material-row__actions">
+              <button
+                type="button"
+                class="button button--icon-only button--danger"
+                [disabled]="salidaMaterialRows.length <= 1"
+                (click)="quitarMaterialSalida(i)">
+                -
+              </button>
+            </div>
+          </form>
+
+          <button type="button" class="button button--add-material" (click)="agregarMaterialSalida()">
+            +
+          </button>
+        </div>
+      </section>
+
+      <div class="editor-actions">
+        <p *ngIf="saveErrorMessage" class="editor-feedback editor-feedback--error">{{ saveErrorMessage }}</p>
+        <button type="button" class="button button--primary" [disabled]="isSavingIngreso || isLoadingCatalogos || isLoadingEditor" (click)="guardarIngresoDirecto()">
+          {{ editorSaveButtonText }}
+        </button>
+        <button type="button" class="button button--secondary" [disabled]="isLoadingEditor" (click)="cancelarIngresoDirecto()">
+          Cancelar
+        </button>
+      </div>
+    </section>
+  </section>
+</section>

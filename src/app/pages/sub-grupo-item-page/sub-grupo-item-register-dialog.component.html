@@ -1,0 +1,33 @@
+<form class="sub-grupo-item-dialog" [formGroup]="form" (ngSubmit)="guardar()">
+  <h2 mat-dialog-title>Nuevo Sub Grupo de Item</h2>
+
+  <mat-dialog-content class="sub-grupo-item-dialog__content">
+    <p class="sub-grupo-item-dialog__description">
+      Registra un nuevo sub grupo de item. El estado inicial siempre sera activo.
+    </p>
+
+    <label class="sub-grupo-item-dialog__field">
+      <span>Grupo</span>
+      <select formControlName="grpId" [disabled]="isLoadingGrupos">
+        <option [ngValue]="null">{{ isLoadingGrupos ? 'Cargando grupos...' : 'Seleccionar grupo' }}</option>
+        <option *ngFor="let grupo of grupos" [ngValue]="grupo.id">{{ grupo.descripcion }}</option>
+      </select>
+      <small class="sub-grupo-item-dialog__error" *ngIf="form.controls['grpId'].touched && form.controls['grpId'].hasError('required')">Campo Grupo obligatorio.</small>
+    </label>
+
+    <label class="sub-grupo-item-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="subGrpDes" maxlength="120">
+      <small class="sub-grupo-item-dialog__error" *ngIf="form.controls['subGrpDes'].touched && (form.controls['subGrpDes'].hasError('required') || form.controls['subGrpDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <p *ngIf="errorMessage" class="sub-grupo-item-dialog__error">{{ errorMessage }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSaving || isLoadingGrupos">
+      {{ isSaving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

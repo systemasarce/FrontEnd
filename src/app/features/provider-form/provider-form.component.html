@@ -1,0 +1,116 @@
+<section class="supplier-card" [class.supplier-card--embedded]="embedded">
+  <header class="supplier-header">
+    <div class="supplier-header__copy">
+      <p class="eyebrow">Formulario</p>
+      <h2>Datos de Proveedor</h2>
+    </div>
+
+    <button
+      type="button"
+      class="eventual-button"
+      [class.eventual-button--active]="isEventualMode"
+      (click)="toggleEventual()">
+      {{ isEventualMode ? 'Desactivar eventual' : 'Activar eventual' }}
+    </button>
+  </header>
+
+  <form class="supplier-form" [formGroup]="form">
+    <div class="form-row form-row--top">
+      <label class="field-group field-group--supplier">
+        <span class="field-label">Proveedor</span>
+        <div class="selector-wrap">
+          <button
+            type="button"
+            class="code-trigger"
+            (click)="openProviderDialog()"
+            [disabled]="isEventualMode || isLoadingProviders || !providers.length"
+            aria-label="Seleccionar proveedor">
+            {{ supplierCode }}
+          </button>
+          <input
+            type="text"
+            formControlName="supplierName"
+          />
+        </div>
+      </label>
+
+      <label class="field-group">
+        <span class="field-label">Telefono</span>
+        <input type="text" formControlName="phone" />
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="field-group field-group--wide">
+        <span class="field-label">Direccion</span>
+        <input type="text" formControlName="address" />
+      </label>
+
+      <label class="field-group">
+        <span class="field-label">Contacto</span>
+        <input type="text" formControlName="contact" />
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="field-group field-group--medium">
+        <span class="field-label">RUC</span>
+        <input type="text" formControlName="ruc" />
+      </label>
+
+      <label class="field-group field-group--payment">
+        <span class="field-label">Forma de Pago</span>
+        <div class="selector-wrap">
+          <button
+            type="button"
+            class="code-trigger"
+            (click)="openPaymentDialog()"
+            [disabled]="isLoadingPayments || !paymentOptions.length"
+            aria-label="Seleccionar forma de pago">
+            {{ paymentCode }}
+          </button>
+          <input
+            type="text"
+            formControlName="paymentDescription"
+          />
+        </div>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="field-group">
+        <span class="field-label">Email</span>
+        <input type="text" formControlName="email" />
+      </label>
+
+      <label class="field-group">
+        <span class="field-label">Banco</span>
+        <div class="selector-wrap">
+          <button
+            type="button"
+            class="code-trigger"
+            disabled
+            aria-label="Codigo de banco">
+            {{ form.controls.bankCode.value }}
+          </button>
+          <input
+            type="text"
+            formControlName="bankName"
+          />
+        </div>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="field-group">
+        <span class="field-label">Nro. Cuenta Bancaria</span>
+        <input type="text" formControlName="bankAccountNumber" />
+      </label>
+
+      <label class="field-group">
+        <span class="field-label">CCI</span>
+        <input type="text" formControlName="bankCci" />
+      </label>
+    </div>
+  </form>
+</section>

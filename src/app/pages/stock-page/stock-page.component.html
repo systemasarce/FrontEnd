@@ -1,0 +1,132 @@
+<section class="stock-page">
+  <section class="stock-card">
+    <header class="stock-card__header">
+      <div>
+        <p class="stock-card__eyebrow">Operacion</p>
+        <h2>Stock</h2>
+        <p class="stock-card__description">
+          Consulta la informacion disponible del stock de materiales registrados.
+        </p>
+      </div>
+    </header>
+
+    <section class="panel panel--listing">
+      <label class="field field--search">
+        <span>Buscar en la grilla</span>
+        <input
+          type="text"
+          [value]="globalSearch"
+          placeholder="Escribe para filtrar..."
+          (input)="onGlobalSearchChange(($any($event.target).value || '').toString())">
+      </label>
+
+      <p *ngIf="errorMessage" class="editor-feedback editor-feedback--error">{{ errorMessage }}</p>
+
+      <div class="table-shell">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Codigo</th>
+              <th>Descripcion</th>
+              <th>Grupo</th>
+              <th>Sub Grupo</th>
+              <th>Detalle de Material</th>
+              <th>Stock</th>
+              <th>Centros de Costo</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngIf="isLoading">
+              <td colspan="7" class="empty-row">Cargando informacion de stock...</td>
+            </tr>
+
+            <tr *ngIf="!isLoading && !errorMessage && !filteredItems.length">
+              <td colspan="7" class="empty-row">No se encontraron items registrados.</td>
+            </tr>
+
+            <tr *ngFor="let item of paginatedItems; trackBy: trackByItem" class="stock-table__row">
+              <td>{{ item.itemCodigo }}</td>
+              <td class="text-cell">{{ item.descripcion }}</td>
+              <td>{{ item.grupo }}</td>
+              <td>{{ item.subGrupo }}</td>
+              <td>{{ item.detalleMaterial }}</td>
+              <td>{{ item.stock | number:'1.2-2' }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="stock-action-btn"
+                  title="Visualizar ingresos y salidas por centro de costo"
+                  (click)="abrirDetallePorCentroCosto(item)">
+                  Visualizar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-grid-pagination
+        *ngIf="filteredItems.length"
+        [totalItems]="filteredItems.length"
+        [currentPage]="currentPage"
+        [pageSize]="pageSize"
+        (pageChange)="onPageChange($event)">
+      </app-grid-pagination>
+    </section>
+  </section>
+</section>
+
+<div
+  *ngIf="isDetalleModalOpen"
+  class="stock-modal-backdrop"
+  (click)="onDetalleBackdropClick($event)">
+  <section class="stock-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="stock-modal__header">
+      <div>
+        <h3>{{ detalleItemSeleccionado?.descripcion || 'Detalle de Stock' }}</h3>
+        <p *ngIf="detalleItemSeleccionado">Codigo: {{ detalleItemSeleccionado.itemCodigo }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="stock-modal__close"
+        aria-label="Cerrar"
+        (click)="cerrarDetallePorCentroCosto()">
+        ×
+      </button>
+    </header>
+
+    <p *ngIf="detalleErrorMessage" class="editor-feedback editor-feedback--error">{{ detalleErrorMessage }}</p>
+
+    <div class="table-shell">
+      <table class="stock-table stock-table--modal">
+        <thead>
+          <tr>
+            <th>Centro de Costo</th>
+            <th>Ingreso</th>
+            <th>Salida</th>
+            <th>Stock</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="isDetalleLoading">
+            <td colspan="4" class="empty-row">Cargando detalle por centro de costo...</td>
+          </tr>
+
+          <tr *ngIf="!isDetalleLoading && !detalleErrorMessage && !detalleCentroCosto.length">
+            <td colspan="4" class="empty-row">No se encontraron movimientos para este item.</td>
+          </tr>
+
+          <tr *ngFor="let row of detalleCentroCosto; trackBy: trackByCentroCosto">
+            <td class="text-cell">{{ row.centroCostoDescripcion }}</td>
+            <td>{{ row.ingreso | number:'1.2-2' }}</td>
+            <td>{{ row.salida | number:'1.2-2' }}</td>
+            <td>{{ row.stock | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,131 @@
+<section class="provider-page">
+  <section class="providers-card">
+    <header class="providers-card__header">
+      <div>
+        <p class="providers-card__eyebrow">Administracion</p>
+        <h2>Proveedores</h2>
+        <p class="providers-card__description">Consulta, registra y actualiza proveedores sin afectar el formulario operativo existente.</p>
+      </div>
+
+      <div class="providers-card__actions">
+        <button type="button" class="providers-card__create" (click)="registrarProveedor()">
+          Nuevo
+        </button>
+      </div>
+    </header>
+
+    <form class="providers-filters" [formGroup]="filtersForm" (ngSubmit)="cargarProveedores()">
+      <label class="filter-field">
+        <span>ID</span>
+        <input
+          type="number"
+          formControlName="id"
+          min="1"
+          step="1"
+          (input)="sanitizeIdInput($event)">
+      </label>
+
+      <label class="filter-field">
+        <span>Nombre</span>
+        <input type="text" formControlName="nombre">
+      </label>
+
+      <label class="filter-field">
+        <span>RUC</span>
+        <input type="text" formControlName="ruc">
+      </label>
+
+      <label class="filter-field">
+        <span>Nombre Contacto</span>
+        <input type="text" formControlName="nombreContacto">
+      </label>
+
+      <label class="filter-field filter-field--select">
+        <span>Estado</span>
+        <select formControlName="estado">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </label>
+
+      <button type="submit" class="providers-filters__search" [disabled]="isLoading">
+        Buscar
+      </button>
+
+      <button type="button" class="providers-filters__clear" (click)="limpiarFiltros()">
+        Limpiar
+      </button>
+    </form>
+
+    <div *ngIf="isLoading" class="state-card">
+      Cargando proveedores desde la API...
+    </div>
+
+    <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage && !proveedores.length" class="state-card">
+      No hay proveedores para mostrar.
+    </div>
+
+    <div *ngIf="proveedores.length" class="table-shell">
+      <table class="providers-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>NOM</th>
+            <th>RUC</th>
+            <th>TEL</th>
+            <th>DIR</th>
+            <th>NOMBRE CONTACTO</th>
+            <th>EMAIL</th>
+            <th>BANCO</th>
+            <th>FECHA</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let proveedor of paginatedProveedores; trackBy: trackByProveedor">
+            <td>{{ proveedor.prvId ?? '-' }}</td>
+            <td>{{ proveedor.prvNom || '-' }}</td>
+            <td>{{ proveedor.prvRuc || '-' }}</td>
+            <td>{{ proveedor.prvTel || '-' }}</td>
+            <td>{{ proveedor.prvDir || '-' }}</td>
+            <td>{{ proveedor.prvNomCon || '-' }}</td>
+            <td>{{ proveedor.prvEmail || '-' }}</td>
+            <td>
+              <button
+                type="button"
+                class="providers-table__assign"
+                [disabled]="proveedor.prvId === null"
+                (click)="asignarBanco(proveedor)">
+                Asignar
+              </button>
+            </td>
+            <td>{{ proveedor.fecha || '-' }}</td>
+            <td>
+              <button
+                type="button"
+                class="table-action"
+                aria-label="Editar proveedor"
+                [disabled]="proveedor.prvId === null"
+                (click)="editarProveedor(proveedor)">
+                &#9998;
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <app-grid-pagination
+      *ngIf="proveedores.length"
+      [totalItems]="proveedores.length"
+      [currentPage]="currentPage"
+      [pageSize]="pageSize"
+      (pageChange)="onPageChange($event)">
+    </app-grid-pagination>
+  </section>
+</section>

@@ -1,0 +1,56 @@
+<div class="files-dialog">
+  <header class="files-dialog__header">
+    <div class="files-dialog__title">
+      <h2>Archivos</h2>
+    </div>
+
+    <button type="button" class="files-dialog__close" (click)="cerrar()" aria-label="Cerrar">✕</button>
+  </header>
+
+  <div class="files-dialog__sections">
+    <section class="section-card" *ngFor="let seccion of secciones">
+      <h3 class="section-card__title">{{ seccion.titulo }}</h3>
+      <p class="section-card__description">{{ seccion.descripcion }}</p>
+
+      <div class="file-row" *ngFor="let archivo of seccion.archivos; trackBy: trackByArchivo">
+        <div class="file-row__main">
+          <div class="file-row__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"></path>
+              <path d="M8 13h8"></path>
+            </svg>
+          </div>
+
+          <div class="file-row__text">
+            <span class="file-row__name">{{ archivo.nombre }}</span>
+            <span class="file-row__meta">{{ archivo.etiqueta }}</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="file-row__view"
+          [disabled]="!archivo.ruta"
+          (click)="verArchivo(archivo)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+      </div>
+
+      <div class="file-row file-row--empty" *ngIf="seccion.archivos.length === 0">
+        <div class="file-row__main">
+          <div class="file-row__text">
+            <span class="file-row__name">Sin archivo</span>
+            <span class="file-row__meta">No hay elementos disponibles para mostrar.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="files-dialog__footer">
+    <button type="button" class="files-dialog__button" (click)="cerrar()">Cerrar</button>
+  </footer>
+</div>

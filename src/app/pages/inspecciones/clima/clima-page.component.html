@@ -1,0 +1,174 @@
+<section class="clima-card">
+  <header class="clima-card__header">
+    <div>
+      <p class="clima-card__eyebrow">Administracion</p>
+      <h2>Clima</h2>
+      <p class="clima-card__description">
+        Administra los climas activos y actualiza su información desde mantenimiento.
+      </p>
+    </div>
+
+    <div class="clima-card__actions">
+      <button type="button" class="clima-card__create" (click)="abrirNuevo()">
+        Nuevo Clima
+      </button>
+    </div>
+  </header>
+
+  <div class="clima-filters">
+    <label class="filter-field">
+      <span>ID</span>
+      <input
+        type="number"
+        min="1"
+        step="1"
+        placeholder="Buscar por ID"
+        [(ngModel)]="filtros.Id">
+    </label>
+
+    <label class="filter-field">
+      <span>Nombre</span>
+      <input
+        type="text"
+        placeholder="Buscar por Nombre"
+        [(ngModel)]="filtros.Nombre">
+    </label>
+
+    <label class="filter-field estado-field">
+      <span>Estado:</span>
+      <div class="custom-select-wrap">
+        <select
+          class="custom-select"
+          [(ngModel)]="filtros.Estado"
+          name="estado-clima">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+        <span class="custom-select-arrow"></span>
+      </div>
+    </label>
+
+    <button type="button" class="clima-filters__search" (click)="buscar()">
+      Buscar
+    </button>
+
+    <button type="button" class="clima-filters__clear" (click)="limpiar()">
+      Limpiar
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="state-card">
+    Cargando climas desde la API...
+  </div>
+
+  <div *ngIf="!cargando && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!cargando && !errorMessage && !climas.length" class="state-card">
+    No hay climas para mostrar.
+  </div>
+
+  <ng-container *ngIf="climas.length">
+    <div class="table-shell">
+      <table class="clima-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let clima of climasPaginados; trackBy: trackByClima">
+            <td>{{ clima.id ?? '-' }}</td>
+            <td>{{ clima.nombre || '-' }}</td>
+            <td>
+              <span
+                class="estado-badge"
+                [class.estado-badge--activo]="formatEstado(clima.estado) === 'Activo'"
+                [class.estado-badge--inactivo]="formatEstado(clima.estado) === 'Inactivo'">
+                {{ formatEstado(clima.estado) }}
+              </span>
+            </td>
+            <td>
+              <button type="button" class="table-action" aria-label="Editar" (click)="editarClima(clima)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                </svg>
+              </button>
+              <button type="button" class="table-action table-action--delete" aria-label="Eliminar" (click)="eliminarClima(clima)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M8 6V4h8v2"></path>
+                  <path d="M19 6l-1 13H6L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span class="pagination__info">
+        Página {{ paginaActual }} de {{ totalPaginas }}
+        &nbsp;·&nbsp;
+        {{ climas.length }} registro{{ climas.length !== 1 ? 's' : '' }}
+      </span>
+
+      <div class="pagination__controls">
+        <button
+          type="button"
+          class="pagination__btn"
+          [disabled]="paginaActual === 1"
+          (click)="irAPagina(1)">
+          «
+        </button>
+        <button
+          type="button"
+          class="pagination__btn"
+          [disabled]="paginaActual === 1"
+          (click)="irAPagina(paginaActual - 1)">
+          ‹
+        </button>
+
+        <ng-container *ngFor="let pagina of paginas">
+          <button
+            *ngIf="pagina === 1 || pagina === totalPaginas || (pagina >= paginaActual - 2 && pagina <= paginaActual + 2)"
+            type="button"
+            class="pagination__btn"
+            [class.pagination__btn--active]="pagina === paginaActual"
+            (click)="irAPagina(pagina)">
+            {{ pagina }}
+          </button>
+
+          <span
+            *ngIf="(pagina === paginaActual - 3 && pagina > 1) || (pagina === paginaActual + 3 && pagina < totalPaginas)"
+            class="pagination__ellipsis">
+            …
+          </span>
+        </ng-container>
+
+        <button
+          type="button"
+          class="pagination__btn"
+          [disabled]="paginaActual === totalPaginas"
+          (click)="irAPagina(paginaActual + 1)">
+          ›
+        </button>
+        <button
+          type="button"
+          class="pagination__btn"
+          [disabled]="paginaActual === totalPaginas"
+          (click)="irAPagina(totalPaginas)">
+          »
+        </button>
+      </div>
+    </div>
+  </ng-container>
+</section>

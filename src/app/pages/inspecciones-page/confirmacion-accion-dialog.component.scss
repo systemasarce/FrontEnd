@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.confirmacion-dialog__content {
+  min-width: 320px;
+}
+
+.confirmacion-dialog__content p {
+  margin: 0;
+  color: #7c8797;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.confirmacion-dialog__actions {
+  gap: 0.75rem;
+}

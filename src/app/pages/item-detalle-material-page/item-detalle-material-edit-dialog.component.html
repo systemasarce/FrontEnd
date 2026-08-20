@@ -1,0 +1,13 @@
+<form class="sub-grupo-item-dialog" [formGroup]="form" (ngSubmit)="guardar()">
+  <h2 mat-dialog-title>Modificar Detalle de Material</h2>
+  <mat-dialog-content class="sub-grupo-item-dialog__content">
+    <p class="sub-grupo-item-dialog__description">Actualiza el grupo, sub grupo, descripcion o estado del detalle de material.</p>
+    <label class="sub-grupo-item-dialog__field"><span>Codigo</span><input type="text" formControlName="codigo"></label>
+    <label class="sub-grupo-item-dialog__field"><span>Grupo</span><select formControlName="grupoId" (change)="onGrupoChange()" [disabled]="isLoading"><option [ngValue]="null">Seleccionar grupo</option><option *ngFor="let item of grupos" [ngValue]="item.id">{{ item.descripcion }}</option></select></label>
+    <label class="sub-grupo-item-dialog__field"><span>Sub Grupo</span><select formControlName="subGrupoId" [disabled]="!form.controls['grupoId'].value || isLoadingSubGrupos"><option [ngValue]="null">{{ isLoadingSubGrupos ? 'Cargando sub grupos...' : 'Seleccionar sub grupo' }}</option><option *ngFor="let item of subGrupos" [ngValue]="item.id">{{ item.descripcion }}</option></select></label>
+    <label class="sub-grupo-item-dialog__field"><span>Descripcion</span><input type="text" formControlName="descripcion" maxlength="120"></label>
+    <label class="sub-grupo-item-dialog__field"><span>Estado</span><select formControlName="estado"><option value="A">Activo</option><option value="I">Inactivo</option></select></label>
+    <p *ngIf="errorMessage" class="sub-grupo-item-dialog__error">{{ errorMessage }}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end"><button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button><button mat-flat-button color="primary" type="submit" [disabled]="isSaving || isLoading || isLoadingSubGrupos">{{ isSaving ? 'Guardando...' : 'Guardar cambios' }}</button></mat-dialog-actions>
+</form>

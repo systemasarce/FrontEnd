@@ -1,0 +1,397 @@
+:host {
+  display: block;
+}
+
+.obra-page {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.obra-page__header,
+.obra-filters,
+.obra-editor,
+.obra-grid-card {
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
+}
+
+.obra-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.obra-page__header > .button {
+  margin-top: 2.25rem;
+}
+
+.obra-page__eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.obra-page__header h2,
+.obra-editor h3 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.obra-page__header h2 {
+  font-size: 2rem;
+}
+
+.obra-page__header p:not(.obra-page__eyebrow) {
+  margin: 0.65rem 0 0;
+  color: var(--text-secondary);
+}
+
+.obra-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.obra-editor__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.15rem;
+}
+
+.obra-filters {
+  padding: 1.25rem;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 0.4rem;
+}
+
+.field span {
+  color: var(--text-primary);
+  font-weight: 750;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font: inherit;
+  outline: none;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.field select[disabled] {
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.field small {
+  color: #b94646;
+  font-size: 0.76rem;
+}
+
+.obra-select {
+  width: 100%;
+}
+
+:host ::ng-deep .obra-select .mat-form-field-wrapper {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+:host ::ng-deep .obra-select .mat-form-field-flex {
+  min-height: 3rem;
+  align-items: center;
+  border-radius: 10px;
+}
+
+:host ::ng-deep .obra-select .mat-form-field-infix {
+  width: auto;
+  padding: 0.7rem 0;
+  border-top-width: 0.35rem;
+}
+
+:host ::ng-deep .obra-select-search-option {
+  height: auto;
+  padding: 0.45rem 0.75rem;
+}
+
+:host ::ng-deep .obra-select-search {
+  width: 100%;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font: inherit;
+  outline: none;
+}
+
+:host ::ng-deep .obra-select-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.obra-filters__actions,
+.obra-editor__actions {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.button {
+  min-height: 3rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.button--primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.button--secondary {
+  border: 1px solid var(--line-soft);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.obra-editor {
+  padding: 1.25rem;
+}
+
+.obra-editor__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.obra-editor__close {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.message {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--text-secondary);
+}
+
+.message--error {
+  border-color: #efb4b4;
+  background: #fff5f5;
+  color: #b42318;
+}
+
+.message--success {
+  border-color: #a9dcc0;
+  background: #f1fbf5;
+  color: #207148;
+}
+
+.obra-grid-card {
+  min-width: 0;
+  padding: 1.25rem;
+}
+
+.table-shell {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+}
+
+.obra-table {
+  width: 100%;
+  min-width: 116rem;
+  border-collapse: collapse;
+}
+
+.obra-table th,
+.obra-table td {
+  padding: 1rem;
+  border-right: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.obra-table th:last-child,
+.obra-table td:last-child {
+  border-right: 0;
+}
+
+.obra-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.obra-table th {
+  background: var(--text-primary);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.obra-table__name {
+  min-width: 15rem;
+  text-align: left !important;
+}
+
+.status-pill {
+  display: inline-flex;
+  min-width: 7rem;
+  justify-content: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: #fff1d7;
+  color: #9b5d00;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.status-pill[data-state='EE'] {
+  background: #e3f2fd;
+  color: #1769aa;
+}
+
+.status-pill[data-state='FI'] {
+  background: #dcf5e7;
+  color: #207148;
+}
+
+.status-pill[data-state='CA'] {
+  background: #fde2e2;
+  color: #b42318;
+}
+
+.table-action {
+  display: inline-grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border: 1px solid rgba(255, 158, 49, 0.28);
+  border-radius: 10px;
+  background: #fff8f0;
+  color: var(--accent);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.table-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.date-update {
+  display: grid;
+  min-width: 11.5rem;
+  gap: 0.55rem;
+}
+
+.date-update input {
+  width: 100%;
+  min-height: 2.55rem;
+  box-sizing: border-box;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font: inherit;
+  outline: none;
+}
+
+.date-update input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.date-update__button {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--accent);
+  border-radius: 9px;
+  background: #fff8f0;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.date-update__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 1100px) {
+  .obra-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .obra-page__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .obra-page__header > .button {
+    margin-top: 0.5rem;
+  }
+
+  .obra-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .obra-filters__actions,
+  .obra-editor__actions {
+    flex-wrap: wrap;
+  }
+
+  .obra-filters__actions .button,
+  .obra-editor__actions .button {
+    flex: 1 1 9rem;
+  }
+}

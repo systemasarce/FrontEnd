@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Seleccionar Usuario de Aprobacion</h2>
+<p class="selector-description">Elige un usuario de la lista actual.</p>
+
+<div mat-dialog-content class="selector-content">
+  <label class="selector-search">
+    <span>Buscar usuario</span>
+    <input
+      type="text"
+      [value]="searchTerm"
+      (input)="setSearchTerm($any($event.target).value)"
+      autocomplete="off"
+      placeholder="Buscar por ID, codigo o nombre">
+  </label>
+
+  <button
+    *ngFor="let user of filteredUsers; trackBy: trackByUser"
+    type="button"
+    class="option-row"
+    (click)="selectUser(user)">
+    <span class="option-code">{{ user.id }}</span>
+    <span class="option-value">{{ user.code }}<small>{{ user.name }}</small></span>
+  </button>
+
+  <p *ngIf="!filteredUsers.length" class="empty-state">No se encontraron usuarios de aprobacion.</p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+</div>

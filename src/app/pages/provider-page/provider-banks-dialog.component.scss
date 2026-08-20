@@ -1,0 +1,253 @@
+.provider-banks-dialog {
+  display: grid;
+  gap: 1rem;
+  width: min(48rem, calc(100vw - 2rem));
+  max-width: 100%;
+  max-height: min(72vh, 42rem);
+  overflow: auto;
+}
+
+.provider-banks-dialog__summary,
+.provider-banks-dialog__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.provider-banks-dialog__summary label,
+.provider-banks-dialog__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.provider-banks-dialog__summary span,
+.provider-banks-dialog__field span {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.provider-banks-dialog__summary input,
+.provider-banks-dialog__field input,
+.provider-banks-dialog__field select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font: inherit;
+  outline: none;
+}
+
+.provider-banks-dialog__summary input:disabled {
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.provider-banks-dialog__field input:focus,
+.provider-banks-dialog__field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.provider-banks-dialog__field small {
+  color: var(--accent);
+}
+
+.provider-banks-dialog__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.provider-banks-dialog__description {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.provider-banks-dialog__primary {
+  min-height: 2.75rem;
+  padding: 0.75rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.provider-banks-dialog__table-shell {
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.provider-banks-dialog__table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.provider-banks-dialog__select-column {
+  width: 3.2rem;
+}
+
+.provider-banks-dialog__table th,
+.provider-banks-dialog__table td {
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.provider-banks-dialog__table th {
+  background: var(--text-primary);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.provider-banks-dialog__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.provider-banks-dialog__table td {
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.provider-banks-dialog__select-cell {
+  text-align: center;
+}
+
+.provider-banks-dialog__checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.provider-banks-dialog__checkbox:disabled {
+  cursor: wait;
+}
+
+.provider-banks-dialog__row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.provider-banks-dialog__icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.provider-banks-dialog__icon-button--delete {
+  color: var(--accent);
+}
+
+.provider-banks-dialog__icon-button:hover {
+  background: var(--surface-accent);
+}
+
+.provider-banks-dialog__icon-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.provider-banks-dialog__empty,
+.provider-banks-dialog__error {
+  padding: 1rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.provider-banks-dialog__error {
+  border-color: var(--line-strong);
+  background: var(--surface-accent);
+  color: var(--accent);
+}
+
+@media screen and (max-width: 700px) {
+  .provider-banks-dialog {
+    width: calc(100vw - 2rem);
+    max-height: 70vh;
+  }
+
+  .provider-banks-dialog__summary,
+  .provider-banks-dialog__form {
+    grid-template-columns: 1fr;
+  }
+
+  .provider-banks-dialog__toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .provider-banks-dialog__primary {
+    width: 100%;
+  }
+
+  .provider-banks-dialog__table,
+  .provider-banks-dialog__table thead,
+  .provider-banks-dialog__table tbody,
+  .provider-banks-dialog__table tr,
+  .provider-banks-dialog__table td {
+    display: block;
+  }
+
+  .provider-banks-dialog__table thead {
+    display: none;
+  }
+
+  .provider-banks-dialog__table tr {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .provider-banks-dialog__table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .provider-banks-dialog__table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border-bottom: 0;
+    text-align: right;
+  }
+
+  .provider-banks-dialog__select-cell {
+    align-items: center;
+  }
+
+  .provider-banks-dialog__table td::before {
+    content: attr(data-label);
+    flex: 0 0 42%;
+    color: var(--text-primary);
+    font-weight: 800;
+    text-align: left;
+  }
+
+  .provider-banks-dialog__row-actions {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}

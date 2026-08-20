@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Eliminar item del detalle</h2>
+
+<div mat-dialog-content class="pedido-detalle-delete__content">
+  <p class="pedido-detalle-delete__description">
+    Estas seguro de eliminar el item <strong>{{ data.codigoItem }}</strong> del detalle del pedido.
+  </p>
+
+  <p class="pedido-detalle-delete__hint" *ngIf="data.descripcion">
+    {{ data.descripcion }}
+  </p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="cerrar()">
+    Cancelar
+  </button>
+
+  <button mat-raised-button color="primary" type="button" (click)="confirmar()">
+    Eliminar
+  </button>
+</div>

@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Seleccionar Centro de Costo</h2>
+<p class="selector-description">Elige un centro de costo.</p>
+
+<div mat-dialog-content class="selector-content">
+  <label class="selector-search">
+    <span>Buscar centro de costo</span>
+    <input
+      type="text"
+      [value]="searchTerm"
+      (input)="setSearchTerm($any($event.target).value)"
+      autocomplete="off"
+      placeholder="Buscar por ID o descripcion">
+  </label>
+
+  <button
+    *ngFor="let centroCosto of filteredCentrosCosto; trackBy: trackByCentroCosto"
+    type="button"
+    class="option-row"
+    (click)="selectCentroCosto(centroCosto)">
+    <span class="option-code">{{ centroCosto.id }}</span>
+    <span class="option-value">{{ centroCosto.descripcion }}</span>
+  </button>
+
+  <p *ngIf="!filteredCentrosCosto.length" class="empty-state">No se encontraron centros de costo.</p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+</div>

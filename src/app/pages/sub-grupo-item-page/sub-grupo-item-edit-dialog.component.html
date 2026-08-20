@@ -1,0 +1,46 @@
+<form class="sub-grupo-item-dialog" [formGroup]="form" (ngSubmit)="guardar()">
+  <h2 mat-dialog-title>Modificar Sub Grupo de Item</h2>
+
+  <mat-dialog-content class="sub-grupo-item-dialog__content">
+    <p class="sub-grupo-item-dialog__description">
+      Actualiza la descripcion, el grupo asociado o el estado del sub grupo de item seleccionado.
+    </p>
+
+    <label class="sub-grupo-item-dialog__field">
+      <span>Cod. Sub Grupo</span>
+      <input type="text" formControlName="subGrpCod">
+    </label>
+
+    <label class="sub-grupo-item-dialog__field">
+      <span>Grupo</span>
+      <select formControlName="grpId" [disabled]="isLoadingGrupos">
+        <option [ngValue]="null">{{ isLoadingGrupos ? 'Cargando grupos...' : 'Seleccionar grupo' }}</option>
+        <option *ngFor="let grupo of grupos" [ngValue]="grupo.id">{{ grupo.descripcion }}</option>
+      </select>
+      <small class="sub-grupo-item-dialog__error" *ngIf="form.controls['grpId'].touched && form.controls['grpId'].hasError('required')">Campo Grupo obligatorio.</small>
+    </label>
+
+    <label class="sub-grupo-item-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="subGrpDes" maxlength="120">
+      <small class="sub-grupo-item-dialog__error" *ngIf="form.controls['subGrpDes'].touched && (form.controls['subGrpDes'].hasError('required') || form.controls['subGrpDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <label class="sub-grupo-item-dialog__field">
+      <span>Estado</span>
+      <select formControlName="flgEst">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <p *ngIf="errorMessage" class="sub-grupo-item-dialog__error">{{ errorMessage }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSaving || isLoadingGrupos">
+      {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+    </button>
+  </mat-dialog-actions>
+</form>

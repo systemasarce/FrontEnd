@@ -1,0 +1,593 @@
+<ng-container [ngSwitch]="vistaActual">
+
+  <!-- ── Vista principal de tabla ── -->
+  <ng-container *ngSwitchCase="'inspecciones'">
+  <section class="inspecciones-page">
+    <div class="page-header">
+      <div class="page-header__title-block">
+        <p class="eyebrow">PROCESOS</p>
+        <h1>Inspecciones</h1>
+        <p class="subtitle">
+          Desde aquí puedes acceder a las distintas vistas de inspección y control operativo manteniendo el mismo estilo visual del resto del sistema.
+        </p>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="date-field">
+        <label>Vista:</label>
+        <mat-form-field appearance="outline" class="tabs-field__control">
+          <mat-select [value]="tabActivo" (selectionChange)="cambiarTab($event.value)">
+            <mat-option value="prevencion">Inspecciones de prevención</mat-option>
+            <mat-option value="medio-ambiente">Inspecciones Medio Ambiente</mat-option>
+            <mat-option value="observaciones">Observaciones Planeadas</mat-option>
+            <mat-option value="stop-work">Stop Report</mat-option>
+            <mat-option value="we-report">We Report</mat-option>
+            <mat-option value="centro-monitoreo-hse">Centro de Monitoreo HSE</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="date-field">
+        <label>Desde:</label>
+        <mat-form-field appearance="outline" class="date-field__control">
+          <input
+            matInput
+            [matDatepicker]="desdePicker"
+            [value]="filtroDesde"
+            (dateChange)="cambiarFiltroDesde($event.value)"
+          >
+          <mat-datepicker-toggle matSuffix [for]="desdePicker"></mat-datepicker-toggle>
+          <mat-datepicker #desdePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="date-field">
+        <label>Hasta:</label>
+        <mat-form-field appearance="outline" class="date-field__control">
+          <input
+            matInput
+            [matDatepicker]="hastaPicker"
+            [value]="filtroHasta"
+            (dateChange)="cambiarFiltroHasta($event.value)"
+          >
+          <mat-datepicker-toggle matSuffix [for]="hastaPicker"></mat-datepicker-toggle>
+          <mat-datepicker #hastaPicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="date-field">
+        <label>Estado:</label>
+        <mat-form-field appearance="outline" class="date-field__control">
+          <mat-select [value]="estadoFiltro" (selectionChange)="cambiarEstado($event.value)">
+            <mat-option value="A">Activo</mat-option>
+            <mat-option value="I">Inactivo</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-orange" (click)="abrirObservacionesPlaneadas()">+ {{ labelNuevo }}</button>
+      <button type="button" class="btn-orange" (click)="descargarExcelGeneralCentroMonitoreoHse()">Excel General</button>
+      <button type="button" class="btn-orange" (click)="descargarExcelEspecificoCentroMonitoreoHse()">Excel Específico</button>
+      <button type="button" class="btn-orange btn-search" (click)="buscarObservaciones()">Buscar</button>
+    </div>
+
+    <div class="content-card">
+      <div class="table-toolbar">
+        <div class="table-toolbar__length">
+          Mostrar
+          <select
+            [value]="registrosPorPagina"
+            (change)="cambiarRegistrosPorPagina($any($event.target).value)">
+            <option *ngFor="let cantidad of opcionesRegistros" [value]="cantidad">
+              {{ cantidad === 0 ? 'Todos' : cantidad }}
+            </option>
+          </select>
+        </div>
+
+        <label class="table-toolbar__search">
+          Buscar:
+          <input
+            type="text"
+            [value]="busquedaGeneral"
+            (input)="cambiarBusqueda($any($event.target).value)"
+          >
+        </label>
+      </div>
+
+      <!-- ── Tabla Observaciones Planeadas ── -->
+      <ng-container *ngIf="tabActivo === 'observaciones'">
+        <div class="table-wrapper">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th class="col-id-hidden">#</th>
+                <th>Nro</th>
+                <th>Supervisor</th>
+                <th>Jefe</th>
+                <th>Área Jefe</th>
+                <th>Cliente</th>
+                <th>Subestación</th>
+                <th>Motivo</th>
+                <th>Motivo Det.</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="cargandoObservacionesPlaneadas">
+                <td colspan="10" class="table-empty">Cargando registros...</td>
+              </tr>
+
+              <tr *ngFor="let obs of observacionesPaginadas">
+                <td class="col-id-hidden">{{ obs.Observacion_Id }}</td>
+                <td>{{ obs.Codigo_Obs || '-' }}</td>
+                <td>{{ obs.Usr_Nom || '-' }}</td>
+                <td>{{ obs.Jef_Nombre || '-' }}</td>
+                <td>{{ obs.Cen_Cos_Des || '-' }}</td>
+                <td>{{ obs.Cliente_Nombre || '-' }}</td>
+                <td>{{ obs.Subestacion_Nombre || '-' }}</td>
+                <td>{{ obs.Motivo_Nombre || '-' }}</td>
+                <td>{{ obs.Obs_Detalle || '-' }}</td>
+                <td>
+                  <button type="button" class="table-action" aria-label="Editar observación" title="Editar" (click)="editarObservacion(obs.Observacion_Id, obs.Codigo_Obs)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action table-action--delete" aria-label="Eliminar observación" title="Eliminar" (click)="eliminarObservacion(obs)" [disabled]="eliminandoObservacion">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"></path>
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                      <path d="M10 11v6"></path>
+                      <path d="M14 11v6"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="!cargandoObservacionesPlaneadas && observacionesPaginadas.length === 0">
+                <td colspan="10" class="table-empty">No se encontró ningún registro</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ── Tabla Prevención ── -->
+      <ng-container *ngIf="tabActivo === 'prevencion'">
+        <div class="table-wrapper">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th class="col-id-hidden">#</th>
+                <th>Nro</th>
+                <th>Supervisor</th>
+                <th>Jefe</th>
+                <th>Área Jefe</th>
+                <th>Cliente</th>
+                <th>Subestación</th>
+                <th>Actividad</th>
+                <th>Orden de Trabajo</th>
+                <th>Tipo Inspección</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="cargandoPrevencion">
+                <td colspan="12" class="table-empty">Cargando registros...</td>
+              </tr>
+
+              <tr *ngFor="let reg of prevencionPaginado">
+                <td class="col-id-hidden">{{ reg.Prevencion_Id }}</td>
+                <td>{{ reg.Prevencion_Cod || '-' }}</td>
+                <td>{{ reg.Usr_Nom || '-' }}</td>
+                <td>{{ reg.Jef_Nombre || '-' }}</td>
+                <td>{{ reg.Cen_Cos_Des || '-' }}</td>
+                <td>{{ reg.Cliente_Nombre || '-' }}</td>
+                <td>{{ reg.Subestacion_Nombre || '-' }}</td>
+                <td>{{ reg.Actividad || '-' }}</td>
+                <td>{{ reg.Orden_Trabajo || '-' }}</td>
+                <td>{{ reg.Tipo_Nombre || '-' }}</td>
+                <td>
+                  <button type="button" class="table-action" aria-label="Editar inspección" title="Editar" (click)="editarPrevencion(reg.Prevencion_Id)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action table-action--delete" aria-label="Eliminar inspección" title="Eliminar" (click)="eliminarPrevencion(reg)" [disabled]="eliminandoPrevencion">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"></path>
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                      <path d="M10 11v6"></path>
+                      <path d="M14 11v6"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="!cargandoPrevencion && prevencionPaginado.length === 0">
+                <td colspan="12" class="table-empty">No se encontró ningún registro</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ── Tabla Stop Report ── -->
+      <ng-container *ngIf="tabActivo === 'stop-work'">
+        <div class="table-wrapper">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th class="col-id-hidden">#</th>
+                <th>Nro</th>
+                <th>Código We Report</th>
+                <th>Personal</th>
+                <th>Área</th>
+                <th>Supervisor Responsable</th>
+                <th>Inspector del Cliente</th>
+                <th>Cliente</th>
+                <th>OT</th>
+                <th>Tipo de riesgo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="cargandoStopReport">
+                <td colspan="11" class="table-empty">Cargando registros...</td>
+              </tr>
+
+              <tr *ngFor="let reg of stopReportPaginado; let i = index">
+                <td class="col-id-hidden">{{ reg.Stop_Work_Id }}</td>
+                <td>{{ reg.Codigo_Stop_Work || '-' }}</td>
+                <td>{{ reg.Codigo_We_Report || '-' }}</td>
+                <td>{{ reg.Usr_Nom || '-' }}</td>
+                <td>{{ reg.Cen_Cos_Des || '-' }}</td>
+                <td>{{ reg.Stop_Supervisor_Nom || '-' }}</td>
+                <td>{{ reg.Stop_Inspector || '-' }}</td>
+                <td>{{ reg.Cliente_Nombre || '-' }}</td>
+                <td>{{ reg.OT || '-' }}</td>
+                <td>{{ reg.Tipo_Riesgo || '-' }}</td>
+                <td>
+                  <button type="button" class="table-action" aria-label="Editar Stop Report" title="Editar" (click)="editarStopReport(reg.Stop_Work_Id)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action table-action--delete" aria-label="Eliminar Stop Report" title="Eliminar" (click)="eliminarStopReport(reg)" [disabled]="eliminandoStopReport">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"></path>
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                      <path d="M10 11v6"></path>
+                      <path d="M14 11v6"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="!cargandoStopReport && stopReportPaginado.length === 0">
+                <td colspan="11" class="table-empty">No se encontró ningún registro</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ── Tabla Medio Ambiente ── -->
+      <ng-container *ngIf="tabActivo === 'medio-ambiente'">
+        <div class="table-wrapper">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th class="col-id-hidden">#</th>
+                <th>Nro</th>
+                <th>Supervisor</th>
+                <th>Jefe de Equipo</th>
+                <th>Área</th>
+                <th>Cliente</th>
+                <th>Subestación</th>
+                <th>Actividad</th>
+                <th>Orden de Trabajo</th>
+                <th>Tipo Inspección</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="cargandoMedioAmbiente">
+                <td colspan="12" class="table-empty">Cargando registros...</td>
+              </tr>
+
+              <tr *ngFor="let reg of medioAmbientePaginado">
+                <td class="col-id-hidden">{{ reg.Medio_Ambiente_Id }}</td>
+                <td>{{ reg.Medio_Ambiente_Cod || '-' }}</td>
+                <td>{{ reg.Supervisor_Nom || '-' }}</td>
+                <td>{{ reg.Jef_Nombre || '-' }}</td>
+                <td>{{ reg.Cen_Cos_Des || '-' }}</td>
+                <td>{{ reg.Cliente_Nombre || '-' }}</td>
+                <td>{{ reg.Subestacion_Nombre || '-' }}</td>
+                <td>{{ reg.Actividad || '-' }}</td>
+                <td>{{ reg.Orden_Trabajo || '-' }}</td>
+                <td>{{ reg.Tipo_Nombre || '-' }}</td>
+                <td>
+                  <button type="button" class="table-action" aria-label="Editar inspección" title="Editar" (click)="editarMedioAmbiente(reg.Medio_Ambiente_Id)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action table-action--delete" aria-label="Eliminar inspección" title="Eliminar" (click)="eliminarMedioAmbiente(reg)" [disabled]="eliminandoMedioAmbiente">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"></path>
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                      <path d="M10 11v6"></path>
+                      <path d="M14 11v6"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="!cargandoMedioAmbiente && medioAmbientePaginado.length === 0">
+                <td colspan="12" class="table-empty">No se encontró ningún registro</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ── Tabla We Report ── -->
+      <ng-container *ngIf="tabActivo === 'we-report'">
+        <div class="table-wrapper">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th class="col-id-hidden">#</th>
+                <th>Nro</th>
+                <th>Reportante</th>
+                <th>Tipo</th>
+                <th>Área donde se detectó</th>
+                <th>Cliente</th>
+                <th>Descripción</th>
+                <th>Acciones Inmediatas</th>
+                <th>Archivos</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="cargandoWeReport">
+                <td colspan="10" class="table-empty">Cargando registros...</td>
+              </tr>
+
+              <tr *ngFor="let wr of weReportPaginados">
+                <td class="col-id-hidden">{{ wr.We_Report_Id }}</td>
+                <td>{{ wr.Codigo_We_Report || '-' }}</td>
+                <td>{{ wr.Usr_Nom || '-' }}</td>
+                <td>{{ wr.Reporte_Tipo || '-' }}</td>
+                <td>{{ wr.Cen_Cos_Des || '-' }}</td>
+                <td>{{ wr.Cliente_Nombre || '-' }}</td>
+                <td>{{ wr.Report_Descripcion || '-' }}</td>
+                <td>{{ wr.Report_Acciones_Inmediata || '-' }}</td>
+                <td>
+                  <button type="button" class="table-action" aria-label="Ver archivos" title="Archivos" (click)="abrirArchivosWeReport(wr)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
+                      <path d="M3 10h18"></path>
+                    </svg>
+                  </button>
+                </td>
+                <td>
+                  <button type="button" class="table-action" aria-label="Editar We Report" title="Editar" (click)="editarWeReport(wr)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action table-action--delete" aria-label="Eliminar We Report" title="Eliminar" (click)="eliminarWeReport(wr)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"></path>
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                      <path d="M10 11v6"></path>
+                      <path d="M14 11v6"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="!cargandoWeReport && weReportPaginados.length === 0">
+                <td colspan="10" class="table-empty">No se encontró ningún registro</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <!-- ── Tabla Centro de Monitoreo HSE ── -->
+      <ng-container *ngIf="tabActivo === 'centro-monitoreo-hse'">
+        <div class="table-wrapper">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th class="col-id-hidden">#</th>
+                <th>Nro</th>
+                <th>Inspector</th>
+                <th>Supervisor</th>
+                <th>Cliente</th>
+                <th>Revisión</th>
+                <th>Puntaje</th>
+                <th>Motivo de edición</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="cargandoCentroMonitoreoHse">
+                <td colspan="9" class="table-empty">Cargando registros...</td>
+              </tr>
+
+              <tr *ngFor="let cm of centroMonitoreoPaginado">
+                <td class="col-id-hidden">{{ cm.Centro_HSE_Id }}</td>
+                <td>{{ cm.Centro_HSE_Cod || '-' }}</td>
+                <td>{{ cm.Usr_Inspector || '-' }}</td>
+                <td>{{ cm.Usr_Supervisor || '-' }}</td>
+                <td>{{ cm.Cliente_Nombre || '-' }}</td>
+                <td>{{ cm.Centro_Revision || '-' }}</td>
+                <td>{{ cm.Centro_Puntaje || '-' }}</td>
+                <td>{{ cm.Centro_Comentario || '-' }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="table-action"
+                    aria-label="Ver nota"
+                    [title]="esRevisionAbierta(cm.Centro_Revision) ? 'Nota' : 'Disponible solo cuando la revisión está ABIERTO'"
+                    (click)="verNotaCentroMonitoreoHse(cm)"
+                    [disabled]="!esRevisionAbierta(cm.Centro_Revision)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"></path>
+                      <path d="M14 3v6h6"></path>
+                      <path d="M9 13h6"></path>
+                      <path d="M9 17h6"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action" aria-label="Vista previa PDF" title="Vista previa PDF" (click)="verPdfCentroMonitoreoHse(cm)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action" aria-label="Descargar PDF" title="Descargar PDF" (click)="descargarPdfCentroMonitoreoHse(cm)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <path d="M7 10l5 5 5-5"></path>
+                      <path d="M12 15V3"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action" aria-label="Editar Monitoreo HSE" title="Editar" (click)="elegirEdicionCentroMonitoreoHse(cm.Centro_HSE_Id)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                    </svg>
+                  </button>
+                  <button type="button" class="table-action table-action--delete" aria-label="Eliminar Monitoreo HSE" title="Eliminar" (click)="eliminarCentroMonitoreoHse(cm)" [disabled]="eliminandoCentroMonitoreoHse">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"></path>
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                      <path d="M10 11v6"></path>
+                      <path d="M14 11v6"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="!cargandoCentroMonitoreoHse && centroMonitoreoPaginado.length === 0">
+                <td colspan="9" class="table-empty">No se encontró ningún registro</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <div class="table-footer">
+
+        <span>Mostrando del {{ desdeMostrado }} al {{ hastaMostrado }} de {{ totalFiltrados }} registros</span>
+        <div class="table-pagination">
+          <button type="button" (click)="paginaAnterior()" [disabled]="!puedeIrAnterior">Anterior</button>
+          <button type="button" (click)="paginaSiguiente()" [disabled]="!puedeIrSiguiente">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  </ng-container>
+
+  <!-- ── Observaciones Planeadas ── -->
+  <ng-container *ngSwitchCase="'observaciones-planeadas'">
+    <ng-container *ngTemplateOutlet="vistaObservaciones"></ng-container>
+  </ng-container>
+
+  <!-- ── Inspecciones Medio Ambiente ── -->
+  <ng-container *ngSwitchCase="'medio-ambiente'">
+    <ng-container *ngTemplateOutlet="vistaMedioAmbiente"></ng-container>
+  </ng-container>
+
+  <!-- ── Inspecciones de Prevención ── -->
+  <ng-container *ngSwitchCase="'prevencion'">
+    <ng-container *ngTemplateOutlet="vistaPrevencion"></ng-container>
+  </ng-container>
+
+  <!-- ── Stop Report (formulario) ── -->
+  <ng-container *ngSwitchCase="'stop-report'">
+    <ng-container *ngTemplateOutlet="vistaStopReport"></ng-container>
+  </ng-container>
+
+  <!-- ── We Report (formulario) ── -->
+  <ng-container *ngSwitchCase="'we-report-form'">
+    <ng-container *ngTemplateOutlet="vistaWeReport"></ng-container>
+  </ng-container>
+
+  <!-- ── Centro de Monitoreo HSE (formulario) ── -->
+  <ng-container *ngSwitchCase="'centro-monitoreo-hse-form'">
+    <ng-container *ngTemplateOutlet="vistaCentroMonitoreoHseForm"></ng-container>
+  </ng-container>
+
+  <!-- ── Centro de Monitoreo HSE (nota) ── -->
+  <ng-container *ngSwitchCase="'centro-monitoreo-hse-nota'">
+    <ng-container *ngTemplateOutlet="vistaCentroMonitoreoHseNota"></ng-container>
+  </ng-container>
+
+  <!-- ── Centro de Monitoreo HSE (puntaje) ── -->
+  <ng-container *ngSwitchCase="'centro-monitoreo-hse-puntaje'">
+    <ng-container *ngTemplateOutlet="vistaCentroMonitoreoHsePuntaje"></ng-container>
+  </ng-container>
+
+</ng-container>
+
+
+<ng-template #vistaObservaciones>
+  <app-observaciones-planeadas
+    [observacionIdSeleccionado]="observacionIdSeleccionado"
+    [codigoObsSeleccionado]="codigoObsSeleccionado"
+    [modoEdicion]="modoFormulario === 'editar'"
+    (volver)="volverAInspecciones()"></app-observaciones-planeadas>
+</ng-template>
+
+<ng-template #vistaMedioAmbiente>
+  <app-inspeccion-medio-ambiente
+    [modoEdicion]="modoFormulario === 'editar'"
+    [inspeccionId]="inspeccionIdSeleccionado"
+    (volver)="volverAInspecciones()"></app-inspeccion-medio-ambiente>
+</ng-template>
+
+<ng-template #vistaPrevencion>
+  <app-inspeccion-prevencion
+    [modoEdicion]="modoFormulario === 'editar'"
+    [inspeccionId]="inspeccionIdSeleccionado"
+    (volver)="volverAInspecciones()"></app-inspeccion-prevencion>
+</ng-template>
+
+<ng-template #vistaStopReport>
+  <app-stop-report [modoEdicion]="modoFormulario === 'editar'" [stopReportId]="stopReportIdSeleccionado" [weReportCod]="weReportCodSeleccionado" (volver)="volverAInspecciones()"></app-stop-report>
+</ng-template>
+
+<ng-template #vistaWeReport>
+  <app-we-report [modoEdicion]="modoFormulario === 'editar'" [weReportId]="weReportIdSeleccionado" (volver)="volverAInspecciones()" (guardado)="manejarWeReportGuardado($event)"></app-we-report>
+</ng-template>
+
+<ng-template #vistaCentroMonitoreoHseForm>
+  <app-centro-monitoreo-hse [modoEdicion]="modoFormulario === 'editar'" [centroMonitoreoId]="centroMonitoreoIdSeleccionado" (volver)="volverAInspecciones()"></app-centro-monitoreo-hse>
+</ng-template>
+
+<ng-template #vistaCentroMonitoreoHseNota>
+  <app-centro-monitoreo-hse-nota-dialog
+    [centroMonitoreo]="centroMonitoreoNotaSeleccionado"
+    (volver)="cancelarNotaCentroMonitoreoHse()"
+    (guardado)="manejarNotaCentroMonitoreoGuardado($event)"></app-centro-monitoreo-hse-nota-dialog>
+</ng-template>
+
+<ng-template #vistaCentroMonitoreoHsePuntaje>
+  <app-centro-monitoreo-hse-puntaje-dialog
+    [centroMonitoreo]="centroMonitoreoPuntajeSeleccionado"
+    (volver)="cancelarPuntajeCentroMonitoreoHse()"
+    (guardado)="manejarPuntajeCentroMonitoreoGuardado($event)"></app-centro-monitoreo-hse-puntaje-dialog>
+</ng-template>

@@ -1,0 +1,210 @@
+.home-card {
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
+  padding: 1.5rem;
+}
+
+.home-hero {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.home-card__eyebrow,
+.home-section__eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-card h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.7rem, 2.5vw, 2.15rem);
+}
+
+.home-card__description {
+  max-width: 920px;
+  margin: 0.65rem 0 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.home-section {
+  margin-top: 1.35rem;
+}
+
+.home-section__heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.home-section__heading h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+}
+
+.home-section__count {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.process-card {
+  position: relative;
+  display: flex;
+  min-height: 215px;
+  overflow: hidden;
+  padding: 1.25rem;
+  flex-direction: column;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgb(53 47 43 / 7%);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.process-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: var(--accent);
+  content: '';
+}
+
+.process-card:hover,
+.process-card:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 16px 34px rgb(53 47 43 / 14%);
+  transform: translateY(-4px);
+  outline: none;
+}
+
+.process-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.process-card__icon {
+  display: inline-grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 1px solid rgb(255 146 44 / 18%);
+  border-radius: 14px;
+  background: var(--surface-accent);
+  color: var(--accent);
+}
+
+.process-card__icon svg {
+  width: 1.65rem;
+  height: 1.65rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.process-card__number {
+  display: inline-grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.process-card__arrow {
+  color: var(--accent);
+  font-size: 1.3rem;
+  transition: transform 160ms ease;
+}
+
+.process-card:hover .process-card__arrow,
+.process-card:focus-visible .process-card__arrow {
+  transform: translateX(3px);
+}
+
+.process-card h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.process-card p {
+  margin: 0.55rem 0 1rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.process-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line-soft);
+  color: var(--accent);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.home-empty {
+  margin: 0;
+  padding: 2rem;
+  border: 1px dashed var(--line-soft);
+  border-radius: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@media screen and (max-width: 1180px) {
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .home-card {
+    padding: 1.1rem;
+  }
+
+  .home-section__heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .process-card {
+    min-height: 200px;
+  }
+}

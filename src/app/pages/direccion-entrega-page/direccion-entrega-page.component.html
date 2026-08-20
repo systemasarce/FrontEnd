@@ -1,0 +1,103 @@
+<section class="direccion-entrega-card">
+  <header class="direccion-entrega-card__header">
+    <div>
+      <p class="direccion-entrega-card__eyebrow">Administracion</p>
+      <h2>Direccion de Entrega</h2>
+      <p class="direccion-entrega-card__description">Administra las direcciones de entrega activas y actualiza su estado desde mantenimiento.</p>
+    </div>
+
+    <div class="direccion-entrega-card__actions">
+      <button type="button" class="direccion-entrega-card__create" (click)="registrarDireccionEntrega()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="direccion-entrega-filters" [formGroup]="filtersForm" (ngSubmit)="cargarDireccionesEntrega()">
+    <label class="filter-field">
+      <span>ID</span>
+      <input
+        type="number"
+        formControlName="codigo"
+        min="1"
+        step="1"
+        (input)="sanitizeCodigoInput($event)">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="direccion-entrega-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="direccion-entrega-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando direcciones de entrega desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !direccionesEntrega.length" class="state-card">
+    {{ emptyStateMessage }}
+  </div>
+
+  <div *ngIf="direccionesEntrega.length" class="table-shell">
+    <table class="direccion-entrega-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripcion</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let direccionEntrega of paginatedDireccionesEntrega; trackBy: trackByDireccionEntrega">
+          <td>{{ direccionEntrega.dirId ?? '-' }}</td>
+          <td>{{ direccionEntrega.dirDes || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!direccionEntrega.activo">
+              {{ direccionEntrega.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar direccion de entrega"
+              [disabled]="direccionEntrega.dirId === null"
+              (click)="editarDireccionEntrega(direccionEntrega)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="direccionesEntrega.length"
+    [totalItems]="direccionesEntrega.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

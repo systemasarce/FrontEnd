@@ -1,0 +1,108 @@
+<form class="perfil-accesos-dialog" [formGroup]="form" (ngSubmit)="save()">
+  <h2 mat-dialog-title>{{ currentView === 'listado' ? 'Accesos del perfil' : 'Registrar acceso' }}</h2>
+
+  <mat-dialog-content class="perfil-accesos-dialog__content">
+    <div class="perfil-accesos-dialog__grid">
+      <label class="perfil-accesos-dialog__field">
+        <span>Codigo Perfil</span>
+        <input type="text" [value]="data.perfil.prfCod" readonly disabled tabindex="-1">
+      </label>
+
+      <label class="perfil-accesos-dialog__field">
+        <span>Descripcion Perfil</span>
+        <input type="text" [value]="data.perfil.prfDes" readonly disabled tabindex="-1">
+      </label>
+    </div>
+
+    <ng-container *ngIf="currentView === 'listado'; else registroAcceso">
+      <div class="perfil-accesos-dialog__toolbar">
+        <p class="perfil-accesos-dialog__description">
+          Se muestran las rutas registradas para el perfil seleccionado.
+        </p>
+
+        <button type="button" class="perfil-accesos-dialog__new" (click)="mostrarRegistro()">
+          Nuevo
+        </button>
+      </div>
+
+      <div *ngIf="isLoading" class="perfil-accesos-dialog__state">
+        Cargando accesos...
+      </div>
+
+      <div *ngIf="!isLoading && !accesos.length" class="perfil-accesos-dialog__state">
+        No hay accesos registrados para este perfil.
+      </div>
+
+      <div *ngIf="!isLoading && accesos.length" class="perfil-accesos-dialog__table-shell">
+        <table class="perfil-accesos-dialog__table">
+          <thead>
+            <tr>
+              <th>Ruta</th>
+              <th>Accion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let acceso of accesos">
+              <td>{{ acceso.prfAccDes }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="perfil-accesos-dialog__delete"
+                  aria-label="Eliminar acceso"
+                  [disabled]="deletingAccessPath === acceso.prfAccDes"
+                  (click)="eliminarAcceso(acceso)">
+                  <svg *ngIf="deletingAccessPath !== acceso.prfAccDes" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2l1 11h4l1-11h2l-1.2 13H8.2L7 9z"/>
+                  </svg>
+                  <span *ngIf="deletingAccessPath === acceso.prfAccDes" aria-hidden="true">...</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+
+    <ng-template #registroAcceso>
+      <p class="perfil-accesos-dialog__description">
+        Selecciona la ventana que estara disponible para el perfil.
+      </p>
+
+      <label class="perfil-accesos-dialog__field">
+        <span>Ruta</span>
+        <mat-form-field appearance="outline" class="perfil-accesos-dialog__select">
+          <mat-select
+            formControlName="ruta"
+            (openedChange)="onRutaSelectOpened($event)">
+            <mat-option class="perfil-accesos-dialog__search-option" disabled>
+              <input
+                type="text"
+                placeholder="Buscar ruta o ventana"
+                [formControl]="rutaSearchControl"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option value="">Seleccionar ruta</mat-option>
+            <mat-option *ngFor="let route of filteredRouteOptions" [value]="route.path">
+              {{ route.label }}
+            </mat-option>
+            <mat-option *ngIf="!filteredRouteOptions.length" disabled>No se encontraron rutas.</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </label>
+    </ng-template>
+
+    <p *ngIf="errorMessage" class="perfil-accesos-dialog__error">{{ errorMessage }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions *ngIf="currentView === 'listado'" align="end" class="perfil-accesos-dialog__actions">
+    <button mat-stroked-button type="button" (click)="close()">Cerrar</button>
+  </mat-dialog-actions>
+
+  <mat-dialog-actions *ngIf="currentView === 'registro'" align="end" class="perfil-accesos-dialog__actions">
+    <button mat-stroked-button type="button" (click)="volverListado()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

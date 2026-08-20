@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Cancelar pedido</h2>
+
+<div mat-dialog-content class="pedido-cancel__content">
+  <p class="pedido-cancel__description">
+    Se cancelara el pedido en edicion. Esta accion cerrara el formulario actual.
+  </p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="cerrar()">
+    Volver
+  </button>
+
+  <button mat-raised-button color="primary" type="button" (click)="confirmar()">
+    Confirmar cancelacion
+  </button>
+</div>

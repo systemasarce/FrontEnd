@@ -1,0 +1,20 @@
+Archivos modificados y ruta:
+
+1) frontend/src/app/pages/inspecciones-page/we-report-archivos-dialog.component.ts
+   - Muestra solo nombre del archivo y botón Ver.
+   - Elimina miniaturas y la ruta visible en pantalla.
+
+2) frontend/src/app/pages/inspecciones-page/we-report-archivos-dialog.component.html
+   - Reemplaza cada archivo por una fila simple con texto y botón Ver.
+
+3) frontend/src/app/pages/inspecciones-page/we-report-archivos-dialog.component.scss
+   - Ajusta la vista para escritorio y celular sin miniaturas.
+
+4) frontend/src/app/pages/inspecciones-page/we-report/we-report.component.ts
+   - Mantiene el flujo de edición/anónimo y el soporte de varias rutas.
+
+5) frontend/src/app/pages/inspecciones-page/we-report/we-report.component.html
+   - Conserva el bloque de edición y la apertura del diálogo de archivos.
+
+6) frontend/src/app/pages/inspecciones-page/we-report/we-report.component.scss
+   - Mantiene el panel responsivo para el formulario principal.

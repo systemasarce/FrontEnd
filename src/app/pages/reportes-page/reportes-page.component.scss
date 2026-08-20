@@ -1,0 +1,114 @@
+:host {
+  display: block;
+}
+
+.reportes-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.reportes-page__hero {
+  padding: 1.8rem 1.9rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 26px;
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
+}
+
+.reportes-page__eyebrow {
+  margin: 0 0 0.55rem;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.reportes-page__hero h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.8rem, 2.3vw, 2.35rem);
+}
+
+.reportes-page__intro {
+  max-width: 46rem;
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.reportes-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.2rem;
+}
+
+.reportes-card {
+  position: relative;
+  display: grid;
+  gap: 1.1rem;
+  min-height: 17rem;
+  padding: 1.35rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.reportes-card__accent {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, #ff922c 0%, #ffb567 100%);
+}
+
+.reportes-card__content {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.reportes-card h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+}
+
+.reportes-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.reportes-card__action {
+  align-self: end;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.9rem;
+  padding: 0.85rem 1.2rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ff922c 0%, #ffad4d 100%);
+  color: #ffffff;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 14px 28px rgba(255, 146, 44, 0.22);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.reportes-card__action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(255, 146, 44, 0.28);
+}
+
+@media screen and (max-width: 720px) {
+  .reportes-page__hero {
+    padding: 1.35rem;
+  }
+
+  .reportes-card {
+    min-height: auto;
+  }
+}

@@ -1,0 +1,238 @@
+<main class="shell" [class.shell--sidebar-collapsed]="sidebarCollapsed">
+  <button
+    *ngIf="sidebarOpen"
+    type="button"
+    class="sidebar-overlay"
+    (click)="closeSidebar()"
+    aria-label="Cerrar menu lateral">
+  </button>
+
+  <button
+    type="button"
+    class="mobile-menu-toggle"
+    [class.mobile-menu-toggle--hidden]="sidebarOpen"
+    (click)="toggleSidebar()"
+    [attr.aria-expanded]="sidebarOpen"
+    aria-controls="sidebar"
+    aria-label="Abrir menu lateral">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <button
+    type="button"
+    class="desktop-sidebar-restore"
+    *ngIf="sidebarCollapsed"
+    (click)="toggleSidebarCollapsed()"
+    aria-label="Mostrar menu lateral">
+    ›
+  </button>
+
+  <aside id="sidebar" class="sidebar" [class.sidebar--open]="sidebarOpen">
+    <button
+      type="button"
+      class="sidebar_collapse_button"
+      (click)="toggleSidebarCollapsed()"
+      aria-label="Ocultar menu lateral">
+      ‹
+    </button>
+
+    <div class="sidebar_brand_top">
+      <div class="sidebar_logo">AR</div>
+      <div>
+        <h2>{{ currentUserName }}</h2>
+        <p class="sidebar_user">{{ currentUser }}</p>
+      </div>
+    </div>
+
+    <nav class="sidebar_menu">
+      <a
+        *ngFor="let item of visibleMenuItems"
+        [routerLink]="item.route"
+        [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+        routerLinkActive="active"
+        class="sidebar_link"
+        (click)="closeSidebar()">
+        <span class="sidebar_link_content">
+          <span class="sidebar_link_identity">
+            <span class="sidebar_link_icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path *ngFor="let path of item.icon.paths" [attr.d]="path"></path>
+              </svg>
+            </span>
+            <span>{{ item.label }}</span>
+          </span>
+        </span>
+      </a>
+
+      <div class="sidebar_group" *ngIf="visibleProcessItems.length" [class.sidebar_group--open]="processOpen">
+        <button
+          type="button"
+          class="sidebar_group_toggle"
+          [class.active]="isProcessRouteActive()"
+          [attr.aria-expanded]="processOpen"
+          (click)="toggleProcessMenu()">
+          <span class="sidebar_group_label">
+            <span class="sidebar_link_icon sidebar_link_icon--group" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path *ngFor="let path of icons.procesos.paths" [attr.d]="path"></path>
+              </svg>
+            </span>
+            <span>Procesos</span>
+          </span>
+          <span class="sidebar_group_arrow" [class.sidebar_group_arrow--open]="processOpen" aria-hidden="true"></span>
+        </button>
+
+        <div class="sidebar_group_links" [class.sidebar_group_links--open]="processOpen">
+          <div class="sidebar_group_links_inner">
+            <a
+              *ngFor="let item of visibleProcessItems"
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="sidebar_link sidebar_link--nested"
+              (click)="closeSidebar()">
+              <span class="sidebar_link_content">
+                <span class="sidebar_link_identity">
+                  <span class="sidebar_link_icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path *ngFor="let path of item.icon.paths" [attr.d]="path"></path>
+                    </svg>
+                  </span>
+                  <span>{{ item.label }}</span>
+                </span>
+                <span
+                  *ngIf="getProcessNotificationCount(item) > 0"
+                  class="sidebar_notification_badge"
+                  [attr.aria-label]="getProcessNotificationCount(item) + ' notificaciones pendientes'">
+                  {{ getProcessNotificationCount(item) }}
+                </span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar_group" *ngIf="visibleMaintenanceItems.length" [class.sidebar_group--open]="maintenanceOpen">
+        <button
+          type="button"
+          class="sidebar_group_toggle"
+          [class.active]="isMaintenanceRouteActive()"
+          [attr.aria-expanded]="maintenanceOpen"
+          (click)="toggleMaintenanceMenu()">
+          <span class="sidebar_group_label">
+            <span class="sidebar_link_icon sidebar_link_icon--group" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path *ngFor="let path of icons.mantenimiento.paths" [attr.d]="path"></path>
+              </svg>
+            </span>
+            <span>Mantenimiento</span>
+          </span>
+          <span class="sidebar_group_arrow" [class.sidebar_group_arrow--open]="maintenanceOpen" aria-hidden="true"></span>
+        </button>
+
+        <div class="sidebar_group_links" [class.sidebar_group_links--open]="maintenanceOpen">
+          <div class="sidebar_group_links_inner">
+            <a
+              *ngFor="let item of visibleMaintenanceItems"
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="sidebar_link sidebar_link--nested"
+              (click)="closeSidebar()">
+              <span class="sidebar_link_content">
+                <span class="sidebar_link_identity">
+                  <span class="sidebar_link_icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path *ngFor="let path of item.icon.paths" [attr.d]="path"></path>
+                    </svg>
+                  </span>
+                  <span>{{ item.label }}</span>
+                </span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <button type="button" class="sidebar_logout" (click)="logout()">
+      <span class="sidebar_logout_content">
+        <span class="sidebar_link_icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path *ngFor="let path of icons.logout.paths" [attr.d]="path"></path>
+          </svg>
+        </span>
+        <span>Cerrar sesion</span>
+      </span>
+    </button>
+  </aside>
+
+  <section class="content">
+    <div class="top-notifications">
+      <button
+        type="button"
+        class="notification-bell"
+        [class.notification-bell--active]="notificationsOpen"
+        [class.notification-bell--ringing]="notificationBellRinging || totalNotifications > 0"
+        [attr.aria-expanded]="notificationsOpen"
+        aria-label="Ver notificaciones"
+        (click)="toggleNotifications()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm7-6V11a7 7 0 0 0-5-6.7V3a2 2 0 0 0-4 0v1.3A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2z"/>
+        </svg>
+        <span *ngIf="totalNotifications > 0" class="notification-bell__badge">{{ totalNotifications }}</span>
+      </button>
+
+      <div *ngIf="notificationsOpen" class="notification-panel">
+        <header class="notification-panel__header">
+          <h3>Notificaciones</h3>
+          <button type="button" class="notification-panel__close" aria-label="Cerrar notificaciones" (click)="closeNotifications()">x</button>
+        </header>
+
+        <button
+          *ngIf="pedidosPendientesAprobacion > 0"
+          type="button"
+          class="notification-item"
+          (click)="goToPendingApprovals()">
+          <span class="notification-item__title">Pedidos pendientes por aprobar</span>
+          <span class="notification-item__meta">{{ pedidosPendientesAprobacion }} pendiente{{ pedidosPendientesAprobacion === 1 ? '' : 's' }}</span>
+        </button>
+
+        <button
+          *ngIf="pedidosPendientesOrdenCompra > 0"
+          type="button"
+          class="notification-item"
+          (click)="goToPendingPurchaseOrders()">
+          <span class="notification-item__title">Ordenes de compra pendientes por generar</span>
+          <span class="notification-item__meta">{{ pedidosPendientesOrdenCompra }} pendiente{{ pedidosPendientesOrdenCompra === 1 ? '' : 's' }}</span>
+        </button>
+
+        <button
+          *ngIf="pedidosPendientesOrdenServicio > 0"
+          type="button"
+          class="notification-item"
+          (click)="goToPendingServiceOrders()">
+          <span class="notification-item__title">Ordenes de servicio pendientes por generar</span>
+          <span class="notification-item__meta">{{ pedidosPendientesOrdenServicio }} pendiente{{ pedidosPendientesOrdenServicio === 1 ? '' : 's' }}</span>
+        </button>
+
+        <button
+          *ngIf="ordenesCompraPendientesAlmacen > 0"
+          type="button"
+          class="notification-item"
+          (click)="goToPendingWarehouseEntries()">
+          <span class="notification-item__title">Ingresos de almacen pendientes</span>
+          <span class="notification-item__meta">{{ ordenesCompraPendientesAlmacen }} pendiente{{ ordenesCompraPendientesAlmacen === 1 ? '' : 's' }}</span>
+        </button>
+
+        <p *ngIf="totalNotifications === 0" class="notification-panel__empty">
+          No tienes notificaciones pendientes.
+        </p>
+      </div>
+    </div>
+
+    <section class="shell__content">
+      <router-outlet></router-outlet>
+    </section>
+  </section>
+</main>

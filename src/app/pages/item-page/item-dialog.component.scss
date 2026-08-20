@@ -1,0 +1,198 @@
+.item-dialog {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  max-height: min(42rem, 90vh);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.item-dialog__content {
+  display: grid;
+  gap: 1rem;
+  min-width: min(30rem, 78vw);
+  position: relative;
+  z-index: 3;
+  overflow-y: auto;
+}
+
+.item-dialog__description {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.item-dialog__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.item-dialog__field span {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.item-dialog__field input,
+.item-dialog__field select,
+.item-dialog__field mat-select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.item-dialog__field input:focus,
+.item-dialog__field select:focus,
+.item-dialog__field mat-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.item-dialog__field mat-select {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.item-dialog__field .mat-select-search {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.item-dialog__field .mat-select-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.item-dialog__field mat-select ::ng-deep .mat-select-trigger {
+  width: 100%;
+  min-height: 1.35rem;
+}
+
+.item-dialog__field input:disabled,
+.item-dialog__field select:disabled {
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.item-dialog__combobox {
+  position: relative;
+  z-index: 4;
+}
+
+.item-dialog__combobox input {
+  padding-right: 2.75rem;
+}
+
+.item-dialog__combobox-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.item-dialog__combobox-toggle:hover {
+  background: var(--surface-soft);
+  color: var(--text-primary);
+}
+
+.item-dialog__combobox--open .item-dialog__combobox-toggle {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.item-dialog__combobox-chevron {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-1px);
+}
+
+.item-dialog__combobox-panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: grid;
+  gap: 0.2rem;
+  max-height: 14rem;
+  padding: 0.45rem;
+  overflow-y: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 16px 30px rgba(32, 24, 15, 0.14);
+}
+
+.item-dialog__actions {
+  position: relative;
+  z-index: 4;
+  min-height: 4.25rem;
+  border-top: 1px solid var(--line-soft);
+  background: #ffffff;
+}
+
+.item-dialog__combobox-option,
+.item-dialog__combobox-empty {
+  min-height: 2.5rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.item-dialog__combobox-option {
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.item-dialog__combobox-option:hover {
+  background: var(--surface-accent);
+  color: var(--accent-strong);
+}
+
+.item-dialog__combobox-empty {
+  color: var(--text-secondary);
+}
+
+.item-dialog__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.item-dialog__error {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-accent);
+  color: var(--accent);
+}

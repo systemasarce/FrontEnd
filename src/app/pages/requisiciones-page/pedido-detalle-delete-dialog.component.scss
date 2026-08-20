@@ -1,0 +1,16 @@
+.pedido-detalle-delete__content {
+  display: grid;
+  gap: 0.85rem;
+  min-width: min(28rem, 78vw);
+}
+
+.pedido-detalle-delete__description,
+.pedido-detalle-delete__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.pedido-detalle-delete__description strong {
+  color: var(--text-primary);
+}

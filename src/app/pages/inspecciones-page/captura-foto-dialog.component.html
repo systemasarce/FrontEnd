@@ -1,0 +1,18 @@
+<div class="capture-dialog">
+  <h2>{{ data.titulo }}</h2>
+  <p class="capture-dialog__help">Se abrirá la cámara para tomar una imagen y guardarla en el reporte.</p>
+
+  <div class="capture-dialog__content" *ngIf="!errorMensaje; else errorTpl">
+    <video #video class="capture-dialog__video" playsinline autoplay muted></video>
+    <canvas #canvas class="capture-dialog__canvas"></canvas>
+  </div>
+
+  <ng-template #errorTpl>
+    <p class="capture-dialog__error">{{ errorMensaje }}</p>
+  </ng-template>
+
+  <div class="capture-dialog__actions">
+    <button type="button" class="btn-primary" [disabled]="cargando || !!errorMensaje" (click)="capturar()">Tomar foto</button>
+    <button type="button" class="btn-cancel" (click)="cancelar()">Cancelar</button>
+  </div>
+</div>

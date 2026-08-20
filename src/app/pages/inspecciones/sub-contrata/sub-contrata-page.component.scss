@@ -1,0 +1,317 @@
+.sub-contrata-card {
+  display: grid;
+  gap: 1.35rem;
+  padding: 1.5rem;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: var(--shadow-lg);
+}
+
+.sub-contrata-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sub-contrata-card__eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent, #ff9e31);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sub-contrata-card__header h2 {
+  margin: 0;
+  color: var(--text-primary, #111827);
+  font-size: 1.8rem;
+}
+
+.sub-contrata-card__description {
+  max-width: 42rem;
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.6;
+}
+
+.sub-contrata-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 2.5rem;
+}
+
+.sub-contrata-card__create,
+.sub-contrata-filters__search,
+.sub-contrata-filters__clear {
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.sub-contrata-card__create {
+  border: 1px solid var(--accent, #ff9e31);
+  background: var(--accent, #ff9e31);
+  color: #ffffff;
+}
+
+.sub-contrata-filters {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.7fr) minmax(14rem, 1.5fr) minmax(12rem, 1fr) auto auto;
+  align-items: end;
+  gap: 1rem;
+}
+
+.filter-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.filter-field span {
+  color: var(--text-primary, #111827);
+  font-weight: 700;
+}
+
+.filter-field input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line-soft, #d7dfeb);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--text-primary, #111827);
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.filter-field input:focus {
+  border-color: var(--accent, #ff9e31);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.estado-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.custom-select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 2.2rem 0.7rem 0.8rem;
+  border: 1px solid var(--line-soft, #d7dfeb);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--text-primary, #111827);
+  font: inherit;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.custom-select:focus {
+  border-color: var(--accent, #ff9e31);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.custom-select-arrow {
+  position: absolute;
+  top: 50%;
+  right: 0.9rem;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #6b7280;
+  border-bottom: 2px solid #6b7280;
+  transform: translateY(-60%) rotate(45deg);
+  pointer-events: none;
+}
+
+.sub-contrata-filters__search {
+  border: 1px solid var(--accent, #ff9e31);
+  background: var(--accent, #ff9e31);
+  color: #ffffff;
+}
+
+.sub-contrata-filters__clear {
+  border: 1px solid var(--line-soft, #d7dfeb);
+  background: var(--surface-soft, #f4f7fb);
+  color: var(--text-primary, #111827);
+}
+
+.sub-contrata-filters__clear:hover {
+  background: var(--surface-accent, #fff3e6);
+  border-color: var(--line-strong, #c8d2e1);
+}
+
+.state-card {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line-soft, #d7dfeb);
+  border-radius: 10px;
+  background: var(--surface-soft, #f4f7fb);
+  color: var(--text-secondary, #6b7280);
+}
+
+.state-card--error {
+  border-color: var(--line-strong, #c8d2e1);
+  background: var(--surface-accent, #fff3e6);
+  color: var(--accent, #ff9e31);
+}
+
+.table-shell {
+  overflow-x: auto;
+  border: 1px solid var(--line-soft, #d7dfeb);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.sub-contrata-table {
+  width: 100%;
+  min-width: 58rem;
+  border-collapse: collapse;
+}
+
+.sub-contrata-table th,
+.sub-contrata-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--line-soft, #d7dfeb);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.sub-contrata-table th {
+  background: var(--text-primary, #111827);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 0.38rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  background: #eef2f7;
+  color: #334155;
+}
+
+.estado-badge--activo {
+  background: #e8f8ef;
+  color: #157347;
+}
+
+.estado-badge--inactivo {
+  background: #fbeaec;
+  color: #b42318;
+}
+
+.table-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary, #111827);
+  cursor: pointer;
+}
+
+.table-action svg {
+  pointer-events: none;
+}
+
+.table-action:hover {
+  background: var(--surface-accent, #fff3e6);
+}
+
+.table-action--delete {
+  margin-left: 0.35rem;
+  color: #b42318;
+}
+
+.table-action--delete:hover {
+  background: #fbeaec;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pagination__info {
+  color: var(--text-secondary, #6b7280);
+  font-weight: 600;
+}
+
+.pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.pagination__btn {
+  min-width: 2.3rem;
+  height: 2.3rem;
+  border: 1px solid var(--line-soft, #d7dfeb);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-primary, #111827);
+  cursor: pointer;
+}
+
+.pagination__btn--active {
+  border-color: var(--accent, #ff9e31);
+  background: var(--accent, #ff9e31);
+  color: #ffffff;
+}
+
+.pagination__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination__ellipsis {
+  padding: 0 0.35rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+@media screen and (max-width: 700px) {
+  .sub-contrata-card {
+    padding: 1rem;
+  }
+
+  .sub-contrata-card__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sub-contrata-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination {
+    justify-content: center;
+  }
+}

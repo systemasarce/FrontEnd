@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Seleccionar Proveedor</h2>
+<p class="selector-description">Elige un proveedor.</p>
+
+<div mat-dialog-content class="selector-content">
+  <label class="selector-search">
+    <span>Buscar proveedor</span>
+    <input
+      type="text"
+      [value]="searchTerm"
+      (input)="setSearchTerm($any($event.target).value)"
+      autocomplete="off"
+      placeholder="Buscar por codigo, nombre, RUC o contacto">
+  </label>
+
+  <button
+    *ngFor="let provider of filteredProviders; trackBy: trackByCode"
+    type="button"
+    class="option-row"
+    (click)="selectProvider(provider)">
+    <span class="option-code">{{ provider.code }}</span>
+    <span class="option-value">{{ provider.name }}</span>
+  </button>
+
+  <p *ngIf="!filteredProviders.length" class="empty-state">No se encontraron proveedores.</p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+</div>

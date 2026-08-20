@@ -1,0 +1,28 @@
+<section class="tipo-servicio-dialog">
+  <div mat-dialog-content class="tipo-servicio-dialog__content" [formGroup]="form">
+    <p class="tipo-servicio-dialog__description">Actualiza la descripcion o el estado del registro seleccionado.</p>
+
+    <label class="tipo-servicio-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="tipSerDes" maxlength="120">
+      <small class="tipo-servicio-dialog__error" *ngIf="form.controls['tipSerDes'].touched && (form.controls['tipSerDes'].hasError('required') || form.controls['tipSerDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <label class="tipo-servicio-dialog__field">
+      <span>Estado</span>
+      <select formControlName="flgEst">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <p *ngIf="errorMessage" class="tipo-servicio-dialog__error">{{ errorMessage }}</p>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="button" (click)="guardar()" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+    </button>
+  </div>
+</section>

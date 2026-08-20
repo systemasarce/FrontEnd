@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>Seleccionar Item</h2>
+<p class="selector-description">Elige el item que se registrara en el detalle.</p>
+
+<div mat-dialog-content class="selector-content">
+  <label class="selector-search">
+    <span>Buscar item</span>
+    <input
+      type="text"
+      [value]="searchTerm"
+      (input)="setSearchTerm($any($event.target).value)"
+      autocomplete="off"
+      placeholder="Buscar por ID, codigo, descripcion o grupo">
+  </label>
+
+  <button
+    *ngFor="let item of filteredItems; trackBy: trackByItem"
+    type="button"
+    class="option-row"
+    (click)="selectItem(item)">
+    <span class="option-code">{{ item.code }}</span>
+    <span class="option-value">
+      {{ item.description }}
+      <small>{{ item.groupDescription }}</small>
+    </span>
+  </button>
+
+  <p *ngIf="!filteredItems.length" class="empty-state">No se encontraron items.</p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+</div>

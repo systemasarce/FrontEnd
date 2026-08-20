@@ -1,0 +1,92 @@
+.usuario-edit {
+  display: block;
+}
+
+.usuario-edit__content {
+  display: grid;
+  gap: 1rem;
+  min-width: min(30rem, 78vw);
+}
+
+.usuario-edit__description {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.usuario-edit__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.usuario-edit__field span {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.usuario-edit__field input,
+.usuario-edit__field select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.usuario-edit__mat-select {
+  width: 100%;
+}
+
+.usuario-edit__mat-select ::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.usuario-edit__mat-select ::ng-deep .mat-form-field-outline {
+  color: var(--line-soft);
+}
+
+.usuario-edit__mat-select ::ng-deep .mat-form-field-infix {
+  min-height: 2.75rem;
+  padding: 0.7rem 0;
+  border-top: 0;
+}
+
+.usuario-edit__search-option {
+  height: auto;
+  padding: 0;
+}
+
+.usuario-edit__search-option input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  background: #ffffff;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.usuario-edit__field input:disabled {
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.usuario-edit__field input:focus,
+.usuario-edit__field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 158, 49, 0.14);
+}
+
+.usuario-edit__error {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-accent);
+  color: var(--accent);
+}

@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>Registrar proveedor</h2>
+
+<form class="provider-dialog" [formGroup]="form" (ngSubmit)="guardar()">
+  <div mat-dialog-content class="provider-dialog__content">
+    <p class="provider-dialog__description">
+      Ingresa los datos del nuevo proveedor. El registro se enviara al backend.
+    </p>
+
+    <div class="provider-dialog__grid">
+      <label class="provider-dialog__field">
+        <span>Nombre</span>
+        <input type="text" formControlName="prvNom">
+        <small class="provider-dialog__error" *ngIf="form.controls['prvNom'].touched && (form.controls['prvNom'].hasError('required') || form.controls['prvNom'].hasError('whitespace'))">Campo Nombre obligatorio.</small>
+      </label>
+
+      <label class="provider-dialog__field">
+        <span>RUC</span>
+        <input type="text" formControlName="prvRuc">
+        <small class="provider-dialog__error" *ngIf="form.controls['prvRuc'].touched && (form.controls['prvRuc'].hasError('required') || form.controls['prvRuc'].hasError('whitespace'))">Campo RUC obligatorio.</small>
+        <small class="provider-dialog__error" *ngIf="form.controls['prvRuc'].touched && form.controls['prvRuc'].hasError('pattern')">Debe tener 11 digitos.</small>
+      </label>
+
+      <label class="provider-dialog__field">
+        <span>Telefono</span>
+        <input type="text" formControlName="prvTel">
+        <small class="provider-dialog__error" *ngIf="form.controls['prvTel'].touched && form.controls['prvTel'].hasError('pattern')">Formato invalido.</small>
+      </label>
+
+      <label class="provider-dialog__field">
+        <span>Nombre Contacto</span>
+        <input type="text" formControlName="prvNomCon">
+      </label>
+
+      <label class="provider-dialog__field">
+        <span>Email</span>
+        <input type="email" formControlName="prvEmail">
+        <small class="provider-dialog__error" *ngIf="form.controls['prvEmail'].touched && form.controls['prvEmail'].hasError('email')">Correo invalido.</small>
+      </label>
+
+      <label class="provider-dialog__field provider-dialog__field--full">
+        <span>Direccion</span>
+        <input type="text" formControlName="prvDir">
+        <small class="provider-dialog__error" *ngIf="form.controls['prvDir'].touched && (form.controls['prvDir'].hasError('required') || form.controls['prvDir'].hasError('whitespace'))">Campo Direccion obligatorio.</small>
+      </label>
+    </div>
+
+    <p *ngIf="errorMessage" class="provider-dialog__error">
+      {{ errorMessage }}
+    </p>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">
+      Cancelar
+    </button>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Registrando...' : 'Registrar proveedor' }}
+    </button>
+  </div>
+</form>

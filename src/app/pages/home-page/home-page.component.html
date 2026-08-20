@@ -1,0 +1,47 @@
+<section class="home-card">
+  <header class="home-hero">
+    <p class="home-card__eyebrow">Inicio</p>
+    <h2>Procesos del sistema</h2>
+    <p class="home-card__description">
+      Accede a las operaciones principales para gestionar pedidos, &oacute;rdenes, almac&eacute;n, stock, asignaciones e informes.
+    </p>
+  </header>
+
+  <section class="home-section" aria-labelledby="procesos-disponibles-title">
+    <div class="home-section__heading">
+      <div>
+        <p class="home-section__eyebrow">Operaci&oacute;n</p>
+        <h3 id="procesos-disponibles-title">Procesos disponibles</h3>
+      </div>
+      <span class="home-section__count">{{ visibleProcessCards.length }} m&oacute;dulos</span>
+    </div>
+
+    <div class="home-grid" *ngIf="visibleProcessCards.length; else noProcesses">
+      <a
+        *ngFor="let process of visibleProcessCards; let index = index"
+        class="process-card"
+        [routerLink]="process.route">
+        <div class="process-card__top">
+          <span class="process-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path *ngFor="let path of process.iconPaths" [attr.d]="path"></path>
+            </svg>
+          </span>
+          <span class="process-card__number">{{ index + 1 | number: '2.0-0' }}</span>
+        </div>
+
+        <h3>{{ process.title }}</h3>
+        <p>{{ process.description }}</p>
+
+        <footer class="process-card__footer">
+          <span>Abrir proceso</span>
+          <span class="process-card__arrow" aria-hidden="true">&#8594;</span>
+        </footer>
+      </a>
+    </div>
+
+    <ng-template #noProcesses>
+      <p class="home-empty">No tienes procesos habilitados para tu perfil.</p>
+    </ng-template>
+  </section>
+</section>

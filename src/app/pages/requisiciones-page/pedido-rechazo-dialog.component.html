@@ -1,0 +1,18 @@
+<form class="pedido-rechazo-dialog" [formGroup]="form" (ngSubmit)="confirmar()">
+  <h2 mat-dialog-title>{{ titulo }}</h2>
+
+  <mat-dialog-content class="pedido-rechazo-dialog__content">
+    <label class="pedido-rechazo-dialog__field">
+      <span>{{ etiquetaMotivo }}</span>
+      <textarea formControlName="motivo" rows="5" maxlength="500"></textarea>
+      <small *ngIf="form.controls['motivo'].touched && form.controls['motivo'].invalid">
+        {{ textoError }}
+      </small>
+    </label>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit">{{ textoConfirmar }}</button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,106 @@
+<section class="usuarios-card">
+  <header class="usuarios-card__header">
+    <div>
+      <p class="usuarios-card__eyebrow">Administracion</p>
+      <h2>Usuarios</h2>
+      <p class="usuarios-card__description">Consulta la informacion registrada de usuarios y filtra por codigo, usuario, nombre o estado.</p>
+    </div>
+
+    <div class="usuarios-card__actions">
+      <button type="button" class="usuarios-card__create" (click)="registrarUsuario()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="usuarios-filters" [formGroup]="filtersForm" (ngSubmit)="cargarUsuarios()">
+    <label class="filter-field">
+      <span>Codigo</span>
+      <input
+        type="number"
+        formControlName="codigo"
+        min="1"
+        step="1"
+        (input)="sanitizeCodigoInput($event)">
+    </label>
+
+    <label class="filter-field">
+      <span>Cod. Usuario</span>
+      <input type="text" formControlName="codigoUsuario">
+    </label>
+
+    <label class="filter-field">
+      <span>Nombres</span>
+      <input type="text" formControlName="nombres">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="usuarios-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="usuarios-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando usuarios desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !usuarios.length" class="state-card">
+    No hay usuarios para mostrar.
+  </div>
+
+  <div *ngIf="usuarios.length" class="table-shell">
+    <table class="usuarios-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Codigo</th>
+          <th>NOMBRE</th>
+          <th>FECHA</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let usuario of paginatedUsuarios; trackBy: trackByUsuario">
+          <td>{{ usuario.usrId ?? '-' }}</td>
+          <td>{{ usuario.usrCod || '-' }}</td>
+          <td>{{ usuario.usrNom || '-' }}</td>
+          <td>{{ usuario.fecha || '-' }}</td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar usuario"
+              [disabled]="usuario.usrId === null"
+              (click)="editarUsuario(usuario)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="usuarios.length"
+    [totalItems]="usuarios.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

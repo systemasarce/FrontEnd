@@ -1,0 +1,27 @@
+<h2 mat-dialog-title class="cotizaciones-archivo__titulo">Documento de la cotización</h2>
+
+<div mat-dialog-content class="cotizaciones-archivo__content">
+  <article class="cotizaciones-archivo__item">
+    <div class="cotizaciones-archivo__info">
+      <span class="cotizaciones-archivo__badge">PDF</span>
+      <p class="cotizaciones-archivo__nombre">{{ data.nombre }}</p>
+    </div>
+
+    <button
+      type="button"
+      class="cotizaciones-archivo__action"
+      aria-label="Ver PDF en otra pestaña"
+      (click)="verArchivo()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    </button>
+  </article>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="cerrar()">
+    Cerrar
+  </button>
+</div>

@@ -1,0 +1,147 @@
+<h2 mat-dialog-title>{{ mode === 'list' ? 'Bancos del proveedor' : (editingBank ? 'Editar banco' : 'Asignar banco') }}</h2>
+
+<div mat-dialog-content class="provider-banks-dialog">
+  <div class="provider-banks-dialog__summary">
+    <label>
+      <span>Proveedor</span>
+      <input type="text" [value]="data.providerName || '-'" disabled>
+    </label>
+
+    <label>
+      <span>RUC</span>
+      <input type="text" [value]="data.providerRuc || '-'" disabled>
+    </label>
+  </div>
+
+  <ng-container *ngIf="mode === 'list'; else bankForm">
+    <div class="provider-banks-dialog__toolbar">
+      <p class="provider-banks-dialog__description">
+        Se muestran los bancos registrados para el proveedor seleccionado.
+      </p>
+
+      <button type="button" class="provider-banks-dialog__primary" (click)="nuevo()">
+        Nuevo
+      </button>
+    </div>
+
+    <div *ngIf="isLoading" class="provider-banks-dialog__empty">
+      Cargando bancos del proveedor...
+    </div>
+
+    <div class="provider-banks-dialog__table-shell" *ngIf="!isLoading && banks.length; else emptyBanks">
+      <table class="provider-banks-dialog__table">
+        <thead>
+        <tr>
+            <th class="provider-banks-dialog__select-column"></th>
+            <th>Banco</th>
+            <th>Moneda</th>
+            <th>Nro. Cuenta Bancaria</th>
+            <th>CCI</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let bank of banks">
+            <td data-label="Principal" class="provider-banks-dialog__select-cell">
+              <input
+                type="checkbox"
+                class="provider-banks-dialog__checkbox"
+                [checked]="bank.id === selectedProviderBankId"
+                [disabled]="isSaving"
+                (change)="seleccionarCuenta(bank)">
+            </td>
+            <td data-label="Banco">{{ bank.bankName || '-' }}</td>
+            <td data-label="Moneda">{{ bank.currencyName || '-' }}</td>
+            <td data-label="Nro. Cuenta Bancaria">{{ bank.accountNumber || '-' }}</td>
+            <td data-label="CCI">{{ bank.cci || '-' }}</td>
+            <td data-label="Accion">
+              <div class="provider-banks-dialog__row-actions">
+                <button
+                  type="button"
+                  class="provider-banks-dialog__icon-button"
+                  aria-label="Editar banco"
+                  (click)="editar(bank)">
+                  &#9998;
+                </button>
+
+                <button
+                  type="button"
+                  class="provider-banks-dialog__icon-button provider-banks-dialog__icon-button--delete"
+                  aria-label="Eliminar banco"
+                  [disabled]="isSaving"
+                  (click)="eliminar(bank)">
+                  &#128465;
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #emptyBanks>
+      <div *ngIf="!isLoading" class="provider-banks-dialog__empty">
+        No hay bancos registrados para este proveedor.
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <ng-template #bankForm>
+    <form class="provider-banks-dialog__form" [formGroup]="form" (ngSubmit)="guardar()">
+      <p class="provider-banks-dialog__description">
+        Completa los datos bancarios que quedaran asociados al proveedor.
+      </p>
+
+      <label class="provider-banks-dialog__field">
+        <span>Banco</span>
+        <select formControlName="bankId">
+          <option value="">Seleccionar banco</option>
+          <option *ngFor="let bank of bankOptions" [value]="bank.id">
+            {{ bank.description }}
+          </option>
+        </select>
+      </label>
+
+      <label class="provider-banks-dialog__field">
+        <span>Moneda</span>
+        <select formControlName="currencyId">
+          <option value="">Seleccionar moneda</option>
+          <option *ngFor="let currency of currencyOptions" [value]="currency.id">
+            {{ currency.description }}
+          </option>
+        </select>
+      </label>
+
+      <label class="provider-banks-dialog__field">
+        <span>Nro. Cuenta Bancaria</span>
+        <input type="text" formControlName="accountNumber">
+        <small *ngIf="form.controls['accountNumber'].touched && form.controls['accountNumber'].invalid">Ingresa una cuenta bancaria valida.</small>
+      </label>
+
+      <label class="provider-banks-dialog__field">
+        <span>CCI</span>
+        <input type="text" formControlName="cci">
+        <small *ngIf="form.controls['cci'].touched && form.controls['cci'].invalid">Ingresa un CCI valido.</small>
+      </label>
+    </form>
+  </ng-template>
+
+  <p *ngIf="errorMessage" class="provider-banks-dialog__error">
+    {{ errorMessage }}
+  </p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" *ngIf="mode === 'form'" (click)="cancelarFormulario()" [disabled]="isSaving">
+    Cancelar
+  </button>
+
+  <button mat-raised-button color="primary" type="button" *ngIf="mode === 'form'" (click)="guardar()" [disabled]="isSaving">
+    {{ isSaving ? 'Guardando...' : 'Guardar' }}
+  </button>
+
+  <button mat-stroked-button type="button" *ngIf="mode === 'list'" (click)="cerrar()" [disabled]="isSaving">
+    Cerrar
+  </button>
+</div>

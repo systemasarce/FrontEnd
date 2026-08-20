@@ -1,0 +1,86 @@
+
+.foto-dialog {
+  width: 100%;
+  padding: 1.1rem;
+  box-sizing: border-box;
+}
+
+.foto-dialog h2 {
+  margin: 0 0 0.5rem;
+  color: #1f2937;
+  font-size: 1.2rem;
+}
+
+.foto-dialog p {
+  margin: 0 0 1rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.foto-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-cancel {
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.btn-primary {
+  border: 1px solid #ff9e31;
+  background: #ff9e31;
+  color: #ffffff;
+}
+
+.btn-secondary {
+  border: 1px solid #ff9e31;
+  background: #ff9e31;
+  color: #ffffff;
+}
+
+.btn-cancel {
+  border: 1px solid #4b5563 !important;
+  background: #4b5563 !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-cancel:hover {
+  opacity: 0.92;
+}
+
+.btn-primary:active,
+.btn-secondary:active,
+.btn-cancel:active {
+  transform: translateY(1px);
+}
+
+
+@media (max-width: 768px) {
+  .foto-dialog {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .foto-dialog__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .foto-dialog .btn-primary,
+  .foto-dialog .btn-secondary,
+  .foto-dialog .btn-cancel {
+    width: 100%;
+  }
+}

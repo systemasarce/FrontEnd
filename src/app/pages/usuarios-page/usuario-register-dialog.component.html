@@ -1,0 +1,137 @@
+<h2 mat-dialog-title>Registrar usuario</h2>
+
+<form class="usuario-edit" [formGroup]="form" (ngSubmit)="guardar()">
+  <div mat-dialog-content class="usuario-edit__content">
+    <p class="usuario-edit__description">
+      Ingresa los datos del nuevo usuario. El registro se enviara al backend.
+    </p>
+
+    <label class="usuario-edit__field">
+      <span>Codigo</span>
+      <input type="text" formControlName="usrCod">
+      <small class="usuario-edit__error" *ngIf="form.controls['usrCod'].touched && (form.controls['usrCod'].hasError('required') || form.controls['usrCod'].hasError('whitespace'))">Campo Codigo obligatorio.</small>
+      <small class="usuario-edit__error" *ngIf="form.controls['usrCod'].touched && form.controls['usrCod'].hasError('pattern')">Formato invalido.</small>
+    </label>
+
+    <label class="usuario-edit__field">
+      <span>Nombre</span>
+      <input type="text" formControlName="usrNom">
+      <small class="usuario-edit__error" *ngIf="form.controls['usrNom'].touched && (form.controls['usrNom'].hasError('required') || form.controls['usrNom'].hasError('whitespace'))">Campo Nombre obligatorio.</small>
+    </label>
+
+    <label class="usuario-edit__field">
+      <span>Correo</span>
+      <input type="email" formControlName="usrCorr">
+      <small class="usuario-edit__error" *ngIf="form.controls['usrCorr'].touched && (form.controls['usrCorr'].hasError('required') || form.controls['usrCorr'].hasError('whitespace'))">Campo Correo obligatorio.</small>
+      <small class="usuario-edit__error" *ngIf="form.controls['usrCorr'].touched && form.controls['usrCorr'].hasError('email')">Ingresa un correo valido.</small>
+    </label>
+
+    <label class="usuario-edit__field">
+      <span>Numero de documento</span>
+      <input type="text" formControlName="usrDocNro">
+      <small class="usuario-edit__error" *ngIf="form.controls['usrDocNro'].touched && (form.controls['usrDocNro'].hasError('required') || form.controls['usrDocNro'].hasError('whitespace'))">Campo Numero de documento obligatorio.</small>
+      <small class="usuario-edit__error" *ngIf="form.controls['usrDocNro'].touched && form.controls['usrDocNro'].hasError('pattern')">Solo se permiten numeros.</small>
+    </label>
+
+    <label class="usuario-edit__field">
+      <span>Contraseña</span>
+      <input type="password" formControlName="usrPass" autocomplete="new-password">
+      <small class="usuario-edit__error" *ngIf="form.controls['usrPass'].touched && (form.controls['usrPass'].hasError('required') || form.controls['usrPass'].hasError('whitespace'))">Campo Contraseña obligatorio.</small>
+    </label>
+
+    <label class="usuario-edit__field">
+      <span>Centro de costo</span>
+      <mat-form-field appearance="outline" class="usuario-edit__mat-select">
+        <mat-select
+          formControlName="usrCenCosId"
+          [disabled]="isLoadingCentrosCosto"
+          (openedChange)="onCentroCostoSelectOpened($event)">
+          <mat-option class="usuario-edit__search-option" disabled>
+            <input
+              type="text"
+              placeholder="Buscar centro de costo"
+              [formControl]="centroCostoSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">{{ isLoadingCentrosCosto ? 'Cargando centros de costo...' : 'Seleccionar centro de costo' }}</mat-option>
+          <mat-option *ngFor="let option of filteredCentroCostoOptions" [value]="option.id">{{ option.descripcion }}</mat-option>
+          <mat-option *ngIf="!filteredCentroCostoOptions.length && !isLoadingCentrosCosto" disabled>No hay centros de costo activos.</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <small class="usuario-edit__error" *ngIf="form.controls['usrCenCosId'].touched && form.controls['usrCenCosId'].hasError('min')">Campo Centro de costo obligatorio.</small>
+    </label>
+
+    <label class="usuario-edit__field">
+      <span>Cargo</span>
+      <mat-form-field appearance="outline" class="usuario-edit__mat-select">
+        <mat-select
+          formControlName="usrCrg"
+          [disabled]="isLoadingCargos"
+          (openedChange)="onCargoSelectOpened($event)">
+          <mat-option class="usuario-edit__search-option" disabled>
+            <input
+              type="text"
+              placeholder="Buscar cargo"
+              [formControl]="cargoSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">{{ isLoadingCargos ? 'Cargando cargos...' : 'Seleccionar cargo' }}</mat-option>
+          <mat-option *ngFor="let cargo of filteredCargoOptions" [value]="cargo.id">
+            {{ cargo.nombre }}
+          </mat-option>
+          <mat-option *ngIf="!filteredCargoOptions.length && !isLoadingCargos" disabled>No hay cargos registrados.</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <small class="usuario-edit__error" *ngIf="form.controls['usrCrg'].touched && form.controls['usrCrg'].hasError('min')">Campo Cargo obligatorio.</small>
+    </label>
+
+    <label class="usuario-edit__field">
+      <span>Perfil</span>
+      <mat-form-field appearance="outline" class="usuario-edit__mat-select">
+        <mat-select
+          formControlName="usrPrf"
+          [disabled]="isLoadingPerfiles"
+          (openedChange)="onPerfilSelectOpened($event)">
+          <mat-option class="usuario-edit__search-option" disabled>
+            <input
+              type="text"
+              placeholder="Buscar perfil"
+              [formControl]="perfilSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option value="">{{ isLoadingPerfiles ? 'Cargando perfiles...' : 'Seleccionar perfil' }}</mat-option>
+          <mat-option *ngFor="let perfil of filteredPerfilOptions" [value]="perfil.codigo">
+            {{ perfil.descripcion }}
+          </mat-option>
+          <mat-option *ngIf="!filteredPerfilOptions.length && !isLoadingPerfiles" disabled>No hay perfiles activos.</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <small class="usuario-edit__error" *ngIf="form.controls['usrPrf'].touched && (form.controls['usrPrf'].hasError('required') || form.controls['usrPrf'].hasError('whitespace'))">Campo Perfil obligatorio.</small>
+    </label>
+
+    <label class="usuario-edit__field">
+      <span>¿Es usuario de aprobación?</span>
+      <select formControlName="usrApr">
+        <option value="S">Si</option>
+        <option value="N">No</option>
+      </select>
+    </label>
+
+    <p *ngIf="errorMessage" class="usuario-edit__error">
+      {{ errorMessage }}
+    </p>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">
+      Cancelar
+    </button>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Registrando...' : 'Registrar usuario' }}
+    </button>
+  </div>
+</form>

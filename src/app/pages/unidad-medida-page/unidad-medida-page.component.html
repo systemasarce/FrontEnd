@@ -1,0 +1,105 @@
+<section class="unidad-medida-card">
+  <header class="unidad-medida-card__header">
+    <div>
+      <p class="unidad-medida-card__eyebrow">Administracion</p>
+      <h2>Unidad de Medida</h2>
+      <p class="unidad-medida-card__description">Administra las unidades de medida activas y actualiza su estado desde mantenimiento.</p>
+    </div>
+
+    <div class="unidad-medida-card__actions">
+      <button type="button" class="unidad-medida-card__create" (click)="registrarUnidadMedida()">
+        Nuevo
+      </button>
+    </div>
+  </header>
+
+  <form class="unidad-medida-filters" [formGroup]="filtersForm" (ngSubmit)="cargarUnidadesMedida()">
+    <label class="filter-field">
+      <span>ID</span>
+      <input
+        type="number"
+        formControlName="codigo"
+        min="1"
+        step="1"
+        (input)="sanitizeCodigoInput($event)">
+    </label>
+
+    <label class="filter-field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="descripcion">
+    </label>
+
+    <label class="filter-field filter-field--select">
+      <span>Estado</span>
+      <select formControlName="estado">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <button type="submit" class="unidad-medida-filters__search" [disabled]="isLoading">
+      Buscar
+    </button>
+
+    <button type="button" class="unidad-medida-filters__clear" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">
+    Cargando unidades de medida desde la API...
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !unidadesMedida.length" class="state-card">
+    No hay unidades de medida para mostrar.
+  </div>
+
+  <div *ngIf="unidadesMedida.length" class="table-shell">
+    <table class="unidad-medida-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripcion</th>
+          <th>Abreviatura</th>
+          <th>Estado</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let unidadMedida of paginatedUnidadesMedida; trackBy: trackByUnidadMedida">
+          <td>{{ unidadMedida.uniMedId ?? '-' }}</td>
+          <td>{{ unidadMedida.uniMedDes || '-' }}</td>
+          <td>{{ unidadMedida.uniMedAbr || '-' }}</td>
+          <td>
+            <span class="status-pill" [class.status-pill--inactive]="!unidadMedida.activo">
+              {{ unidadMedida.estado }}
+            </span>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="table-action"
+              aria-label="Editar unidad de medida"
+              [disabled]="unidadMedida.uniMedId === null"
+              (click)="editarUnidadMedida(unidadMedida)">
+              &#9998;
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <app-grid-pagination
+    *ngIf="unidadesMedida.length"
+    [totalItems]="unidadesMedida.length"
+    [currentPage]="currentPage"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event)">
+  </app-grid-pagination>
+</section>

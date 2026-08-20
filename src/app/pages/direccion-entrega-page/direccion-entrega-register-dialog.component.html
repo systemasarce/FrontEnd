@@ -1,0 +1,26 @@
+<section class="direccion-entrega-dialog">
+  <div mat-dialog-content class="direccion-entrega-dialog__content" [formGroup]="form">
+    <p class="direccion-entrega-dialog__description">Registra una nueva direccion de entrega. El estado se asigna como activo por defecto.</p>
+
+    <label class="direccion-entrega-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="dirDes" maxlength="250">
+      <small class="direccion-entrega-dialog__error" *ngIf="form.controls['dirDes'].touched && (form.controls['dirDes'].hasError('required') || form.controls['dirDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <label class="direccion-entrega-dialog__field">
+      <span>Ubicacion</span>
+      <input type="text" formControlName="dirUbi" maxlength="250">
+      <small class="direccion-entrega-dialog__error" *ngIf="form.controls['dirUbi'].touched && (form.controls['dirUbi'].hasError('required') || form.controls['dirUbi'].hasError('whitespace'))">Campo Ubicacion obligatorio.</small>
+    </label>
+
+    <p *ngIf="errorMessage" class="direccion-entrega-dialog__error">{{ errorMessage }}</p>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="button" (click)="guardar()" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</section>

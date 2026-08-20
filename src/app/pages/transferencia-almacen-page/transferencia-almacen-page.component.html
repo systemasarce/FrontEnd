@@ -1,0 +1,282 @@
+<section class="transfer-page">
+  <header class="transfer-header">
+    <div>
+      <p class="transfer-eyebrow">Procesos</p>
+      <h2>Transferencia de almacén</h2>
+      <p>Transfiere materiales entre centros de costo con control de stock y aprobación.</p>
+    </div>
+    <button *ngIf="!showEditor" type="button" class="button button--primary transfer-header__new" (click)="nuevaTransferencia()">
+      Nueva transferencia
+    </button>
+  </header>
+
+  <form *ngIf="!showEditor" class="transfer-filters" [formGroup]="filtrosForm" (ngSubmit)="buscarTransferencias()">
+    <label class="field">
+      <span>Fecha inicial</span>
+      <input type="date" formControlName="fechaInicio">
+    </label>
+
+    <label class="field">
+      <span>Fecha final</span>
+      <input type="date" formControlName="fechaFin">
+    </label>
+
+    <label class="field">
+      <span>Solicitante</span>
+      <mat-form-field appearance="outline" class="searchable-select">
+        <mat-select formControlName="solicitante" placeholder="Todos los solicitantes">
+          <mat-option class="search-option">
+            <input matInput placeholder="Buscar solicitante" [formControl]="filtroSolicitanteSearch"
+              (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option value="">Todos los solicitantes</mat-option>
+          <mat-option *ngFor="let option of filteredFiltroSolicitantes; trackBy: trackByUser" [value]="option.code">
+            {{ option.code }} - {{ option.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="field">
+      <span>Centro de costo</span>
+      <mat-form-field appearance="outline" class="searchable-select">
+        <mat-select formControlName="centroCosto" placeholder="Todos los centros de costo">
+          <mat-option class="search-option">
+            <input matInput placeholder="Buscar centro de costo" [formControl]="filtroCentroSearch"
+              (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todos los centros de costo</mat-option>
+          <mat-option *ngFor="let option of filteredFiltroCentros; trackBy: trackByOption" [value]="option.id">
+            {{ option.id }} - {{ option.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="field">
+      <span>Almacén destino</span>
+      <mat-form-field appearance="outline" class="searchable-select">
+        <mat-select formControlName="destino" placeholder="Todos los destinos">
+          <mat-option class="search-option">
+            <input matInput placeholder="Buscar almacén destino" [formControl]="filtroDestinoSearch"
+              (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todos los destinos</mat-option>
+          <mat-option *ngFor="let option of filteredFiltroDestinos; trackBy: trackByOption" [value]="option.id">
+            {{ option.id }} - {{ option.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="field">
+      <span>Tipo de movimiento</span>
+      <select formControlName="tipoIngreso">
+        <option [ngValue]="0">Todos los tipos</option>
+        <option [ngValue]="5">Salida por transferencia</option>
+        <option [ngValue]="6">Ingreso por transferencia</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Usuario de aprobación</span>
+      <mat-form-field appearance="outline" class="searchable-select">
+        <mat-select formControlName="aprobador" placeholder="Todos los usuarios">
+          <mat-option class="search-option">
+            <input matInput placeholder="Buscar usuario de aprobación" [formControl]="filtroAprobadorSearch"
+              (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option value="">Todos los usuarios</mat-option>
+          <mat-option *ngFor="let option of filteredFiltroAprobadores; trackBy: trackByUser" [value]="option.code">
+            {{ option.code }} - {{ option.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="field">
+      <span>Movimiento de origen</span>
+      <input type="number" min="1" formControlName="movimientoOrigen" placeholder="Todos">
+    </label>
+
+    <div class="filter-actions">
+      <button type="button" class="button button--secondary" [disabled]="isLoadingList" (click)="limpiarFiltros()">Limpiar</button>
+      <button type="submit" class="button button--primary" [disabled]="isLoadingList">
+        {{ isLoadingList ? 'Buscando...' : 'Buscar' }}
+      </button>
+    </div>
+  </form>
+
+  <section *ngIf="showEditor" class="transfer-editor">
+    <div class="transfer-editor__heading">
+      <h3>{{ editorTitle }}</h3>
+      <button type="button" class="close-button" aria-label="Cerrar" (click)="cancelar()">&times;</button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <div class="transfer-header-form">
+        <label class="field">
+          <span>Almacén de origen *</span>
+          <mat-form-field appearance="outline" class="searchable-select">
+            <mat-select formControlName="origenId" placeholder="Seleccionar centro de costo">
+              <mat-option class="search-option">
+                <input matInput placeholder="Buscar almacén de origen" [formControl]="origenSearch"
+                  (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+              </mat-option>
+              <mat-option *ngFor="let option of filteredOrigenes; trackBy: trackByOption" [value]="option.id">
+                {{ option.id }} - {{ option.description }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <small *ngIf="form.controls['origenId'].touched && form.controls['origenId'].invalid">Selecciona el almacén de origen.</small>
+        </label>
+
+        <label class="field">
+          <span>Almacén de destino *</span>
+          <mat-form-field appearance="outline" class="searchable-select">
+            <mat-select formControlName="destinoId" placeholder="Seleccionar centro de costo">
+              <mat-option class="search-option">
+                <input matInput placeholder="Buscar almacén de destino" [formControl]="destinoSearch"
+                  (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+              </mat-option>
+              <mat-option *ngFor="let option of filteredDestinos; trackBy: trackByOption" [value]="option.id">
+                {{ option.id }} - {{ option.description }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <small *ngIf="form.controls['destinoId'].touched && form.controls['destinoId'].invalid">Selecciona el almacén de destino.</small>
+        </label>
+
+        <label class="field">
+          <span>Solicitante *</span>
+          <mat-form-field appearance="outline" class="searchable-select">
+            <mat-select formControlName="solicitante" placeholder="Seleccionar solicitante">
+              <mat-option class="search-option">
+                <input matInput placeholder="Buscar solicitante" [formControl]="solicitanteSearch"
+                  (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+              </mat-option>
+              <mat-option *ngFor="let option of filteredSolicitantes; trackBy: trackByUser" [value]="option.code">
+                {{ option.description }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <small *ngIf="form.controls['solicitante'].touched && form.controls['solicitante'].invalid">Selecciona un solicitante.</small>
+        </label>
+
+        <label class="field">
+          <span>Usuario de aprobación *</span>
+          <mat-form-field appearance="outline" class="searchable-select">
+            <mat-select formControlName="aprobador" placeholder="Seleccionar usuario de aprobación">
+              <mat-option class="search-option">
+                <input matInput placeholder="Buscar usuario de aprobación" [formControl]="aprobadorSearch"
+                  (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+              </mat-option>
+              <mat-option *ngFor="let option of filteredAprobadores; trackBy: trackByUser" [value]="option.code">
+                {{ option.description }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <small *ngIf="form.controls['aprobador'].touched && form.controls['aprobador'].invalid">Selecciona el usuario de aprobación.</small>
+        </label>
+      </div>
+
+      <section class="details-card">
+        <div class="details-card__heading">
+          <div>
+            <h3>Detalle de transferencia</h3>
+            <p>Agrega los materiales y especifica la cantidad que se trasladará.</p>
+          </div>
+          <button type="button" class="add-button" aria-label="Agregar ítem" title="Agregar ítem" (click)="agregarDetalle()">+</button>
+        </div>
+
+        <div class="detail-list" formArrayName="detalles">
+          <article class="detail-row" *ngFor="let detail of detailRows; let index = index; trackBy: trackByIndex" [formGroupName]="index">
+            <label class="field detail-row__item">
+              <span>Ítem *</span>
+              <mat-form-field appearance="outline" class="searchable-select">
+                <mat-select formControlName="itemId" placeholder="Seleccionar ítem" (selectionChange)="onItemChange(index)">
+                  <mat-option class="search-option">
+                    <input matInput placeholder="Buscar por código o descripción" formControlName="itemSearch"
+                      (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                  </mat-option>
+                  <mat-option *ngFor="let item of filteredItems(index); trackBy: trackByOption" [value]="item.id">
+                    {{ item.code }} - {{ item.description }}{{ item.unit ? ' (' + item.unit + ')' : '' }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <small *ngIf="detail.controls['itemId'].touched && detail.controls['itemId'].invalid">Selecciona un ítem.</small>
+            </label>
+
+            <label class="field">
+              <span>Stock actual</span>
+              <input class="stock-input" type="text" formControlName="stock" readonly>
+              <small class="stock-loading" *ngIf="detail.controls['loadingStock'].value">Consultando stock...</small>
+            </label>
+
+            <label class="field">
+              <span>Cantidad solicitada *</span>
+              <input type="number" min="0.001" step="0.001" formControlName="cantidad">
+              <small *ngIf="detail.controls['cantidad'].touched && detail.controls['cantidad'].invalid">Ingresa una cantidad válida.</small>
+            </label>
+
+            <button type="button" class="remove-button" aria-label="Quitar ítem" title="Quitar ítem" (click)="quitarDetalle(index)">&minus;</button>
+          </article>
+        </div>
+      </section>
+
+      <p *ngIf="editorErrorMessage" class="message message--error">{{ editorErrorMessage }}</p>
+      <div class="editor-actions">
+        <button type="button" class="button button--secondary" [disabled]="isSaving" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="button button--primary" [disabled]="isSaving || isLoadingCatalogs">
+          {{ isSaving ? 'Guardando...' : (editingId === null ? 'Guardar' : 'Actualizar') }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <p *ngIf="!showEditor && errorMessage" class="message message--error">{{ errorMessage }}</p>
+  <p *ngIf="!showEditor && actionMessage" class="message message--info">{{ actionMessage }}</p>
+  <p *ngIf="!showEditor && isLoadingList" class="message">Cargando transferencias...</p>
+
+  <section *ngIf="!showEditor && !isLoadingList" class="transfer-grid-card">
+    <div class="table-shell">
+      <table class="transfer-table">
+        <thead>
+          <tr>
+            <th>Acciones</th>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Centro de costo</th>
+            <th>Tipo de movimiento</th>
+            <th>Solicitante</th>
+            <th>Usuario de aprobación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of paginatedTransferencias; trackBy: trackByTransfer">
+            <td>
+              <div class="row-actions">
+                <button type="button" class="edit-button" aria-label="Editar transferencia" title="Editar" (click)="editar(row)">&#9998;</button>
+                <button type="button" class="approve-button" aria-label="Aprobar transferencia" title="Aprobar" (click)="aprobar(row)">Aprobar</button>
+                <button type="button" class="reject-button" aria-label="Rechazar transferencia" title="Rechazar" (click)="rechazar(row)">Rechazar</button>
+              </div>
+            </td>
+            <td>{{ row.id }}</td>
+            <td>{{ row.fecha }}</td>
+            <td>{{ row.centroCosto }}</td>
+            <td>{{ row.tipoMovimiento }}</td>
+            <td>{{ row.solicitante }}</td>
+            <td>{{ row.aprobador }}</td>
+          </tr>
+          <tr *ngIf="!transferencias.length && !errorMessage">
+            <td colspan="7" class="empty-cell">No se encontraron transferencias registradas.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-grid-pagination *ngIf="transferencias.length"
+      [totalItems]="transferencias.length" [currentPage]="currentPage" [pageSize]="pageSize"
+      (pageChange)="onPageChange($event)">
+    </app-grid-pagination>
+  </section>
+</section>

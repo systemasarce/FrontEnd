@@ -1,0 +1,39 @@
+<div class="wr-dialog">
+  <header class="wr-dialog__header">
+    <div>
+      <p class="wr-dialog__eyebrow">PROCESOS</p>
+      <h2>INSPECCIONES</h2>
+    </div>
+    <button type="button" class="wr-dialog__close" (click)="cerrar()" aria-label="Cerrar">×</button>
+  </header>
+
+  <section class="wr-dialog__body">
+    <div class="wr-dialog__card">
+      <div class="wr-dialog__section-title">Descripción del Evento</div>
+      <p class="wr-dialog__text">{{ data.Report_Descripcion || 'Sin descripción' }}</p>
+
+      <div class="wr-dialog__files-list">
+        <div class="archivo-item" *ngFor="let archivo of archivosFoto1; trackBy: trackByRuta">
+          <div class="archivo-nombre">{{ archivo.nombre }}</div>
+          <button type="button" class="btn-ver" (click)="verArchivo(archivo.ruta)">Ver</button>
+        </div>
+
+        <div class="wr-dialog__empty" *ngIf="archivosFoto1.length === 0">No hay archivos para Foto 1</div>
+      </div>
+    </div>
+
+    <div class="wr-dialog__card">
+      <div class="wr-dialog__section-title">Acciones Inmediatas</div>
+      <p class="wr-dialog__text">{{ data.Report_Acciones_Inmediata || 'Sin acciones inmediatas' }}</p>
+
+      <div class="wr-dialog__files-list">
+        <div class="archivo-item" *ngFor="let archivo of archivosFoto2; trackBy: trackByRuta">
+          <div class="archivo-nombre">{{ archivo.nombre }}</div>
+          <button type="button" class="btn-ver" (click)="verArchivo(archivo.ruta)">Ver</button>
+        </div>
+
+        <div class="wr-dialog__empty" *ngIf="archivosFoto2.length === 0">No hay archivos para Foto 2</div>
+      </div>
+    </div>
+  </section>
+</div>

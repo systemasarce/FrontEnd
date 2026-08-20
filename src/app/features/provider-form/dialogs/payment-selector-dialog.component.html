@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Seleccionar Forma de Pago</h2>
+<p class="selector-description">Selecciona una opcion.</p>
+
+<div mat-dialog-content class="selector-content">
+  <label class="selector-search">
+    <span>Buscar forma de pago</span>
+    <input
+      type="text"
+      [value]="searchTerm"
+      (input)="setSearchTerm($any($event.target).value)"
+      autocomplete="off"
+      placeholder="Buscar por codigo o descripcion">
+  </label>
+
+  <button
+    *ngFor="let paymentOption of filteredPaymentOptions; trackBy: trackByCode"
+    type="button"
+    class="option-row"
+    (click)="selectPayment(paymentOption)">
+    <span class="option-code">{{ paymentOption.code }}</span>
+    <span class="option-value">{{ paymentOption.description }}</span>
+  </button>
+
+  <p *ngIf="!filteredPaymentOptions.length" class="empty-state">No se encontraron formas de pago.</p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+</div>

@@ -1,0 +1,72 @@
+.cotizaciones-archivo__titulo {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.cotizaciones-archivo__content {
+  padding-top: 0.25rem;
+}
+
+.cotizaciones-archivo__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.cotizaciones-archivo__info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.cotizaciones-archivo__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  min-height: 3rem;
+  padding: 0 0.75rem;
+  border-radius: 12px;
+  background: var(--surface-accent);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.cotizaciones-archivo__nombre {
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 400;
+  word-break: break-word;
+}
+
+.cotizaciones-archivo__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cotizaciones-archivo__action svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.cotizaciones-archivo__action:hover {
+  background: var(--surface-soft);
+}

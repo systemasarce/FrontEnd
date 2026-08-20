@@ -1,0 +1,39 @@
+<form class="detraccion-dialog" [formGroup]="form" (ngSubmit)="guardar()">
+  <h2 mat-dialog-title>Modificar Detraccion</h2>
+
+  <mat-dialog-content class="detraccion-dialog__content">
+    <p class="detraccion-dialog__description">
+      Actualiza la descripcion, el porcentaje o el estado del registro seleccionado.
+    </p>
+
+    <label class="detraccion-dialog__field">
+      <span>Descripcion</span>
+      <input type="text" formControlName="detDes" maxlength="120">
+      <small class="detraccion-dialog__error" *ngIf="form.controls['detDes'].touched && (form.controls['detDes'].hasError('required') || form.controls['detDes'].hasError('whitespace'))">Campo Descripcion obligatorio.</small>
+    </label>
+
+    <label class="detraccion-dialog__field">
+      <span>Porcentaje</span>
+      <input type="number" formControlName="detPor" min="0" max="100" step="0.01" (input)="sanitizePorcentajeInput($event)">
+      <small class="detraccion-dialog__error" *ngIf="form.controls['detPor'].touched && form.controls['detPor'].hasError('required')">Campo Porcentaje obligatorio.</small>
+      <small class="detraccion-dialog__error" *ngIf="form.controls['detPor'].touched && (form.controls['detPor'].hasError('min') || form.controls['detPor'].hasError('max'))">El porcentaje debe estar entre 0 y 100.</small>
+    </label>
+
+    <label class="detraccion-dialog__field">
+      <span>Estado</span>
+      <select formControlName="flgEst">
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+      </select>
+    </label>
+
+    <p *ngIf="errorMessage" class="detraccion-dialog__error">{{ errorMessage }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()" [disabled]="isSaving">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSaving">
+      {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,218 @@
+<section class="reporte-panel" aria-labelledby="asignaciones-usuarios-title">
+  <header class="reporte-panel__header">
+    <div>
+      <a routerLink="/reportes" class="reporte-panel__back" aria-label="Volver a reportes">
+        <span class="reporte-panel__back-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 5l-7 7 7 7"></path>
+          </svg>
+        </span>
+        <span>Volver a reportes</span>
+      </a>
+      <h1 id="asignaciones-usuarios-title">Asignaciones por Usuario</h1>
+      <p>Consulta las asignaciones de materiales por usuario, fecha, centro de costo e ítem.</p>
+    </div>
+  </header>
+
+  <section
+    class="reporte-panel__filters reporte-panel__filters--movimientos"
+    aria-label="Filtros del reporte de asignaciones por usuario">
+    <label class="reporte-panel__field">
+      <span>Fecha inicial</span>
+      <mat-form-field appearance="outline">
+        <input matInput [matDatepicker]="fechaInicioPicker" [formControl]="fechaInicioControl">
+        <mat-datepicker-toggle matSuffix [for]="fechaInicioPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fechaInicioPicker></mat-datepicker>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Fecha final</span>
+      <mat-form-field appearance="outline">
+        <input matInput [matDatepicker]="fechaFinPicker" [formControl]="fechaFinControl">
+        <mat-datepicker-toggle matSuffix [for]="fechaFinPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fechaFinPicker></mat-datepicker>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>ID asignación</span>
+      <mat-form-field appearance="outline">
+        <input matInput type="number" min="1" placeholder="Todas" [formControl]="asignacionControl">
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Estado</span>
+      <mat-form-field appearance="outline">
+        <mat-select [formControl]="estadoControl">
+          <mat-option *ngFor="let estado of estados; trackBy: trackByEstado" [value]="estado.code">
+            {{ estado.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Usuario asignado</span>
+      <mat-form-field appearance="outline">
+        <mat-select
+          [formControl]="usuarioAsignadoControl"
+          [disabled]="isLoadingCatalogos"
+          (openedChange)="onSelectOpened($event, usuarioAsignadoSearchControl)">
+          <mat-option>
+            <input
+              matInput
+              placeholder="Buscar usuario asignado"
+              [formControl]="usuarioAsignadoSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option value="">Todos los usuarios</mat-option>
+          <mat-option *ngFor="let usuario of filteredUsuariosAsignados; trackBy: trackByUsuario" [value]="usuario.code">
+            {{ usuario.code }} - {{ usuario.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Registrado por</span>
+      <mat-form-field appearance="outline">
+        <mat-select
+          [formControl]="usuarioRegistroControl"
+          [disabled]="isLoadingCatalogos"
+          (openedChange)="onSelectOpened($event, usuarioRegistroSearchControl)">
+          <mat-option>
+            <input
+              matInput
+              placeholder="Buscar registrador"
+              [formControl]="usuarioRegistroSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option value="">Todos los usuarios</mat-option>
+          <mat-option *ngFor="let usuario of filteredUsuariosRegistro; trackBy: trackByUsuario" [value]="usuario.code">
+            {{ usuario.code }} - {{ usuario.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Centro de costo</span>
+      <mat-form-field appearance="outline">
+        <mat-select
+          [formControl]="centroCostoControl"
+          [disabled]="isLoadingCatalogos"
+          (openedChange)="onSelectOpened($event, centroCostoSearchControl)">
+          <mat-option>
+            <input
+              matInput
+              placeholder="Buscar centro de costo"
+              [formControl]="centroCostoSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todos los centros de costo</mat-option>
+          <mat-option *ngFor="let centro of filteredCentrosCosto; trackBy: trackById" [value]="centro.id">
+            {{ centro.code }} - {{ centro.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <label class="reporte-panel__field">
+      <span>Ítem</span>
+      <mat-form-field appearance="outline">
+        <mat-select
+          [formControl]="itemControl"
+          [disabled]="isLoadingCatalogos"
+          (openedChange)="onSelectOpened($event, itemSearchControl)">
+          <mat-option>
+            <input
+              matInput
+              placeholder="Buscar ítem"
+              [formControl]="itemSearchControl"
+              (click)="$event.stopPropagation()"
+              (keydown)="$event.stopPropagation()">
+          </mat-option>
+          <mat-option [value]="0">Todos los ítems</mat-option>
+          <mat-option *ngFor="let item of filteredItems; trackBy: trackById" [value]="item.id">
+            {{ item.code }} - {{ item.description }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <div class="reporte-panel__actions">
+      <button
+        type="button"
+        class="reporte-panel__export"
+        [disabled]="isLoadingGrid || !rows.length"
+        (click)="exportarExcel()">
+        Exportar a Excel
+      </button>
+
+      <button
+        type="button"
+        class="reporte-panel__search"
+        [disabled]="isLoadingGrid"
+        (click)="buscar()">
+        {{ isLoadingGrid ? 'Consultando...' : 'Buscar' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="reporte-panel__canvas" aria-label="Resultados de asignaciones por usuario">
+    <p *ngIf="errorMessage" class="reporte-panel__message reporte-panel__message--error">{{ errorMessage }}</p>
+    <p *ngIf="!errorMessage && isLoadingGrid" class="reporte-panel__message">Cargando reporte...</p>
+    <p *ngIf="!errorMessage && !isLoadingGrid && !rows.length" class="reporte-panel__message">
+      No se encontraron asignaciones para los filtros seleccionados.
+    </p>
+
+    <div class="reporte-panel__table-shell" *ngIf="!errorMessage && rows.length">
+      <table class="reporte-panel__table reporte-panel__table--movimientos">
+        <thead>
+          <tr>
+            <th>Asignación</th>
+            <th>Fecha</th>
+            <th>Cód. usuario asignado</th>
+            <th>Usuario asignado</th>
+            <th>Centro de costo</th>
+            <th>Cód. registrador</th>
+            <th>Registrado por</th>
+            <th>ID ítem</th>
+            <th>Cód. ítem</th>
+            <th>Descripción ítem</th>
+            <th>Cantidad</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let row of paginatedRows; let rowIndex = index; trackBy: trackByRow">
+            <td data-label="Asignación">{{ row.asignacionId }}</td>
+            <td data-label="Fecha">{{ row.fecha }}</td>
+            <td data-label="Cód. usuario asignado">{{ row.usuarioAsignadoCodigo }}</td>
+            <td data-label="Usuario asignado">{{ row.usuarioAsignado }}</td>
+            <td data-label="Centro de costo">{{ row.centroCosto }}</td>
+            <td data-label="Cód. registrador">{{ row.usuarioRegistroCodigo }}</td>
+            <td data-label="Registrado por">{{ row.usuarioRegistro }}</td>
+            <td data-label="ID ítem">{{ row.itemId }}</td>
+            <td data-label="Cód. ítem">{{ row.itemCodigo }}</td>
+            <td data-label="Descripción ítem">{{ row.itemDescripcion }}</td>
+            <td data-label="Cantidad" class="reporte-panel__quantity">{{ formatCantidad(row.cantidad) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <app-grid-pagination
+      *ngIf="!errorMessage && rows.length"
+      [totalItems]="rows.length"
+      [currentPage]="currentPage"
+      [pageSize]="pageSize"
+      (pageChange)="onPageChange($event)">
+    </app-grid-pagination>
+  </section>
+</section>

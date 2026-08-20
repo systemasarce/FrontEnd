@@ -1,0 +1,30 @@
+<form class="cmhse-motivo-dialog" [formGroup]="form" (ngSubmit)="confirmar()">
+  <h2 mat-dialog-title>{{ data.titulo || 'Motivo de edición' }}</h2>
+
+  <mat-dialog-content class="cmhse-motivo-dialog__content">
+    <p class="cmhse-motivo-dialog__mensaje">
+      {{ data.mensaje || 'Escriba el motivo el cual está editando el puntaje.' }}
+    </p>
+
+    <label class="cmhse-motivo-dialog__field">
+      <span>Motivo</span>
+      <textarea
+        formControlName="motivo"
+        rows="5"
+        maxlength="500"
+        placeholder="Describe el motivo de la edición"></textarea>
+      <small *ngIf="form.controls['motivo'].touched && form.controls['motivo'].invalid">
+        Debes escribir un motivo para continuar.
+      </small>
+    </label>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cerrar()">
+      {{ data.textoCancelar || 'Cancelar' }}
+    </button>
+    <button mat-flat-button color="primary" type="submit">
+      {{ data.textoConfirmar || 'Guardar motivo' }}
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,187 @@
+<form class="pedido-detalle-dialog" [formGroup]="form" (ngSubmit)="save()">
+  <h2 mat-dialog-title>{{ data.isEditing ? 'Modificar detalle del pedido' : 'Nuevo detalle del pedido' }}</h2>
+
+  <mat-dialog-content class="pedido-detalle-dialog__content">
+    <div class="pedido-detalle-dialog__meta">
+      <label class="pedido-detalle-dialog__field" *ngIf="!data.modoPedidoB">
+        <span>Nro. Pedido</span>
+        <input type="text" class="input--readonly" [value]="data.pedidoCodigo" readonly disabled tabindex="-1">
+      </label>
+
+      <label class="pedido-detalle-dialog__field">
+        <span>Item</span>
+        <input type="text" class="input--readonly" [value]="data.itemNumber" readonly disabled tabindex="-1">
+      </label>
+    </div>
+
+    <div class="pedido-detalle-dialog__selector-row" [class.pedido-detalle-dialog__selector-row--single]="data.modoPedidoB">
+      <label class="pedido-detalle-dialog__field pedido-detalle-dialog__field--code">
+        <span>Producto</span>
+        <button *ngIf="!data.modoPedidoB" type="button" class="selector-code-button" (click)="openItemSelectorDialog()">
+          {{ itemButtonLabel }}
+        </button>
+
+        <mat-form-field *ngIf="data.modoPedidoB" appearance="outline" class="pedido-detalle-dialog__material-field">
+          <mat-select
+            formControlName="itemCode"
+            [disabled]="!data.items.length"
+            (openedChange)="onItemSelectOpened($event)"
+            (selectionChange)="onItemChange($event.value)">
+            <mat-option class="pedido-detalle-dialog__search-option" disabled>
+              <input
+                type="text"
+                placeholder="Buscar producto"
+                [formControl]="itemSearchControl"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option [value]="''">Seleccionar producto</mat-option>
+            <mat-option *ngFor="let item of filteredItems" [value]="item.code">
+              {{ item.description }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </label>
+
+      <label class="pedido-detalle-dialog__field pedido-detalle-dialog__field--fill" *ngIf="!data.modoPedidoB">
+        <span>Descripcion</span>
+        <input type="text" class="input--readonly" formControlName="itemDescription" readonly tabindex="-1">
+      </label>
+    </div>
+
+    <div class="pedido-detalle-dialog__selector-row" [class.pedido-detalle-dialog__selector-row--single]="data.modoPedidoB">
+      <label class="pedido-detalle-dialog__field pedido-detalle-dialog__field--code">
+        <span>Unidad</span>
+        <button *ngIf="!data.modoPedidoB" type="button" class="selector-code-button" (click)="openUnitSelectorDialog()">
+          {{ unitButtonLabel }}
+        </button>
+
+        <mat-form-field *ngIf="data.modoPedidoB" appearance="outline" class="pedido-detalle-dialog__material-field">
+          <mat-select
+            formControlName="unitCode"
+            [disabled]="!data.units.length"
+            (openedChange)="onUnitSelectOpened($event)"
+            (selectionChange)="onUnitChange($event.value)">
+            <mat-option class="pedido-detalle-dialog__search-option" disabled>
+              <input
+                type="text"
+                placeholder="Buscar unidad"
+                [formControl]="unitSearchControl"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option [value]="''">Seleccionar unidad</mat-option>
+            <mat-option *ngFor="let unit of filteredUnits" [value]="unit.code">
+              {{ unit.description }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </label>
+
+      <label class="pedido-detalle-dialog__field pedido-detalle-dialog__field--fill" *ngIf="!data.modoPedidoB">
+        <span>Descripcion</span>
+        <input type="text" class="input--readonly" formControlName="unitDescription" readonly tabindex="-1">
+      </label>
+    </div>
+
+    <div class="pedido-detalle-dialog__selector-row pedido-detalle-dialog__selector-row--required" [class.pedido-detalle-dialog__selector-row--pedido-b]="data.modoPedidoB">
+      <div class="pedido-detalle-dialog__field pedido-detalle-dialog__field--full">
+        <span>Centro de Costo</span>
+        <mat-form-field appearance="outline" class="pedido-detalle-dialog__material-field">
+          <mat-select
+            formControlName="centroCostoId"
+            [disabled]="!data.centrosCosto.length"
+            (openedChange)="onCentroCostoSelectOpened($event)"
+            (selectionChange)="onCentroCostoChange($event.value)">
+            <mat-option class="pedido-detalle-dialog__search-option" disabled>
+              <input
+                type="text"
+                placeholder="Buscar centro de costo"
+                [formControl]="centroCostoSearchControl"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()">
+            </mat-option>
+            <mat-option [value]="0">Seleccionar centro de costo</mat-option>
+            <mat-option *ngFor="let centroCosto of filteredCentrosCosto" [value]="centroCosto.id">
+              {{ centroCosto.descripcion }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <small *ngIf="!data.centrosCosto.length">{{ data.modoPedidoB ? 'No hay centros de costo activos.' : 'No hay centros de costo ligados a este pedido.' }}</small>
+      </div>
+
+      <label class="pedido-detalle-dialog__field" *ngIf="data.modoPedidoB">
+        <span>Cantidad</span>
+        <input type="number" min="0" step="0.001" formControlName="quantity">
+        <small class="pedido-detalle-dialog__error" *ngIf="form.controls['quantity'].touched && form.controls['quantity'].value <= 0">Campo Cantidad obligatorio.</small>
+      </label>
+
+      <label class="pedido-detalle-dialog__field" *ngIf="data.modoPedidoB">
+        <span>Costo Unit. (Opcional)</span>
+        <input
+          type="number"
+          min="0"
+          step="0.0001"
+          inputmode="decimal"
+          formControlName="unitPrice"
+          (input)="onCostoInput($event)">
+      </label>
+
+      <label class="pedido-detalle-dialog__field" *ngIf="data.modoPedidoB">
+        <span>Costo Total</span>
+        <input
+          type="text"
+          class="input--readonly"
+          [value]="formatMoney(pedidoBCostoTotal, 4)"
+          readonly
+          disabled
+          tabindex="-1">
+      </label>
+
+      <label class="pedido-detalle-dialog__field" *ngIf="!data.modoPedidoB">
+        <span>Cantidad Restante</span>
+        <input
+          type="text"
+          class="input--readonly"
+          [value]="formatNumber(cantidadRestanteCentroCosto)"
+          readonly
+          disabled
+          tabindex="-1">
+      </label>
+    </div>
+
+    <div class="pedido-detalle-dialog__numbers" *ngIf="!data.modoPedidoB">
+      <label class="pedido-detalle-dialog__field">
+        <span>Cantidad</span>
+        <input type="number" min="0" step="0.001" [max]="cantidadRestanteCentroCosto" formControlName="quantity">
+        <small>Restante: {{ formatNumber(cantidadRestanteCentroCosto) }}</small>
+        <small class="pedido-detalle-dialog__error" *ngIf="form.controls['quantity'].touched && form.controls['quantity'].value <= 0">Campo Cantidad obligatorio.</small>
+      </label>
+
+      <label class="pedido-detalle-dialog__field">
+        <span>Precio Unitario sin IGV</span>
+        <input type="number" min="0" step="0.001" formControlName="unitPrice">
+        <small class="pedido-detalle-dialog__error" *ngIf="form.controls['unitPrice'].touched && form.controls['unitPrice'].value <= 0">Campo Precio Unitario obligatorio.</small>
+      </label>
+
+      <label class="pedido-detalle-dialog__field">
+        <span>Moneda</span>
+        <input type="text" class="input--readonly" [value]="data.moneda" readonly disabled tabindex="-1">
+      </label>
+    </div>
+
+    <label class="pedido-detalle-dialog__field" *ngIf="!data.modoPedidoB">
+      <span>Subtotal</span>
+      <input type="text" class="input--readonly" [value]="formatNumber(subtotal)" readonly disabled tabindex="-1">
+    </label>
+
+    <p *ngIf="errorMessage" class="pedido-detalle-dialog__error">{{ errorMessage }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="pedido-detalle-dialog__actions">
+    <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit">
+      {{ data.isEditing ? 'Guardar cambios' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,39 @@
+<section class="sub-grupo-item-card">
+  <header class="sub-grupo-item-card__header">
+    <div>
+      <p class="sub-grupo-item-card__eyebrow">Administracion</p>
+      <h2>Detalle de Material</h2>
+      <p class="sub-grupo-item-card__description">Administra los detalles de material vinculados a grupos y sub grupos de item.</p>
+    </div>
+    <div class="sub-grupo-item-card__actions">
+      <button type="button" class="sub-grupo-item-card__create" (click)="nuevo()">Nuevo</button>
+    </div>
+  </header>
+
+  <form class="sub-grupo-item-filters" [formGroup]="filtersForm" (ngSubmit)="cargar()">
+    <label class="filter-field"><span>Cod. Material</span><input type="text" formControlName="codigo"></label>
+    <label class="filter-field"><span>Descripcion</span><input type="text" formControlName="descripcion"></label>
+    <label class="filter-field"><span>Estado</span><select formControlName="estado"><option value="A">Activo</option><option value="I">Inactivo</option></select></label>
+    <button type="submit" class="sub-grupo-item-filters__search" [disabled]="isLoading">Buscar</button>
+    <button type="button" class="sub-grupo-item-filters__clear" (click)="limpiar()">Limpiar</button>
+  </form>
+
+  <div *ngIf="isLoading" class="state-card">Cargando detalles de material...</div>
+  <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">{{ errorMessage }}</div>
+  <div *ngIf="!isLoading && !errorMessage && !items.length" class="state-card">No se encontraron detalles de material para mostrar.</div>
+
+  <div *ngIf="items.length" class="table-shell">
+    <table class="sub-grupo-item-table">
+      <thead><tr><th>ID</th><th>Codigo</th><th>Descripcion</th><th>Grupo</th><th>Sub Grupo</th><th>Estado</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let item of paginatedItems; trackBy: trackByItem">
+          <td>{{ item.id ?? '-' }}</td><td>{{ item.codigo || '-' }}</td><td>{{ item.descripcion || '-' }}</td>
+          <td>{{ item.grupo || '-' }}</td><td>{{ item.subGrupo || '-' }}</td>
+          <td><span class="status-pill" [class.status-pill--inactive]="!item.activo">{{ item.estado }}</span></td>
+          <td><button type="button" class="table-action" aria-label="Editar detalle de material" (click)="editar(item)">&#9998;</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <app-grid-pagination *ngIf="items.length" [totalItems]="items.length" [currentPage]="currentPage" [pageSize]="pageSize" (pageChange)="onPageChange($event)"></app-grid-pagination>
+</section>

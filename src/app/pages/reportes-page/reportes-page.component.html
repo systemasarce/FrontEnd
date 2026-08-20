@@ -1,0 +1,22 @@
+<section class="reportes-page" aria-labelledby="reportes-title">
+  <header class="reportes-page__hero">
+    <div>
+      <p class="reportes-page__eyebrow">Procesos</p>
+      <h1 id="reportes-title">Reportes</h1>
+      <p class="reportes-page__intro">
+        Elige un reporte para abrir su panel de consulta, aplicar filtros y exportar sus resultados.
+      </p>
+    </div>
+  </header>
+
+  <section class="reportes-page__grid" aria-label="Listado de reportes disponibles">
+    <article *ngFor="let reporte of reportes" class="reportes-card">
+      <div class="reportes-card__accent" aria-hidden="true"></div>
+      <div class="reportes-card__content">
+        <h2>{{ reporte.title }}</h2>
+        <p>{{ reporte.description }}</p>
+      </div>
+      <a [routerLink]="reporte.route" class="reportes-card__action">Abrir reporte</a>
+    </article>
+  </section>
+</section>

@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>Seleccionar Unidad de Medida</h2>
+<p class="selector-description">Elige la unidad de medida para el item del detalle.</p>
+
+<div mat-dialog-content class="selector-content">
+  <label class="selector-search">
+    <span>Buscar unidad</span>
+    <input
+      type="text"
+      [value]="searchTerm"
+      (input)="setSearchTerm($any($event.target).value)"
+      autocomplete="off"
+      placeholder="Buscar por ID, codigo, descripcion o abreviatura">
+  </label>
+
+  <button
+    *ngFor="let unit of filteredUnits; trackBy: trackByUnit"
+    type="button"
+    class="option-row"
+    (click)="selectUnit(unit)">
+    <span class="option-code">{{ unit.code }}</span>
+    <span class="option-value">
+      {{ unit.description }}
+      <small>{{ unit.abbreviation }}</small>
+    </span>
+  </button>
+
+  <p *ngIf="!filteredUnits.length" class="empty-state">No se encontraron unidades de medida.</p>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+</div>
