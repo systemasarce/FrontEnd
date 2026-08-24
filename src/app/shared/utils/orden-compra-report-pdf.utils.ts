@@ -73,6 +73,28 @@ export function mapOrdenCompraReportDisplayDate(value: string): string {
   return formatDisplayDate(value) || '-';
 }
 
+export function mapOrdenCompraReportDisplayDateTime(value: string): string {
+  const normalizedValue = String(value || '').trim();
+  const match = normalizedValue.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[T ](\d{1,2}):(\d{2})/);
+
+  if (match) {
+    return `${match[3].padStart(2, '0')}-${match[2].padStart(2, '0')}-${match[1]} ${match[4].padStart(2, '0')}:${match[5]}`;
+  }
+
+  const parsedDate = new Date(normalizedValue);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return formatDisplayDate(normalizedValue) || '-';
+  }
+
+  const day = String(parsedDate.getDate()).padStart(2, '0');
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+  const year = parsedDate.getFullYear();
+  const hours = String(parsedDate.getHours()).padStart(2, '0');
+  const minutes = String(parsedDate.getMinutes()).padStart(2, '0');
+
+  return `${day}-${month}-${year} ${hours}:${minutes}`;
+}
+
 type OrdenCompraReportePdfPage = {
   rows: OrdenCompraReporteDetallePdf[];
   isFirstPage: boolean;
@@ -270,11 +292,12 @@ function drawInfoBlock(
   top: number,
   report: OrdenCompraReportePdfData
 ): void {
-  addRect(PAGE_LEFT, top, PAGE_RIGHT - PAGE_LEFT, 86);
+  addRect(PAGE_LEFT, top, PAGE_RIGHT - PAGE_LEFT, 102);
   addLabelValue(PAGE_LEFT + 6, top + 16, 'PEDIDO:', report.pedido, 8);
   addLabelValue(PAGE_LEFT + 6, top + 32, 'DIRECCION ENVIO:', report.direccionEnvio, 8, PAGE_RIGHT - PAGE_LEFT - 12);
   addLabelValue(PAGE_LEFT + 6, top + 48, 'SOLICITADO POR:', report.solicitadoPor, 8, PAGE_RIGHT - PAGE_LEFT - 12);
   addLabelValue(PAGE_LEFT + 6, top + 64, 'CONDICION PAGO:', report.condicionPago, 8);
+  addLabelValue(PAGE_LEFT + 6, top + 80, 'PLAZO DE ENTREGA / EJECUCIÓN:', report.fecha, 8, PAGE_RIGHT - PAGE_LEFT - 12);
 }
 
 function drawSignaturesBlock(

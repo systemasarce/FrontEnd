@@ -356,7 +356,7 @@
 
           <label class="field">
             <span>Fecha de atencion</span>
-            <input type="date" formControlName="fechaAtencion" (click)="openFechaAtencionPicker($event)">
+            <input type="datetime-local" formControlName="fechaAtencion" step="60" (click)="openFechaAtencionPicker($event)">
           </label>
 
           <div class="field">
