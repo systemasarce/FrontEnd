@@ -9,7 +9,7 @@ import { ActualizarDetallePedidoRequest, ActualizarPedidoEstadoRequest, Actualiz
 import { AuthService } from 'src/app/features/auth/services/auth.service';
 import { ApprovalUserOption, ApprovalUserSelectorDialogComponent } from './approval-user-selector-dialog.component';
 import { CentroCostoOption, CentroCostoSelectorDialogComponent } from './centro-costo-selector-dialog.component';
-import { PedidoCancelDialogComponent } from './pedido-cancel-dialog.component';
+import { ConfirmacionAccionDialogComponent } from '../inspecciones-page/confirmacion-accion-dialog.component';
 import { PedidoDetalleDeleteDialogComponent } from './pedido-detalle-delete-dialog.component';
 import { PedidoDetalleDialogComponent, PedidoDetalleDialogData } from './pedido-detalle-dialog.component';
 import { PedidoDetalleDialogValue, PedidoDetalleItemOption, PedidoDetalleUnidadOption } from './pedido-detalle-dialog.models';
@@ -1046,9 +1046,16 @@ export class RequisicionesPageComponent implements OnInit {
   }
 
   confirmarCancelacionPedido(): void {
-    const dialogRef = this.dialog.open(PedidoCancelDialogComponent, {
-      width: 'min(30rem, 92vw)',
-      disableClose: true
+    const dialogRef = this.dialog.open(ConfirmacionAccionDialogComponent, {
+      width: '460px',
+      disableClose: true,
+      data: {
+        titulo: 'Cancelar pedido',
+        mensaje: 'Se cancelará el registro del nuevo pedido. Esta acción cerrará el formulario actual.',
+        textoConfirmar: 'Confirmar cancelación',
+        textoCancelar: 'Volver',
+        tipo: 'normal'
+      }
     });
 
     dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {

@@ -156,6 +156,7 @@
               <td>
                 <div class="table-action-group">
                   <button
+                    *ngIf="!isListadoIngresado || !esPerfilAlmacen()"
                     type="button"
                     class="table-action"
                     aria-label="Editar movimiento"
@@ -169,7 +170,7 @@
                     class="table-action button--danger"
                     aria-label="Anular movimiento"
                     title="Anular movimiento"
-                    [disabled]="!esEstadoConsumoDespachado(item)"
+                    [disabled]="esPerfilAlmacen() || !esEstadoConsumoDespachado(item)"
                     (click)="anularConsumoSalida(item)">
                     &#10006;
                   </button>

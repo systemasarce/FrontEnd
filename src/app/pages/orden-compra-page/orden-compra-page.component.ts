@@ -27,7 +27,6 @@ import { DEFAULT_GRID_PAGE_SIZE, normalizePaginationPage, paginateItems } from '
 import {
   createOrdenCompraReportPdf,
   mapOrdenCompraReportDisplayDate,
-  mapOrdenCompraReportDisplayDateTime,
   OrdenCompraReporteDetallePdf,
   OrdenCompraReportePdfData
 } from 'src/app/shared/utils/orden-compra-report-pdf.utils';
@@ -1840,7 +1839,7 @@ export class OrdenCompraPageComponent implements OnInit {
       archivo: 'Sin archivo adjunto',
         monedaId: 0,
         descripcionGeneral: '',
-        fechaAtencion: this.getTodayDateTimeInputValue(),
+        fechaAtencion: this.getTodayDateInputValue(),
         direccionEnvio: '',
         periodoGasto: 0,
       detraccionId: null,
@@ -2353,7 +2352,7 @@ export class OrdenCompraPageComponent implements OnInit {
         formaPago: item.formaPago,
         monedaId: item.monedaId > 0 ? item.monedaId : 0,
         descripcionGeneral: item.descripcionGeneral,
-        fechaAtencion: this.toDateTimeInputValue(item.fechaAtencion),
+        fechaAtencion: this.toDateInputValue(item.fechaAtencion) || this.getTodayDateInputValue(),
         direccionEnvio: item.direccionEnvio,
         periodoGasto: item.periodoGasto,
         descuento: item.descuento,
@@ -2470,6 +2469,9 @@ export class OrdenCompraPageComponent implements OnInit {
         precioUnitario: item.costoUnitarioConDescuento,
         importe: item.subtotal
       }));
+    const fechaRegistro = ordenCompra.fechaRegistro
+      ? mapOrdenCompraReportDisplayDate(ordenCompra.fechaRegistro)
+      : mapOrdenCompraReportDisplayDate(new Date().toISOString());
     const fechaRequerida = pedido
       ? mapOrdenCompraReportDisplayDate(this.getTextValue(pedido, ['Ped_Fec_Ent', 'ped_Fec_Ent', 'pedFecEnt']))
       : '-';
@@ -2498,7 +2500,7 @@ export class OrdenCompraPageComponent implements OnInit {
       correlativo: this.formatOrdenCorrelativo(ordenCompra.ordenCompraId),
       tipoServicio: tipoServicio || ordenCompra.tipoServicio,
       monedaAbreviacion: ordenCompra.monedaAbreviacion || 'S/.',
-      fecha: mapOrdenCompraReportDisplayDateTime(ordenCompra.fechaAtencion),
+      fecha: fechaRegistro,
       proveedor: proveedor?.name || ordenCompra.proveedor,
       ruc: proveedor?.ruc || ordenCompra.proveedorRuc || '-',
       banco: bancoDescripcion,
@@ -2511,7 +2513,7 @@ export class OrdenCompraPageComponent implements OnInit {
       observaciones: ordenCompra.observacion || '-',
       fechaRequerida,
       pedido: ordenCompra.pedidoIdAtencion ? `P${ordenCompra.pedidoIdAtencion}` : '-',
-      direccionEnvio: pedido ? this.getTextValue(pedido, ['Ped_Ref', 'ped_Ref', 'pedRef']) || '-' : '-',
+      direccionEnvio: ordenCompra.direccionEnvio?.trim() || '-',
       solicitadoPor: this.resolvePedidoSolicitadoPor(pedido),
       condicionPago: ordenCompra.formaPago || '-',
       subtotal: subtotalReporte,
@@ -2632,35 +2634,24 @@ export class OrdenCompraPageComponent implements OnInit {
     return `${this.getCorrelativoPrefix(tipoId)}${String(ordenCompraId).padStart(5, '0')}`;
   }
 
-  private toDateTimeInputValue(value: string): string {
+  private toDateInputValue(value: string): string {
     const normalizedValue = String(value || '').trim();
-    const isoDateTime = normalizedValue.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})/);
+    const isoDate = normalizedValue.match(/^(\d{4}-\d{2}-\d{2})/);
 
-    if (isoDateTime) {
-      return `${isoDateTime[1]}T${isoDateTime[2]}:${isoDateTime[3]}`;
-    }
-
-    const isoDate = normalizedValue.match(/^(\d{4}-\d{2}-\d{2})$/);
     if (isoDate) {
-      return `${isoDate[1]}T00:00`;
+      return isoDate[1];
     }
 
-    const displayDateTime = normalizedValue.match(/^(\d{2})[/-](\d{2})[/-](\d{4})(?:[ T](\d{2}):(\d{2}))?/);
-    if (displayDateTime) {
-      return `${displayDateTime[3]}-${displayDateTime[2]}-${displayDateTime[1]}T${displayDateTime[4] || '00'}:${displayDateTime[5] || '00'}`;
-    }
-
-    return '';
+    const displayDate = normalizedValue.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+    return displayDate ? `${displayDate[3]}-${displayDate[2]}-${displayDate[1]}` : '';
   }
 
-  private getTodayDateTimeInputValue(): string {
+  private getTodayDateInputValue(): string {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
-    const hours = String(today.getHours()).padStart(2, '0');
-    const minutes = String(today.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return `${year}-${month}-${day}`;
   }
 
   private mapOrdenCompra(item: DataRecord, index: number): OrdenCompraRow | null {

@@ -1,11 +1,18 @@
-.pedido-cancel__content {
-  display: grid;
-  gap: 1rem;
-  min-width: min(28rem, 78vw);
+:host {
+  display: block;
 }
 
-.pedido-cancel__description {
+.pedido-cancel__content {
+  min-width: 320px;
+}
+
+.pedido-cancel__content p {
   margin: 0;
-  color: var(--text-secondary);
+  color: #7c8797;
+  font-size: 1rem;
   line-height: 1.55;
+}
+
+.pedido-cancel__actions {
+  gap: 0.75rem;
 }

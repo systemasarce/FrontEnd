@@ -1606,7 +1606,17 @@ export class AlmacenPageComponent implements OnInit {
   }
 
   puedeEditarMovimiento(item: AlmacenRow): boolean {
+    // El perfil ALMACEN no puede editar movimientos en los listados Ingresado ni Salida.
+    if ((this.isListadoIngresado || this.isListadoSalida) && this.esPerfilAlmacen()) {
+      return false;
+    }
+
     return !this.esMovimientoSalida(item) || this.esUsuarioEditorSalida();
+  }
+
+  esPerfilAlmacen(): boolean {
+    const perfil = this.authService.getCurrentUserProfile().trim().toLowerCase();
+    return perfil === '17' || perfil === 'almacen';
   }
 
   private esUsuarioEditorSalida(): boolean {
