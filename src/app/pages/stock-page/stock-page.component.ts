@@ -23,6 +23,14 @@ interface StockCentroCostoRow {
   stock: number;
 }
 
+interface StockExportRow {
+  itemCodigo: string;
+  descripcion: string;
+  ceco: string;
+  ubicacion: string;
+  stock: number;
+}
+
 @Component({
   selector: 'app-stock-page',
   templateUrl: './stock-page.component.html',
@@ -42,6 +50,9 @@ export class StockPageComponent implements OnInit {
   detalleCentroCosto: StockCentroCostoRow[] = [];
   isDetalleLoading = false;
   detalleErrorMessage = '';
+
+  isExporting = false;
+  exportErrorMessage = '';
 
   constructor(private readonly apiService: ApiService) {}
 
@@ -107,6 +118,128 @@ export class StockPageComponent implements OnInit {
     if (event.target === event.currentTarget) {
       this.cerrarDetallePorCentroCosto();
     }
+  }
+
+  exportarExcel(): void {
+    if (this.isExporting) {
+      return;
+    }
+
+    this.isExporting = true;
+    this.exportErrorMessage = '';
+
+    this.apiService.getListarStockExport().subscribe({
+      next: (response: unknown) => {
+        const rows = this.extractRecords(response)
+          .map((item) => this.mapStockExportRow(item))
+          .filter((item): item is StockExportRow => item !== null);
+
+        if (!rows.length) {
+          this.exportErrorMessage = 'No se encontró información de stock para exportar.';
+          this.isExporting = false;
+          return;
+        }
+
+        this.descargarStockExcel(rows);
+        this.isExporting = false;
+      },
+      error: (error: unknown) => {
+        this.exportErrorMessage = this.resolveErrorMessage(error, 'No se pudo exportar la información de stock.');
+        this.isExporting = false;
+      }
+    });
+  }
+
+  private mapStockExportRow(item: DataRecord): StockExportRow | null {
+    const itemCodigo = this.getTextValue(item, ['Itm_Cod', 'itm_Cod', 'itmCod']);
+    const descripcion = this.getTextValue(item, ['Itm_Des', 'itm_Des', 'itmDes']);
+
+    if (!itemCodigo && !descripcion) {
+      return null;
+    }
+
+    return {
+      itemCodigo: itemCodigo || '-',
+      descripcion: descripcion || '-',
+      ceco: this.getTextValue(item, ['CECO', 'ceco', 'Cen_Cos_Des', 'cen_Cos_Des']) || '-',
+      ubicacion: this.getTextValue(item, ['UBICACION', 'ubicacion', 'Ubi_Des', 'ubi_Des']) || '-',
+      stock: this.getDecimalValue(item, ['Stock', 'stock'])
+    };
+  }
+
+  private descargarStockExcel(rows: StockExportRow[]): void {
+    const headers = ['Codigo', 'Descripcion', 'CECO', 'Ubicacion', 'Stock'];
+    const columnWidths = [90, 260, 140, 140, 70];
+    const rowHeight = 15;
+    const columns = columnWidths.map((width) => `<Column ss:Width="${width}"/>`).join('');
+    const body = rows
+      .map((row) => `<Row ss:Height="${rowHeight}" ss:AutoFitHeight="0">${[
+        row.itemCodigo,
+        row.descripcion,
+        row.ceco,
+        row.ubicacion,
+        this.formatStockValue(row.stock)
+      ].map((value) => this.buildExcelCell(value)).join('')}</Row>`)
+      .join('');
+    const headerCells = headers.map((value) => this.buildExcelCell(value, 'Header')).join('');
+    const workbook = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Styles>
+    <Style ss:ID="Header">
+      <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+      <Interior ss:Color="#6F6B67" ss:Pattern="Solid"/>
+      <Alignment ss:Vertical="Center"/>
+    </Style>
+    <Style ss:ID="Default">
+      <Alignment ss:Vertical="Center" ss:WrapText="0"/>
+    </Style>
+  </Styles>
+  <Worksheet ss:Name="Stock">
+    <Table>
+      ${columns}
+      <Row ss:Height="${rowHeight}" ss:AutoFitHeight="0">${headerCells}</Row>
+      ${body}
+    </Table>
+  </Worksheet>
+</Workbook>`;
+    const blob = new Blob([workbook], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = this.buildExportFileName();
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private formatStockValue(value: number): string {
+    return new Intl.NumberFormat('es-PE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  }
+
+  private buildExportFileName(): string {
+    const today = new Date();
+    const pad = (value: number) => String(value).padStart(2, '0');
+    const fecha = `${today.getFullYear()}${pad(today.getMonth() + 1)}${pad(today.getDate())}`;
+    return `stock_${fecha}.xls`;
+  }
+
+  private buildExcelCell(value: string | number, styleId = 'Default'): string {
+    return `<Cell ss:StyleID="${styleId}"><Data ss:Type="String">${this.escapeXml(value)}</Data></Cell>`;
+  }
+
+  private escapeXml(value: string | number): string {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
   }
 
   private cargarStock(): void {

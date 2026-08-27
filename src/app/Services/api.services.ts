@@ -2488,6 +2488,11 @@ eliminarSubContrata(id: number, usrMod: string): Observable<any> {
         return this.http.get(this.baseUrl + 'Almacen/getListarIngresoSalidaAlmacenPorCentroCosto', { headers, params });
     }
 
+    getListarStockExport(): Observable<any> {
+        const headers = this.Header;
+        return this.http.get(this.baseUrl + 'Almacen/getListarStockExport', { headers });
+    }
+
     getReporteListarSalidas(Fec_Ini: string, Fec_Fin: string, Alm_Det_Itm_Id: number): Observable<any> {
         const headers = this.Header;
         const params = new HttpParams()

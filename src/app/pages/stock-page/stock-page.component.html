@@ -11,16 +11,27 @@
     </header>
 
     <section class="panel panel--listing">
-      <label class="field field--search">
-        <span>Buscar en la grilla</span>
-        <input
-          type="text"
-          [value]="globalSearch"
-          placeholder="Escribe para filtrar..."
-          (input)="onGlobalSearchChange(($any($event.target).value || '').toString())">
-      </label>
+      <div class="panel__toolbar">
+        <label class="field field--search">
+          <span>Buscar en la grilla</span>
+          <input
+            type="text"
+            [value]="globalSearch"
+            placeholder="Escribe para filtrar..."
+            (input)="onGlobalSearchChange(($any($event.target).value || '').toString())">
+        </label>
+
+        <button
+          type="button"
+          class="export-btn"
+          [disabled]="isExporting"
+          (click)="exportarExcel()">
+          {{ isExporting ? 'Exportando...' : 'Exportar' }}
+        </button>
+      </div>
 
       <p *ngIf="errorMessage" class="editor-feedback editor-feedback--error">{{ errorMessage }}</p>
+      <p *ngIf="exportErrorMessage" class="editor-feedback editor-feedback--error">{{ exportErrorMessage }}</p>
 
       <div class="table-shell">
         <table class="stock-table">
