@@ -32,6 +32,88 @@
     </div>
   </section>
 
+  <section class="cmhse-card cmhse-card--vinculados">
+    <h3>Archivos vinculados</h3>
+
+    <div class="vinculados-grid">
+      <div class="vinculado-bloque">
+        <div class="vinculado-bloque__titulo">Documento</div>
+
+        <div *ngIf="!documentosVinculados.length" class="vinculado-vacio">
+          No hay documento vinculado.
+        </div>
+
+        <div class="uploaded-list" *ngIf="documentosVinculados.length">
+          <div class="uploaded-item" *ngFor="let archivo of documentosVinculados">
+            <span class="uploaded-item__name" [title]="archivo.nombre">{{ archivo.nombre }}</span>
+
+            <div class="uploaded-item__actions">
+              <button
+                type="button"
+                class="icon-btn icon-btn--view"
+                (click)="abrirDocumentoVinculado(archivo)"
+                aria-label="Ver documento"
+                title="Ver documento">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vinculado-bloque">
+        <div class="vinculado-bloque__titulo">Audio</div>
+
+        <div *ngIf="!audiosVinculados.length" class="vinculado-vacio">
+          No hay audio vinculado.
+        </div>
+
+        <div class="uploaded-list" *ngIf="audiosVinculados.length">
+          <div class="uploaded-item uploaded-item--column" *ngFor="let archivo of audiosVinculados">
+            <div class="uploaded-item__row">
+              <span class="uploaded-item__name" [title]="archivo.nombre">{{ archivo.nombre }}</span>
+
+              <div class="uploaded-item__actions">
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--view"
+                  (click)="cargarAudioVinculado(archivo)"
+                  [disabled]="audioCargando[archivo.ruta]"
+                  aria-label="Reproducir audio"
+                  title="Reproducir audio">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="audio-preview" *ngIf="audioUrlsVinculados[archivo.ruta]">
+              <audio
+                class="audio-preview__player"
+                [src]="audioUrlsVinculados[archivo.ruta]"
+                controls
+                preload="metadata">
+              </audio>
+            </div>
+
+            <small *ngIf="audioCargando[archivo.ruta]" class="vinculado-info">
+              Cargando audio...
+            </small>
+
+            <small *ngIf="audioError[archivo.ruta]" class="vinculado-error">
+              {{ audioError[archivo.ruta] }}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="cmhse-card">
     <div class="section-head">
       <h3>Preguntas HSE</h3>

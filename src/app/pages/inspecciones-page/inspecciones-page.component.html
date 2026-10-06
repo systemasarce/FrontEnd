@@ -163,7 +163,7 @@
             <thead>
               <tr>
                 <th class="col-id-hidden">#</th>
-                <th>Nro</th>
+                <th class="col-prevencion-nro">Nro</th>
                 <th>Supervisor</th>
                 <th>Jefe</th>
                 <th>Área Jefe</th>
@@ -182,7 +182,7 @@
 
               <tr *ngFor="let reg of prevencionPaginado">
                 <td class="col-id-hidden">{{ reg.Prevencion_Id }}</td>
-                <td>{{ reg.Prevencion_Cod || '-' }}</td>
+                <td class="col-prevencion-nro">{{ reg.Prevencion_Cod || '-' }}</td>
                 <td>{{ reg.Usr_Nom || '-' }}</td>
                 <td>{{ reg.Jef_Nombre || '-' }}</td>
                 <td>{{ reg.Cen_Cos_Des || '-' }}</td>

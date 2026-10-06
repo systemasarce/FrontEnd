@@ -15,8 +15,10 @@ interface InsSubContrata  { SubContrata_Id: number; SubContrata_Nombre: string; 
 interface InsJefeArea     { Usr_Cod: string; Usr_Nom: string; }
 
 interface TipoInspeccion  { Tipo_Id: number; Tipo_Nombre: string; }
+interface UsuarioDniNombre { Usr_Id: string; Usr_Doc_Nro: string; Usr_Nom: string; }
+interface EquipoTrabajoItem { Usr_Id: string; Usr_Doc_Nro: string; Usr_Nom: string; Cargo_Nombre: string; }
 
-type ComboKey = 'cliente' | 'subestacion' | 'subcontrata' | 'jefe' | 'tipoInspeccion';
+type ComboKey = 'cliente' | 'subestacion' | 'subcontrata' | 'jefe' | 'tipoInspeccion' | 'equipo';
 
 interface SupervisorDatos { nombre: string; cargo: string; area: string; }
 
@@ -48,6 +50,9 @@ export class InspeccionPrevencionComponent implements OnInit {
   subContrataSeleccionada:    InsSubContrata | null = null;
   jefeSeleccionado:           InsJefeArea    | null = null;
   tipoInspeccionSeleccionado: TipoInspeccion | null = null;
+  usuarioEquipoSeleccionado: UsuarioDniNombre | null = null;
+  usuariosEquipo: UsuarioDniNombre[] = [];
+  equipoTrabajo: EquipoTrabajoItem[] = [];
 
   // ── Área y DNI del jefe (cargados con SP_Mostrar_Jefe) ──────────
   jefeArea = '';
@@ -58,21 +63,25 @@ export class InspeccionPrevencionComponent implements OnInit {
   cargandoSubContratas  = false;
   cargandoJefes         = false;
   cargandoTipos         = false;
+  cargandoUsuariosEquipo = false;
+  agregandoUsuarioEquipo = false;
   cargandoEdicion       = false;
   guardando             = false;
 
   // ── Estado de combos ─────────────────────────────────────────────
   comboOpen: Record<ComboKey, boolean> = {
     cliente: false, subestacion: false, subcontrata: false,
-    jefe: false, tipoInspeccion: false,
+    jefe: false, tipoInspeccion: false, equipo: false,
   };
   comboSearch: Record<ComboKey, string> = {
     cliente: '', subestacion: '', subcontrata: '',
-    jefe: '', tipoInspeccion: '',
+    jefe: '', tipoInspeccion: '', equipo: '',
   };
 
   /** Datos base cargados al editar (para el método aplicarDatosEdicion) */
   private edicionBase: Record<string, unknown> | null = null;
+  private equipoEdicionClave = '';
+  private cargandoEquipoEdicion = false;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -83,9 +92,9 @@ export class InspeccionPrevencionComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       actividadTarea:       ['', Validators.required],
-      ordenTrabajo:         [''],
-      procedimientoTrabajo: [''],
-      estado:               ['A'],
+      ordenTrabajo:         ['', Validators.required],
+      procedimientoTrabajo: ['', Validators.required],
+      estado:               ['A', Validators.required],
     });
   }
 
@@ -95,6 +104,7 @@ export class InspeccionPrevencionComponent implements OnInit {
     this.cargarSubContratas();
     this.cargarJefes();
     this.cargarTiposInspeccion();
+    this.cargarUsuariosEquipo();
 
     if (this.modoEdicion && this.inspeccionId) {
       this.cargarDatosEdicion(this.inspeccionId);
@@ -153,6 +163,7 @@ export class InspeccionPrevencionComponent implements OnInit {
       Orden_Trabajo:         this.form.get('ordenTrabajo')?.value ?? '',
       Procedimiento_Trabajo: this.form.get('procedimientoTrabajo')?.value ?? '',
       Tipo_Id:               this.tipoInspeccionSeleccionado!.Tipo_Id,
+      Prevencion_Equipo:     this.equipoTrabajo.map(item => item.Usr_Id).join(','),
       Usr_Reg:               usrCod,
     };
 
@@ -165,7 +176,10 @@ export class InspeccionPrevencionComponent implements OnInit {
       error: (err: unknown) => {
         this.guardando = false;
         console.error('Error al guardar inspección de Prevención:', err);
-        alert('Ocurrió un error al guardar. Intente nuevamente.');
+        const mensaje = (err as { error?: { message?: string; Message?: string } })?.error?.message
+          ?? (err as { error?: { message?: string; Message?: string } })?.error?.Message
+          ?? 'Ocurrió un error al guardar. Intente nuevamente.';
+        alert(mensaje);
       },
     });
   }
@@ -192,6 +206,7 @@ export class InspeccionPrevencionComponent implements OnInit {
       Orden_Trabajo:         this.form.get('ordenTrabajo')?.value ?? '',
       Procedimiento_Trabajo: this.form.get('procedimientoTrabajo')?.value ?? '',
       Tipo_Id:               this.tipoInspeccionSeleccionado!.Tipo_Id,
+      Prevencion_Equipo:     this.equipoTrabajo.map(item => item.Usr_Id).join(','),
       Usr_Mod:               usrCod,
       Estado:                estado,
     };
@@ -211,25 +226,51 @@ export class InspeccionPrevencionComponent implements OnInit {
   }
 
   private validarFormulario(): boolean {
-    if (!this.form.get('actividadTarea')?.value) {
-      alert('Seleccione Actividad o Tarea.'); return false;
+    const faltantes: string[] = [];
+
+    if (!this.clienteSeleccionado) { faltantes.push('Cliente'); }
+    if (!this.subestacionSeleccionada) { faltantes.push('Subestación'); }
+    if (!this.subContrataSeleccionada) { faltantes.push('Subcontrata'); }
+    if (!this.jefeSeleccionado) { faltantes.push('Jefe de Equipo'); }
+    if (!this.jefeArea.trim()) { faltantes.push('Área Jefe Equipo'); }
+    if (!this.jefeDni.trim()) { faltantes.push('DNI Jefe Equipo'); }
+
+    if (!String(this.form.get('actividadTarea')?.value ?? '').trim()) {
+      faltantes.push('Actividad o Tarea');
     }
-    if (!this.clienteSeleccionado) {
-      alert('Seleccione un Cliente.'); return false;
+    if (!String(this.form.get('ordenTrabajo')?.value ?? '').trim()) {
+      faltantes.push('Orden de Trabajo');
     }
-    if (!this.subestacionSeleccionada) {
-      alert('Seleccione una Subestación.'); return false;
+    if (!String(this.form.get('procedimientoTrabajo')?.value ?? '').trim()) {
+      faltantes.push('Procedimiento de Trabajo');
     }
-    if (!this.subContrataSeleccionada) {
-      alert('Seleccione una Subcontrata.'); return false;
+    if (!this.tipoInspeccionSeleccionado) { faltantes.push('Tipo Inspección'); }
+
+    if (this.modoEdicion && !String(this.form.get('estado')?.value ?? '').trim()) {
+      faltantes.push('Estado');
     }
-    if (!this.jefeSeleccionado) {
-      alert('Seleccione un Jefe de Equipo.'); return false;
+
+    if (faltantes.length > 0) {
+      this.mostrarCamposIncompletos(faltantes);
+      return false;
     }
-    if (!this.tipoInspeccionSeleccionado) {
-      alert('Seleccione un Tipo de Inspección.'); return false;
-    }
+
     return true;
+  }
+
+  private mostrarCamposIncompletos(faltantes: string[]): void {
+    const mensaje = `Antes de guardar, completa los siguientes datos de Datos Generales: ${faltantes.join(', ')}.`;
+    this.dialog.open(ConfirmacionAccionDialogComponent, {
+      width: '520px',
+      disableClose: true,
+      data: {
+        titulo: 'Campos incompletos',
+        mensaje,
+        textoConfirmar: 'Entendido',
+        textoCancelar: 'Cerrar',
+        tipo: 'peligro',
+      },
+    });
   }
 
   // ── Combos ───────────────────────────────────────────────────────
@@ -311,6 +352,131 @@ export class InspeccionPrevencionComponent implements OnInit {
     this.closeCombos();
   }
 
+  selectUsuarioEquipo(usuario: UsuarioDniNombre | null): void {
+    this.usuarioEquipoSeleccionado = usuario;
+    this.closeCombos();
+  }
+
+  get usuarioEquipoDisplay(): string {
+    if (!this.usuarioEquipoSeleccionado) { return 'Seleccione DNI - Nombre'; }
+    return `${this.usuarioEquipoSeleccionado.Usr_Doc_Nro} - ${this.usuarioEquipoSeleccionado.Usr_Nom}`;
+  }
+
+  get usuariosEquipoFiltrados(): UsuarioDniNombre[] {
+    const term = this.norm(this.comboSearch.equipo.trim());
+    if (!term) { return this.usuariosEquipo; }
+    return this.usuariosEquipo.filter(u =>
+      this.norm(`${u.Usr_Doc_Nro} ${u.Usr_Nom}`).includes(term)
+    );
+  }
+
+  eliminarUsuarioEquipo(usrId: string): void {
+    this.equipoTrabajo = this.equipoTrabajo.filter(item => this.norm(item.Usr_Id) !== this.norm(usrId));
+  }
+
+  // La misma acción está disponible tanto al registrar como al editar.
+  // En edición se conserva el equipo existente y se pueden agregar nuevos integrantes.
+  agregarUsuarioEquipo(): void {
+    if (this.agregandoUsuarioEquipo) { return; }
+
+    if (!this.usuarioEquipoSeleccionado?.Usr_Doc_Nro?.trim()) {
+      this.dialog.open(ConfirmacionAccionDialogComponent, {
+        width: '460px',
+        disableClose: true,
+        data: {
+          titulo: 'Trabajador no seleccionado',
+          mensaje: 'Selecciona un DNI de la lista antes de presionar Agregar.',
+          textoConfirmar: 'Entendido',
+          textoCancelar: 'Cerrar',
+          tipo: 'peligro',
+        },
+      });
+      return;
+    }
+
+    const dni = this.usuarioEquipoSeleccionado.Usr_Doc_Nro.trim();
+    const repetido = this.equipoTrabajo.some(item => this.norm(item.Usr_Doc_Nro) === this.norm(dni));
+    if (repetido) {
+      this.dialog.open(ConfirmacionAccionDialogComponent, {
+        width: '460px',
+        disableClose: true,
+        data: {
+          titulo: 'Trabajador ya agregado',
+          mensaje: `El DNI ${dni} ya se encuentra en el Equipo de Trabajo.`,
+          textoConfirmar: 'Entendido',
+          textoCancelar: 'Cerrar',
+          tipo: 'peligro',
+        },
+      });
+      return;
+    }
+
+    this.agregandoUsuarioEquipo = true;
+    this.apiService.getConsultaDatosUsuarioDni(dni).subscribe({
+      next: (response: unknown) => {
+        const record = this.extractFirstRecord(response);
+        if (!record || Object.keys(record).length === 0) {
+          this.agregandoUsuarioEquipo = false;
+          this.dialog.open(ConfirmacionAccionDialogComponent, {
+            width: '460px',
+            disableClose: true,
+            data: {
+              titulo: 'Usuario no encontrado',
+              mensaje: `No se encontraron datos para el DNI ${dni}.`,
+              textoConfirmar: 'Entendido',
+              textoCancelar: 'Cerrar',
+              tipo: 'peligro',
+            },
+          });
+          return;
+        }
+
+        const item: EquipoTrabajoItem = {
+          Usr_Id:       this.getVal(record, ['Usr_Id', 'usr_Id']),
+          Usr_Doc_Nro:  this.getVal(record, ['Usr_Doc_Nro', 'usr_Doc_Nro']),
+          Usr_Nom:      this.getVal(record, ['Usr_Nom', 'usr_Nom']),
+          Cargo_Nombre: this.getVal(record, ['Cargo_Nombre', 'cargo_Nombre']),
+        };
+
+        if (!item.Usr_Doc_Nro || !item.Usr_Nom) {
+          this.agregandoUsuarioEquipo = false;
+          this.dialog.open(ConfirmacionAccionDialogComponent, {
+            width: '500px',
+            disableClose: true,
+            data: {
+              titulo: 'Datos incompletos',
+              mensaje: `El DNI ${dni} no devolvió la información necesaria para agregar al trabajador.`,
+              textoConfirmar: 'Entendido',
+              textoCancelar: 'Cerrar',
+              tipo: 'peligro',
+            },
+          });
+          return;
+        }
+
+        this.equipoTrabajo = [...this.equipoTrabajo, item];
+        this.usuarioEquipoSeleccionado = null;
+        this.comboSearch.equipo = '';
+        this.agregandoUsuarioEquipo = false;
+      },
+      error: (err: unknown) => {
+        this.agregandoUsuarioEquipo = false;
+        console.error('Error al consultar datos del usuario por DNI:', err);
+        this.dialog.open(ConfirmacionAccionDialogComponent, {
+          width: '520px',
+          disableClose: true,
+          data: {
+            titulo: 'No se pudo agregar el trabajador',
+            mensaje: `No fue posible consultar los datos del DNI ${dni}. Verifica el servicio e intenta nuevamente.`,
+            textoConfirmar: 'Entendido',
+            textoCancelar: 'Cerrar',
+            tipo: 'peligro',
+          },
+        });
+      },
+    });
+  }
+
   // ── Getters display ──────────────────────────────────────────────
   get clienteDisplay():        string { return this.clienteSeleccionado?.Cliente_Nombre         || 'Seleccione'; }
   get subestacionDisplay():    string {
@@ -329,6 +495,30 @@ export class InspeccionPrevencionComponent implements OnInit {
   get tiposInspeccionFiltrados(): TipoInspeccion[]  { return this.filtrar(this.tiposInspeccion, this.comboSearch.tipoInspeccion, i => i.Tipo_Nombre); }
 
   // ── Carga de datos ───────────────────────────────────────────────
+  private cargarUsuariosEquipo(): void {
+    this.cargandoUsuariosEquipo = true;
+    this.apiService.getListarUsuariosDniNombre().subscribe({
+      next: (response: unknown) => {
+        this.usuariosEquipo = this.extraerLista<Record<string, unknown>>(response).map(i => ({
+          Usr_Id:      this.getVal(i, ['Usr_Id', 'usr_Id']),
+          Usr_Doc_Nro: this.getVal(i, ['Usr_Doc_Nro', 'usr_Doc_Nro']),
+          Usr_Nom:     this.getVal(i, ['Usr_Nom', 'usr_Nom']),
+        })).filter(x => !!x.Usr_Id && !!x.Usr_Doc_Nro && !!x.Usr_Nom);
+        this.cargandoUsuariosEquipo = false;
+
+        // El detalle de la edición y la lista de usuarios se cargan de forma
+        // asíncrona. Volvemos a aplicar los datos aquí para garantizar que
+        // Prevencion_Equipo (por ejemplo 2,227,121) se reconstruya cuando
+        // la lista de usuarios llegue después del detalle.
+        this.aplicarDatosEdicion();
+      },
+      error: () => {
+        this.usuariosEquipo = [];
+        this.cargandoUsuariosEquipo = false;
+      },
+    });
+  }
+
   private cargarDatosEdicion(id: number): void {
     this.cargandoEdicion = true;
     this.apiService.getMostrarPrevencion(id).subscribe({
@@ -414,6 +604,80 @@ export class InspeccionPrevencionComponent implements OnInit {
       const t = this.tiposInspeccion.find(x => this.norm(x.Tipo_Nombre) === this.norm(tipoNombre)) ?? null;
       if (t) { this.tipoInspeccionSeleccionado = t; }
     }
+
+    this.cargarEquipoDesdeEdicion();
+  }
+
+  private cargarEquipoDesdeEdicion(): void {
+    if (!this.modoEdicion || !this.edicionBase || !this.usuariosEquipo.length || this.cargandoEquipoEdicion) {
+      return;
+    }
+
+    const raw = this.getVal(this.edicionBase, ['Prevencion_Equipo', 'prevencion_Equipo']);
+    const ids = raw
+      .split(',')
+      .map(id => id.trim())
+      .filter(Boolean);
+    const clave = ids.join(',');
+
+    if (!clave || this.equipoEdicionClave === clave) {
+      return;
+    }
+
+    this.equipoEdicionClave = clave;
+    this.cargandoEquipoEdicion = true;
+
+    const seleccionados = ids
+      .map(id => this.usuariosEquipo.find(u => this.norm(u.Usr_Id) === this.norm(id)))
+      .filter((u): u is UsuarioDniNombre => !!u);
+
+    if (!seleccionados.length) {
+      // No borrar un equipo ya cargado solo porque esta ejecución todavía no
+      // pudo relacionar los IDs. La carga puede volver a intentarse cuando
+      // terminen las listas asíncronas.
+      this.cargandoEquipoEdicion = false;
+      return;
+    }
+
+    let pendientes = seleccionados.length;
+    const equipo: EquipoTrabajoItem[] = [];
+
+    seleccionados.forEach(usuario => {
+      this.apiService.getConsultaDatosUsuarioDni(usuario.Usr_Doc_Nro).subscribe({
+        next: (response: unknown) => {
+          const record = this.extractFirstRecord(response);
+          const item: EquipoTrabajoItem = {
+            Usr_Id:       usuario.Usr_Id,
+            Usr_Doc_Nro:  this.getVal(record, ['Usr_Doc_Nro', 'usr_Doc_Nro']) || usuario.Usr_Doc_Nro,
+            Usr_Nom:      this.getVal(record, ['Usr_Nom', 'usr_Nom']) || usuario.Usr_Nom,
+            Cargo_Nombre: this.getVal(record, ['Cargo_Nombre', 'cargo_Nombre']),
+          };
+          equipo.push(item);
+          pendientes--;
+          if (pendientes === 0) {
+            this.equipoTrabajo = ids
+              .map(id => equipo.find(x => this.norm(x.Usr_Id) === this.norm(id)))
+              .filter((x): x is EquipoTrabajoItem => !!x);
+            this.cargandoEquipoEdicion = false;
+          }
+        },
+        error: () => {
+          equipo.push({
+            Usr_Id: usuario.Usr_Id,
+            Usr_Doc_Nro: usuario.Usr_Doc_Nro,
+            Usr_Nom: usuario.Usr_Nom,
+            Cargo_Nombre: '',
+          });
+          pendientes--;
+          if (pendientes === 0) {
+            this.equipoTrabajo = ids
+              .map(id => equipo.find(x => this.norm(x.Usr_Id) === this.norm(id)))
+              .filter((x): x is EquipoTrabajoItem => !!x);
+            this.cargandoEquipoEdicion = false;
+          }
+        },
+      });
+    });
   }
 
   private cargarDatosSupervisor(): void {

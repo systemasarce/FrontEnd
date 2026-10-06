@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { catchError, of } from 'rxjs';
 
 import { ApiService } from '../../Services/api.services';
@@ -35,12 +36,17 @@ export interface CentroMonitoreoHsePuntajeResult {
   Centro_Comentario: string;
 }
 
+interface ArchivoVinculado {
+  ruta: string;
+  nombre: string;
+}
+
 @Component({
   selector: 'app-centro-monitoreo-hse-puntaje-dialog',
   templateUrl: './centro-monitoreo-hse-puntaje-dialog.component.html',
   styleUrls: ['./centro-monitoreo-hse-nota-dialog.component.scss']
 })
-export class CentroMonitoreoHsePuntajeDialogComponent implements OnInit, OnChanges {
+export class CentroMonitoreoHsePuntajeDialogComponent implements OnInit, OnChanges, OnDestroy {
   @Input() centroMonitoreo: CentroMonitoreoPuntajeData | null = null;
   @Output() volver = new EventEmitter<void>();
   @Output() guardado = new EventEmitter<CentroMonitoreoHsePuntajeResult>();
@@ -55,11 +61,19 @@ export class CentroMonitoreoHsePuntajeDialogComponent implements OnInit, OnChang
 
   private preguntasCargadas = false;
 
+  documentosVinculados: ArchivoVinculado[] = [];
+  audiosVinculados: ArchivoVinculado[] = [];
+  audioUrlsVinculados: Record<string, SafeUrl> = {};
+  audioCargando: Record<string, boolean> = {};
+  audioError: Record<string, string> = {};
+  private objectUrls = new Map<string, string>();
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly apiService: ApiService,
     private readonly authService: AuthService,
-    private readonly dialog: MatDialog
+    private readonly dialog: MatDialog,
+    private readonly sanitizer: DomSanitizer
   ) {
     this.form = this.fb.group({
       estadoRevision: ['CERRADO', Validators.required],
@@ -85,10 +99,19 @@ export class CentroMonitoreoHsePuntajeDialogComponent implements OnInit, OnChang
     this.cargarPuntaje();
   }
 
+  ngOnDestroy(): void {
+    this.limpiarUrlsAudio();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['centroMonitoreo'] && !changes['centroMonitoreo'].firstChange) {
       this.saveError = '';
       this.preguntasCargadas = false;
+      this.limpiarUrlsAudio();
+      this.documentosVinculados = [];
+      this.audiosVinculados = [];
+      this.audioCargando = {};
+      this.audioError = {};
       this.form.reset({
         estadoRevision: 'CERRADO',
         motivo: '',
@@ -193,6 +216,7 @@ export class CentroMonitoreoHsePuntajeDialogComponent implements OnInit, OnChang
         const registros = this.extractRecords(response);
         this.preguntas = this.agruparPorPregunta(registros);
         this.form.patchValue({ comentario: this.extractComentario(response) }, { emitEvent: false });
+        this.cargarArchivosVinculados();
         this.cargando = false;
         this.preguntasCargadas = true;
       },
@@ -203,6 +227,148 @@ export class CentroMonitoreoHsePuntajeDialogComponent implements OnInit, OnChang
         this.cargando = false;
       }
     });
+  }
+
+  abrirDocumentoVinculado(archivo: ArchivoVinculado): void {
+    this.apiService.getArchivoCentroMonitoreoHse(archivo.ruta).subscribe({
+      next: (contenido: ArrayBuffer) => {
+        const extension = archivo.nombre.split('.').pop()?.toLowerCase() || '';
+        const mimeType = this.obtenerMimeType(extension);
+        const blob = new Blob([contenido], { type: mimeType });
+        const objectUrl = URL.createObjectURL(blob);
+        window.open(objectUrl, '_blank', 'noopener,noreferrer');
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000);
+      },
+      error: () => alert('No se pudo abrir el documento vinculado.')
+    });
+  }
+
+  cargarAudioVinculado(archivo: ArchivoVinculado): void {
+    if (this.audioUrlsVinculados[archivo.ruta]) {
+      return;
+    }
+
+    this.audioCargando[archivo.ruta] = true;
+    this.audioError[archivo.ruta] = '';
+
+    this.apiService.getArchivoCentroMonitoreoHse(archivo.ruta).subscribe({
+      next: (contenido: ArrayBuffer) => {
+        const extension = archivo.nombre.split('.').pop()?.toLowerCase() || '';
+        const mimeType = this.obtenerMimeType(extension);
+        const objectUrl = URL.createObjectURL(new Blob([contenido], { type: mimeType }));
+        this.objectUrls.set(archivo.ruta, objectUrl);
+        this.audioUrlsVinculados[archivo.ruta] = this.sanitizer.bypassSecurityTrustUrl(objectUrl);
+        this.audioCargando[archivo.ruta] = false;
+      },
+      error: () => {
+        this.audioCargando[archivo.ruta] = false;
+        this.audioError[archivo.ruta] = 'No se pudo cargar este audio.';
+      }
+    });
+  }
+
+  private cargarArchivosVinculados(): void {
+    const centroHseId = this.centroMonitoreo?.Centro_HSE_Id;
+    if (!centroHseId) {
+      this.documentosVinculados = [];
+      this.audiosVinculados = [];
+      return;
+    }
+
+    this.apiService.getArchivosCentroMonitoreoHse(centroHseId).pipe(
+      catchError((error: unknown) => {
+        console.error('Error cargando archivos vinculados del Centro HSE', error);
+        this.documentosVinculados = [];
+        this.audiosVinculados = [];
+        return of(null);
+      })
+    ).subscribe((response: unknown) => {
+      const data = this.isRecord(response) ? response : {};
+      const documento = this.obtenerTextoRespuesta(data, [
+        'Centro_HSE_Documento',
+        'Centro_Hse_Documento',
+        'centro_HSE_Documento',
+        'centro_Hse_Documento'
+      ]);
+      const audio = this.obtenerTextoRespuesta(data, [
+        'Centro_HSE_Audio',
+        'centro_HSE_Audio'
+      ]);
+
+      this.documentosVinculados = this.convertirRutas(documento, 'Documento');
+      this.audiosVinculados = this.convertirRutas(audio, 'Audio');
+    });
+  }
+
+  private obtenerTextoRespuesta(response: unknown, claves: string[]): string {
+    if (!this.isRecord(response)) {
+      return '';
+    }
+
+    for (const clave of claves) {
+      const valor = response[clave];
+      if (valor !== null && valor !== undefined && String(valor).trim()) {
+        return String(valor).trim();
+      }
+    }
+
+    return '';
+  }
+
+  private convertirRutas(texto: string, prefijo: string): ArchivoVinculado[] {
+    if (!texto) {
+      return [];
+    }
+
+    return texto
+      .split(/[\r\n|;,]+/g)
+      .map(ruta => ruta.trim())
+      .filter(Boolean)
+      .map((ruta, index) => ({
+        ruta,
+        nombre: ruta.split(/[\\/]/).pop()?.trim() || `${prefijo} ${index + 1}`
+      }));
+  }
+
+  private obtenerMimeType(extension: string): string {
+    const tipos: Record<string, string> = {
+      pdf: 'application/pdf',
+      doc: 'application/msword',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      xls: 'application/vnd.ms-excel',
+      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ppt: 'application/vnd.ms-powerpoint',
+      pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      txt: 'text/plain',
+      csv: 'text/csv',
+      rtf: 'application/rtf',
+      zip: 'application/zip',
+      rar: 'application/vnd.rar',
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      bmp: 'image/bmp',
+      webp: 'image/webp',
+      mp3: 'audio/mpeg',
+      wav: 'audio/wav',
+      m4a: 'audio/mp4',
+      aac: 'audio/aac',
+      ogg: 'audio/ogg',
+      oga: 'audio/ogg',
+      webm: 'audio/webm',
+      flac: 'audio/flac'
+    };
+
+    return tipos[extension] || 'application/octet-stream';
+  }
+
+  private limpiarUrlsAudio(): void {
+    for (const objectUrl of this.objectUrls.values()) {
+      URL.revokeObjectURL(objectUrl);
+    }
+    this.objectUrls.clear();
+    this.audioUrlsVinculados = {};
   }
 
   private extractComentario(response: unknown): string {

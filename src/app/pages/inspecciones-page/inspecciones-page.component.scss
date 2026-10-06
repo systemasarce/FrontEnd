@@ -217,6 +217,16 @@
   white-space: nowrap;
 }
 
+/* Evita que el código de Prevención (ej. INS-235) se parta en dos líneas. */
+.styled-table th.col-prevencion-nro,
+.styled-table td.col-prevencion-nro {
+  min-width: 92px;
+  width: 92px;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
 .table-action {
   border: none;
   border-radius: 0.6rem;

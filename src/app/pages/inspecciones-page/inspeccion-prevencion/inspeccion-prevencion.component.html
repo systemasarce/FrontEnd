@@ -44,11 +44,12 @@
   <!-- Datos Generales -->
   <section class="inspeccion-card" [formGroup]="form">
     <h3>Datos Generales</h3>
+    <p class="required-note">Los campos marcados con <span class="required-mark">*</span> son obligatorios.</p>
     <div class="form-grid">
 
       <!-- Cliente -->
-      <div class="field combo-field">
-        <label>Cliente:</label>
+      <div class="field combo-field general-row-1">
+        <label>Cliente: <span class="required-mark">*</span></label>
         <div class="combo">
           <button
             type="button"
@@ -73,8 +74,8 @@
       </div>
 
       <!-- Subestación -->
-      <div class="field combo-field">
-        <label>Subestación:</label>
+      <div class="field combo-field general-row-1">
+        <label>Subestación: <span class="required-mark">*</span></label>
         <div class="combo">
           <button
             type="button"
@@ -100,8 +101,8 @@
       </div>
 
       <!-- Subcontrata -->
-      <div class="field combo-field">
-        <label>Subcontrata:</label>
+      <div class="field combo-field general-row-1">
+        <label>Subcontrata: <span class="required-mark">*</span></label>
         <div class="combo">
           <button
             type="button"
@@ -127,8 +128,8 @@
       </div>
 
       <!-- Jefe Equipo -->
-      <div class="field combo-field">
-        <label>Jefe Equipo:</label>
+      <div class="field combo-field general-row-2">
+        <label>Jefe Equipo: <span class="required-mark">*</span></label>
         <div class="combo">
           <button
             type="button"
@@ -154,20 +155,20 @@
       </div>
 
       <!-- Área Jefe Equipo (readonly, cargada con SP_Mostrar_Jefe) -->
-      <div class="field">
-        <label>Área Jefe Equipo:</label>
+      <div class="field general-row-2">
+        <label>Área Jefe Equipo: <span class="required-mark">*</span></label>
         <input type="text" [value]="jefeArea" readonly placeholder="Se carga al seleccionar jefe">
       </div>
 
       <!-- DNI Jefe Equipo (readonly, cargada con SP_Mostrar_Jefe) -->
-      <div class="field">
-        <label>DNI Jefe Equipo:</label>
+      <div class="field general-row-2">
+        <label>DNI Jefe Equipo: <span class="required-mark">*</span></label>
         <input type="text" [value]="jefeDni" readonly placeholder="Se carga al seleccionar jefe">
       </div>
 
       <!-- Actividad o Tarea -->
-      <div class="field">
-        <label>Actividad o Tarea:</label>
+      <div class="field general-row-3">
+        <label>Actividad o Tarea: <span class="required-mark">*</span></label>
         <select formControlName="actividadTarea">
           <option value="">Seleccione</option>
           <option value="Actividad">Actividad</option>
@@ -176,20 +177,20 @@
       </div>
 
       <!-- Orden de Trabajo -->
-      <div class="field field--wide">
-        <label>Orden de Trabajo:</label>
+      <div class="field field--wide general-row-3">
+        <label>Orden de Trabajo: <span class="required-mark">*</span></label>
         <input type="text" formControlName="ordenTrabajo" placeholder="Orden de Trabajo">
       </div>
 
       <!-- Procedimiento de Trabajo -->
-      <div class="field field--wide">
-        <label>Procedimiento de Trabajo:</label>
+      <div class="field field--wide general-row-4">
+        <label>Procedimiento de Trabajo: <span class="required-mark">*</span></label>
         <input type="text" formControlName="procedimientoTrabajo" placeholder="Procedimiento de Trabajo">
       </div>
 
       <!-- Tipo Inspección (desde BD: Ins_Tipo_Inspeccion) -->
-      <div class="field combo-field">
-        <label>Tipo Inspección:</label>
+      <div class="field combo-field general-row-4">
+        <label>Tipo Inspección: <span class="required-mark">*</span></label>
         <div class="combo">
           <button
             type="button"
@@ -215,8 +216,8 @@
       </div>
 
       <!-- Estado (solo en edición) -->
-      <div class="field" *ngIf="modoEdicion">
-        <label>Estado:</label>
+      <div class="field general-row-5" *ngIf="modoEdicion">
+        <label>Estado: <span class="required-mark">*</span></label>
         <select formControlName="estado">
           <option value="A">Activo</option>
           <option value="I">Inactivo</option>
@@ -224,5 +225,98 @@
       </div>
 
     </div>
+  </section>
+
+  <!-- Datos del Equipo de Trabajo -->
+  <section class="inspeccion-card equipo-card">
+    <h3>Datos del Equipo de Trabajo</h3>
+
+    <div class="equipo-selector-row">
+      <div class="field combo-field">
+        <label>DNI del trabajador:</label>
+        <div class="combo">
+          <button
+            type="button"
+            class="combo__trigger"
+            [class.combo__trigger--placeholder]="!usuarioEquipoSeleccionado"
+            [disabled]="cargandoUsuariosEquipo || agregandoUsuarioEquipo"
+            (click)="$event.stopPropagation(); toggleCombo('equipo')">
+            <span>{{ usuarioEquipoDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+
+          <div class="combo__panel" *ngIf="comboOpen.equipo" (click)="$event.stopPropagation()">
+            <input
+              type="text"
+              class="combo__search"
+              placeholder="Buscar por DNI o nombre..."
+              [value]="comboSearch.equipo"
+              (input)="onSearchChange('equipo', $event)">
+
+            <div class="combo__list">
+              <button type="button" class="combo__option combo__option--empty" (click)="selectUsuarioEquipo(null)">Seleccione</button>
+              <button
+                type="button"
+                class="combo__option"
+                *ngFor="let usuario of usuariosEquipoFiltrados"
+                (click)="selectUsuarioEquipo(usuario)">
+                {{ usuario.Usr_Doc_Nro }} - {{ usuario.Usr_Nom }}
+              </button>
+              <div class="combo__empty" *ngIf="usuariosEquipoFiltrados.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-primary btn-add-equipo"
+        [disabled]="agregandoUsuarioEquipo || !usuarioEquipoSeleccionado"
+        (click)="agregarUsuarioEquipo()">
+        {{ agregandoUsuarioEquipo ? 'Agregando...' : 'Agregar' }}
+      </button>
+    </div>
+
+    <div class="equipo-table-wrapper" *ngIf="equipoTrabajo.length > 0; else equipoVacio">
+      <table class="equipo-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>DNI</th>
+            <th>NOMBRE COMPLETO</th>
+            <th>CARGO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let integrante of equipoTrabajo">
+            <td>{{ integrante.Usr_Id }}</td>
+            <td>{{ integrante.Usr_Doc_Nro }}</td>
+            <td>{{ integrante.Usr_Nom }}</td>
+            <td>{{ integrante.Cargo_Nombre || '-' }}</td>
+            <td class="equipo-actions-cell">
+              <button
+                type="button"
+                class="table-action table-action--delete equipo-delete-action"
+                aria-label="Eliminar integrante"
+                title="Eliminar"
+                (click)="eliminarUsuarioEquipo(integrante.Usr_Id)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"></path>
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #equipoVacio>
+      <div class="equipo-empty">Agrega los trabajadores que conformarán el equipo de trabajo.</div>
+    </ng-template>
   </section>
 </section>

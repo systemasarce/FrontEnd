@@ -1178,6 +1178,17 @@ export class ApiService {
         return this.getUsuariosDesdeRuta('Usuario/getListarUsuarioActivo', filtros);
     }
 
+    getListarUsuariosDniNombre(): Observable<any> {
+        const headers = this.Header;
+        return this.http.get(this.baseUrl + 'Usuario/getListarUsuariosDniNombre', { headers });
+    }
+
+    getConsultaDatosUsuarioDni(Usr_Doc_Nro: string): Observable<any> {
+        const headers = this.Header;
+        const params = new HttpParams().set('Usr_Doc_Nro', Usr_Doc_Nro);
+        return this.http.get(this.baseUrl + 'Usuario/getConsultaDatosUsuarioDni', { headers, params });
+    }
+
     getUsuarios(filtros: UsuariosFiltro = {}): Observable<any> {
         return this.getUsuariosDesdeRuta('Usuario/GetUsuarios', filtros);
     }
@@ -2701,6 +2712,12 @@ eliminarSubContrata(id: number, usrMod: string): Observable<any> {
         return this.http.get(this.baseUrl + 'CentroMonitoreoHse/getArchivoCentroMonitoreoHse', { params, responseType: 'arraybuffer' });
     }
 
+    getArchivosCentroMonitoreoHse(Centro_HSE_Id: number): Observable<any> {
+        const headers = this.Header;
+        const params = new HttpParams().set('Centro_HSE_Id', String(Centro_HSE_Id));
+        return this.http.get(this.baseUrl + 'CentroMonitoreoHse/getArchivosCentroMonitoreoHse', { headers, params });
+    }
+
     getListarCentroMonitoreoHse(filtros: CentroMonitoreoHseFiltro = {}): Observable<any> {
         const headers = this.Header;
         let params = new HttpParams();
@@ -3607,6 +3624,7 @@ eliminarSubContrata(id: number, usrMod: string): Observable<any> {
         Orden_Trabajo: string;
         Procedimiento_Trabajo: string;
         Tipo_Id: number;
+        Prevencion_Equipo: string;
         Usr_Reg: string;
     }): Observable<any> {
         const headers = this.Header;
@@ -3640,6 +3658,7 @@ eliminarSubContrata(id: number, usrMod: string): Observable<any> {
         Orden_Trabajo: string;
         Procedimiento_Trabajo: string;
         Tipo_Id: number;
+        Prevencion_Equipo: string;
         Usr_Mod: string;
         Estado: string;
     }): Observable<any> {

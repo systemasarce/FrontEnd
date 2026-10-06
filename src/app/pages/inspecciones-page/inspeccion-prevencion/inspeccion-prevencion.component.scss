@@ -100,10 +100,15 @@
   font-weight: 800;
 }
 
-.observador-grid,
+.observador-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -114,6 +119,36 @@
 
 .field--wide {
   grid-column: span 2;
+}
+
+/*
+ * Datos Generales en escritorio:
+ * Fila 1: Cliente | Subestación | Subcontrata
+ * Fila 2: Jefe Equipo | Área Jefe Equipo | DNI Jefe Equipo
+ * Fila 3: Actividad o Tarea | Orden de Trabajo (2 columnas)
+ * Fila 4: Procedimiento de Trabajo (2 columnas) | Tipo Inspección
+ * Fila 5: Estado (solo edición)
+ */
+@media (min-width: 901px) {
+  .general-row-1 {
+    grid-row: 1;
+  }
+
+  .general-row-2 {
+    grid-row: 2;
+  }
+
+  .general-row-3 {
+    grid-row: 3;
+  }
+
+  .general-row-4 {
+    grid-row: 4;
+  }
+
+  .general-row-5 {
+    grid-row: 5;
+  }
 }
 
 .field label {
@@ -246,7 +281,7 @@
   font-size: 14px;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 900px) {
   .observador-grid,
   .form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -275,5 +310,98 @@
 
   .field--wide {
     grid-column: span 1;
+  }
+}
+
+.required-mark {
+  color: #dc2626;
+  font-weight: 800;
+}
+
+.required-note {
+  margin: -2px 0 14px;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.equipo-card {
+  overflow: visible;
+}
+
+.equipo-selector-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.btn-add-equipo {
+  min-width: 110px;
+  margin-bottom: 0;
+}
+
+.equipo-table-wrapper {
+  margin-top: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+}
+
+.equipo-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+.equipo-table th,
+.equipo-table td {
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+}
+
+.equipo-table th {
+  background: #f6f7f9;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.equipo-table td {
+  color: var(--text-primary);
+  font-size: 0.88rem;
+}
+
+.equipo-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.equipo-actions-cell {
+  width: 72px;
+  text-align: center !important;
+  white-space: nowrap;
+}
+
+.equipo-delete-action {
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+.equipo-empty {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px dashed var(--line-soft);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .equipo-selector-row {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-add-equipo {
+    width: 100%;
   }
 }
