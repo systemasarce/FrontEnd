@@ -505,11 +505,6 @@ export class InspeccionPrevencionComponent implements OnInit {
           Usr_Nom:     this.getVal(i, ['Usr_Nom', 'usr_Nom']),
         })).filter(x => !!x.Usr_Id && !!x.Usr_Doc_Nro && !!x.Usr_Nom);
         this.cargandoUsuariosEquipo = false;
-
-        // El detalle de la edición y la lista de usuarios se cargan de forma
-        // asíncrona. Volvemos a aplicar los datos aquí para garantizar que
-        // Prevencion_Equipo (por ejemplo 2,227,121) se reconstruya cuando
-        // la lista de usuarios llegue después del detalle.
         this.aplicarDatosEdicion();
       },
       error: () => {

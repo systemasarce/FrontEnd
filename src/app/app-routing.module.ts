@@ -28,6 +28,8 @@ import { UnidadMedidaPageComponent } from './pages/unidad-medida-page/unidad-med
 import { UsuariosPageComponent } from './pages/usuarios-page/usuarios-page.component';
 import { InspeccionesPageComponent } from './pages/inspecciones-page/inspecciones-page.component';
 import { TipoReportePageComponent } from './pages/inspecciones/tipo-reporte/tipo-reporte-page.component';
+import { GrupoPageComponent } from './pages/inspecciones/grupo/grupo-page.component';
+import { GrupoDetallePageComponent } from './pages/inspecciones/grupo-detalle/grupo-detalle-page.component';
 import { ClientePageComponent } from './pages/inspecciones/cliente/cliente-page.component';
 import { ClienteTjh2bPageComponent } from './pages/inspecciones/cliente-tjh2b/cliente-tjh2b-page.component';
 import { SubestacionPageComponent } from './pages/inspecciones/subestacion/subestacion-page.component';
@@ -164,6 +166,14 @@ const routes: Routes = [
       {
         path: 'tipo-reporte',
         component: TipoReportePageComponent
+      },
+      {
+        path: 'grupo',
+        component: GrupoPageComponent
+      },
+      {
+        path: 'grupo-detalle',
+        component: GrupoDetallePageComponent
       },
       {
         path: 'asignacion',

@@ -207,6 +207,7 @@ export class AuthService {
       '/cotizaciones-tjh2b': ['/pedidos'],
       '/jefe': ['/cliente', '/tipo-reporte'],
       '/tipo-reporte': ['/cliente', '/jefe'],
+      '/grupo-detalle': ['/grupo'],
       '/riesgo': ['/cliente'],
       '/reporte': ['/cliente'],
       '/motivo': ['/jefe'],

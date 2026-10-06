@@ -1672,6 +1672,85 @@ export class ApiService {
         return this.http.delete(this.baseUrl + `Jefe/deleteEliminarJefe/${id}`, { headers, params });
     }
 
+    getListarGrupo(filtros: { Grupo_Id?: number; Grupo_Cod?: number; Grupo_Nombre?: string; Estado?: string } = {}): Observable<any> {
+        const headers = this.Header;
+        let params = new HttpParams();
+
+        if (filtros.Grupo_Id !== undefined && filtros.Grupo_Id !== null) {
+            params = params.append('Grupo_Id', String(filtros.Grupo_Id));
+        }
+        if (filtros.Grupo_Cod !== undefined && filtros.Grupo_Cod !== null) {
+            params = params.append('Grupo_Cod', String(filtros.Grupo_Cod));
+        }
+        if (filtros.Grupo_Nombre !== undefined && filtros.Grupo_Nombre !== null) {
+            params = params.append('Grupo_Nombre', filtros.Grupo_Nombre);
+        }
+        if (filtros.Estado !== undefined && filtros.Estado !== null) {
+            params = params.append('Estado', filtros.Estado);
+        }
+
+        return this.http.get(this.baseUrl + 'Grupo/getListarGrupo', { headers, params });
+    }
+
+
+    registrarGrupo(grupo: { Grupo_Cod: number; Grupo_Nombre: string; Usr_Reg: string }): Observable<any> {
+        const headers = this.Header;
+        return this.http.post(this.baseUrl + 'Grupo/postRegistrarGrupo', grupo, { headers });
+    }
+
+    actualizarGrupo(grupo: { Grupo_Id: number; Grupo_Cod: number; Grupo_Nombre: string; Estado: string; Usr_Mod: string }): Observable<any> {
+        const headers = this.Header;
+        return this.http.patch(this.baseUrl + 'Grupo/patchActualizarGrupo', grupo, { headers });
+    }
+
+    eliminarGrupo(id: number, usrMod: string): Observable<any> {
+        const headers = this.Header;
+        const params = new HttpParams().append('Usr_Mod', usrMod);
+        return this.http.delete(this.baseUrl + `Grupo/deleteEliminarGrupo/${id}`, { headers, params });
+    }
+
+    getListarGrupoDetalle(filtros: { Detalle_Id?: number; Detalle_Cod?: string; Detalle_Nombre?: string; Detalle_Valor?: number; Grupo_Nombre?: string; Estado?: string } = {}): Observable<any> {
+        const headers = this.Header;
+        let params = new HttpParams();
+
+        if (filtros.Detalle_Id !== undefined && filtros.Detalle_Id !== null) {
+            params = params.append('Detalle_Id', String(filtros.Detalle_Id));
+        }
+        if (filtros.Detalle_Cod !== undefined && filtros.Detalle_Cod !== null) {
+            params = params.append('Detalle_Cod', filtros.Detalle_Cod);
+        }
+        if (filtros.Detalle_Nombre !== undefined && filtros.Detalle_Nombre !== null) {
+            params = params.append('Detalle_Nombre', filtros.Detalle_Nombre);
+        }
+        if (filtros.Detalle_Valor !== undefined && filtros.Detalle_Valor !== null) {
+            params = params.append('Detalle_Valor', String(filtros.Detalle_Valor));
+        }
+        if (filtros.Grupo_Nombre !== undefined && filtros.Grupo_Nombre !== null) {
+            params = params.append('Grupo_Nombre', filtros.Grupo_Nombre);
+        }
+        if (filtros.Estado !== undefined && filtros.Estado !== null) {
+            params = params.append('Estado', filtros.Estado);
+        }
+
+        return this.http.get(this.baseUrl + 'GrupoDetalle/getListarGrupoDetalle', { headers, params });
+    }
+
+    registrarGrupoDetalle(detalle: { Detalle_Cod: string; Detalle_Nombre: string; Detalle_Valor: number; Grupo_Id: number; Usr_Reg: string }): Observable<any> {
+        const headers = this.Header;
+        return this.http.post(this.baseUrl + 'GrupoDetalle/postRegistrarGrupoDetalle', detalle, { headers });
+    }
+
+    actualizarGrupoDetalle(detalle: { Detalle_Id: number; Detalle_Cod: string; Detalle_Nombre: string; Detalle_Valor: number; Grupo_Id: number; Usr_Mod: string }): Observable<any> {
+        const headers = this.Header;
+        return this.http.patch(this.baseUrl + 'GrupoDetalle/patchActualizarGrupoDetalle', detalle, { headers });
+    }
+
+    eliminarGrupoDetalle(id: number, usrMod: string): Observable<any> {
+        const headers = this.Header;
+        const params = new HttpParams().append('Usr_Mod', usrMod);
+        return this.http.delete(this.baseUrl + `GrupoDetalle/deleteEliminarGrupoDetalle/${id}`, { headers, params });
+    }
+
     getListarTipoReporte(filtros: { Reporte_Id?: number; Reporte_Tipo?: string; Estado?: string } = {}): Observable<any> {
         const headers = this.Header;
         let params = new HttpParams();

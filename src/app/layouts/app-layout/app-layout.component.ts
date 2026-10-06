@@ -101,6 +101,8 @@ export class AppLayoutComponent implements OnInit, OnDestroy {
     { label: 'Tipo de Servicio', route: '/tipo-servicio', icon: this.icons.tipoServicio },
     { label: 'Unidad de Medida', route: '/unidad-medida', icon: this.icons.unidadMedida },
     { label: 'Tipo Reporte', route: '/jefe', icon: this.icons.jefe },
+    { label: 'Grupo', route: '/grupo', icon: this.icons.grupoItem },
+    { label: 'Grupo Detalle', route: '/grupo-detalle', icon: this.icons.grupoItem },
     { label: 'Cliente', route: '/cliente', icon: this.icons.cliente },
     { label: 'Cliente - TJH2B', route: '/cliente-tjh2b', icon: this.icons.cliente },
     { label: 'Tipo de Inspección', route: '/tipo-inspeccion', icon: this.icons.inspecciones },

@@ -87,6 +87,11 @@ import { UnidadMedidaEditDialogComponent } from './pages/unidad-medida-page/unid
 import { UnidadMedidaPageComponent } from './pages/unidad-medida-page/unidad-medida-page.component';
 import { UnidadMedidaRegisterDialogComponent } from './pages/unidad-medida-page/unidad-medida-register-dialog.component';
 import { TipoReportePageComponent } from './pages/inspecciones/tipo-reporte/tipo-reporte-page.component';
+import { GrupoPageComponent } from './pages/inspecciones/grupo/grupo-page.component';
+import { GrupoDetallePageComponent } from './pages/inspecciones/grupo-detalle/grupo-detalle-page.component';
+import { GrupoRegisterDialogComponent } from './pages/inspecciones/grupo/grupo-register-dialog.component';
+import { GrupoDetalleRegisterDialogComponent } from './pages/inspecciones/grupo-detalle/grupo-detalle-register-dialog.component';
+import { GrupoService } from './pages/inspecciones/grupo/grupo.service';
 import { ClientePageComponent } from './pages/inspecciones/cliente/cliente-page.component';
 import { ClienteTjh2bPageComponent } from './pages/inspecciones/cliente-tjh2b/cliente-tjh2b-page.component';
 import { TipoInspeccionPageComponent } from './pages/inspecciones/tipo-inspeccion/tipo-inspeccion-page.component';
@@ -218,6 +223,9 @@ const APP_DATE_FORMATS = {
     UnidadMedidaRegisterDialogComponent,
     UnidadMedidaEditDialogComponent,
     TipoReportePageComponent,
+    GrupoPageComponent,
+    GrupoDetallePageComponent,
+    GrupoDetalleRegisterDialogComponent,
     ClientePageComponent,
     ClienteTjh2bPageComponent,
     TipoInspeccionPageComponent,
@@ -228,6 +236,7 @@ const APP_DATE_FORMATS = {
     MotivoPageComponent,
     SubestacionPageComponent,
     TipoReporteRegisterDialogComponent,
+    GrupoRegisterDialogComponent,
     ClienteRegisterDialogComponent,
     ClienteTjh2bRegisterDialogComponent,
     LoginPageComponent,
@@ -293,7 +302,8 @@ const APP_DATE_FORMATS = {
       provide: MAT_DATE_FORMATS,
       useValue: APP_DATE_FORMATS
     },
-    TipoReporteService
+    TipoReporteService,
+    GrupoService
   ],
   bootstrap: [AppComponent]
 })

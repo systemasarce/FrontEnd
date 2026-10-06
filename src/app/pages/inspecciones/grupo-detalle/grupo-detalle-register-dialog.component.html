@@ -1,0 +1,99 @@
+<div class="dialog-card">
+  <header class="dialog-card__header">
+    <div>
+      <p class="dialog-card__eyebrow">Administración</p>
+      <h2>{{ esEdicion ? 'Editar Grupo Detalle' : 'Nuevo Grupo Detalle' }}</h2>
+      <p class="dialog-card__description">
+        {{ esEdicion ? 'Actualiza los datos del grupo detalle.' : 'Registra un nuevo detalle asociado a un grupo.' }}
+      </p>
+    </div>
+    <button type="button" class="dialog-card__close" (click)="cerrar()" aria-label="Cerrar">&times;</button>
+  </header>
+
+  <form class="dialog-form" [formGroup]="form" (ngSubmit)="guardar()">
+    <div class="dialog-grid">
+      <label class="field">
+        <span>Código</span>
+        <input type="text" maxlength="15" formControlName="detalleCod" placeholder="Ingrese código">
+      </label>
+
+      <div class="field field--full">
+        <label for="detalleNombre">Nombre</label>
+        <textarea
+          id="detalleNombre"
+          formControlName="detalleNombre"
+          placeholder="Ingrese el nombre o descripción del grupo detalle"
+          rows="6"
+          maxlength="2000"
+          spellcheck="true"></textarea>
+        <small class="field__hint">Puedes ampliar el área de texto desde la esquina inferior derecha.</small>
+      </div>
+
+      <label class="field">
+        <span>Valor</span>
+        <input type="number" min="0" step="1" formControlName="detalleValor" placeholder="Ingrese valor">
+      </label>
+
+      <div class="field">
+        <span>Grupo</span>
+        <div class="combo" [class.combo--open]="grupoComboAbierto">
+          <button
+            type="button"
+            class="combo__trigger"
+            [class.combo__trigger--placeholder]="!grupoSeleccionado"
+            [disabled]="cargandoGrupos"
+            (click)="$event.stopPropagation(); toggleGrupoCombo()">
+            <span>{{ grupoDisplay }}</span>
+            <i class="combo__caret"></i>
+          </button>
+
+          <div class="combo__panel" *ngIf="grupoComboAbierto" (click)="$event.stopPropagation()">
+            <input
+              type="text"
+              class="combo__search"
+              placeholder="Buscar grupo..."
+              [value]="grupoBusqueda"
+              (input)="onGrupoBusqueda($event)">
+
+            <div class="combo__list">
+              <button
+                type="button"
+                class="combo__option combo__option--empty"
+                (click)="seleccionarGrupo(null)">
+                Seleccione
+              </button>
+
+              <button
+                type="button"
+                class="combo__option"
+                *ngFor="let grupo of gruposFiltrados"
+                (click)="seleccionarGrupo(grupo)">
+                <span class="combo__option-name">{{ grupo.grupoNombre }}</span>
+              </button>
+
+              <div class="combo__empty" *ngIf="gruposFiltrados.length === 0">No hay resultados</div>
+            </div>
+          </div>
+        </div>
+        <small *ngIf="cargandoGrupos" class="field__hint">Cargando grupos...</small>
+      </div>
+
+      <label class="field field--full" *ngIf="esEdicion">
+        <span>Estado</span>
+        <select formControlName="estado">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </label>
+    </div>
+
+    <p *ngIf="saveError" class="dialog-error">{{ saveError }}</p>
+
+    <footer class="dialog-actions">
+      <button type="button" class="btn btn-secondary" (click)="cerrar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="guardando || cargandoGrupos">
+        {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Guardar') }}
+      </button>
+    </footer>
+  </form>
+</div>
