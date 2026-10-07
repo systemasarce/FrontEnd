@@ -1672,7 +1672,7 @@ export class ApiService {
         return this.http.delete(this.baseUrl + `Jefe/deleteEliminarJefe/${id}`, { headers, params });
     }
 
-    getListarGrupo(filtros: { Grupo_Id?: number; Grupo_Cod?: number; Grupo_Nombre?: string; Estado?: string } = {}): Observable<any> {
+    getListarGrupo(filtros: { Grupo_Id?: number; Grupo_Cod?: number; Grupo_Nombre?: string; Estado?: string; Grupo_Descripcion?: string } = {}): Observable<any> {
         const headers = this.Header;
         let params = new HttpParams();
 
@@ -1687,6 +1687,10 @@ export class ApiService {
         }
         if (filtros.Estado !== undefined && filtros.Estado !== null) {
             params = params.append('Estado', filtros.Estado);
+        }
+
+        if (filtros.Grupo_Descripcion !== undefined && filtros.Grupo_Descripcion !== null) {
+            params = params.append('Grupo_Descripcion', String(filtros.Grupo_Descripcion));
         }
 
         return this.http.get(this.baseUrl + 'Grupo/getListarGrupo', { headers, params });
@@ -1709,7 +1713,7 @@ export class ApiService {
         return this.http.delete(this.baseUrl + `Grupo/deleteEliminarGrupo/${id}`, { headers, params });
     }
 
-    getListarGrupoDetalle(filtros: { Detalle_Id?: number; Detalle_Cod?: string; Detalle_Nombre?: string; Detalle_Valor?: number; Grupo_Nombre?: string; Estado?: string } = {}): Observable<any> {
+    getListarGrupoDetalle(filtros: { Detalle_Id?: number; Detalle_Cod?: string; Detalle_Nombre?: string; Detalle_Valor?: number; Grupo_Nombre?: string; Estado?: string; Grupo_Descripcion?: string } = {}): Observable<any> {
         const headers = this.Header;
         let params = new HttpParams();
 
@@ -1730,6 +1734,9 @@ export class ApiService {
         }
         if (filtros.Estado !== undefined && filtros.Estado !== null) {
             params = params.append('Estado', filtros.Estado);
+        }
+        if (filtros.Grupo_Descripcion !== undefined && filtros.Grupo_Descripcion !== null) {
+            params = params.append('Grupo_Descripcion', filtros.Grupo_Descripcion);
         }
 
         return this.http.get(this.baseUrl + 'GrupoDetalle/getListarGrupoDetalle', { headers, params });

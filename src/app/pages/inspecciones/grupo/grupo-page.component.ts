@@ -18,6 +18,7 @@ export class GrupoPageComponent implements OnInit {
     Grupo_Id: undefined,
     Grupo_Cod: undefined,
     Grupo_Nombre: '',
+    Grupo_Descripcion: '',
     Estado: 'A'
   };
 
@@ -101,6 +102,7 @@ export class GrupoPageComponent implements OnInit {
     this.filtros.Grupo_Id = undefined;
     this.filtros.Grupo_Cod = undefined;
     this.filtros.Grupo_Nombre = '';
+    this.filtros.Grupo_Descripcion = '';
     this.filtros.Estado = 'A';
     this.cargarGrupos();
   }

@@ -44,12 +44,12 @@
   <!-- Datos Generales -->
   <section class="inspeccion-card" [formGroup]="form">
     <h3>Datos Generales</h3>
-    <p class="required-note">Los campos marcados con <span class="required-mark">*</span> son obligatorios.</p>
+    <p class="required-note">Los campos marcados con son obligatorios.</p>
     <div class="form-grid">
 
       <!-- Cliente -->
       <div class="field combo-field general-row-1">
-        <label>Cliente: <span class="required-mark">*</span></label>
+        <label>Cliente:</label>
         <div class="combo">
           <button
             type="button"
@@ -75,7 +75,7 @@
 
       <!-- Subestación -->
       <div class="field combo-field general-row-1">
-        <label>Subestación: <span class="required-mark">*</span></label>
+        <label>Subestación:</label>
         <div class="combo">
           <button
             type="button"
@@ -102,7 +102,7 @@
 
       <!-- Subcontrata -->
       <div class="field combo-field general-row-1">
-        <label>Subcontrata: <span class="required-mark">*</span></label>
+        <label>Subcontrata:</label>
         <div class="combo">
           <button
             type="button"
@@ -129,7 +129,7 @@
 
       <!-- Jefe Equipo -->
       <div class="field combo-field general-row-2">
-        <label>Jefe Equipo: <span class="required-mark">*</span></label>
+        <label>Jefe Equipo:</label>
         <div class="combo">
           <button
             type="button"
@@ -156,19 +156,19 @@
 
       <!-- Área Jefe Equipo (readonly, cargada con SP_Mostrar_Jefe) -->
       <div class="field general-row-2">
-        <label>Área Jefe Equipo: <span class="required-mark">*</span></label>
+        <label>Área Jefe Equipo:</label>
         <input type="text" [value]="jefeArea" readonly placeholder="Se carga al seleccionar jefe">
       </div>
 
       <!-- DNI Jefe Equipo (readonly, cargada con SP_Mostrar_Jefe) -->
       <div class="field general-row-2">
-        <label>DNI Jefe Equipo: <span class="required-mark">*</span></label>
+        <label>DNI Jefe Equipo:</label>
         <input type="text" [value]="jefeDni" readonly placeholder="Se carga al seleccionar jefe">
       </div>
 
       <!-- Actividad o Tarea -->
       <div class="field general-row-3">
-        <label>Actividad o Tarea: <span class="required-mark">*</span></label>
+        <label>Actividad o Tarea:</label>
         <select formControlName="actividadTarea">
           <option value="">Seleccione</option>
           <option value="Actividad">Actividad</option>
@@ -178,19 +178,19 @@
 
       <!-- Orden de Trabajo -->
       <div class="field field--wide general-row-3">
-        <label>Orden de Trabajo: <span class="required-mark">*</span></label>
+        <label>Orden de Trabajo:</label>
         <input type="text" formControlName="ordenTrabajo" placeholder="Orden de Trabajo">
       </div>
 
       <!-- Procedimiento de Trabajo -->
       <div class="field field--wide general-row-4">
-        <label>Procedimiento de Trabajo: <span class="required-mark">*</span></label>
+        <label>Procedimiento de Trabajo:</label>
         <input type="text" formControlName="procedimientoTrabajo" placeholder="Procedimiento de Trabajo">
       </div>
 
       <!-- Tipo Inspección (desde BD: Ins_Tipo_Inspeccion) -->
       <div class="field combo-field general-row-4">
-        <label>Tipo Inspección: <span class="required-mark">*</span></label>
+        <label>Tipo Inspección:</label>
         <div class="combo">
           <button
             type="button"
@@ -217,7 +217,7 @@
 
       <!-- Estado (solo en edición) -->
       <div class="field general-row-5" *ngIf="modoEdicion">
-        <label>Estado: <span class="required-mark">*</span></label>
+        <label>Estado:</label>
         <select formControlName="estado">
           <option value="A">Activo</option>
           <option value="I">Inactivo</option>

@@ -1,20 +1,22 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
 .dialog-card {
-  width: min(700px, calc(100vw - 32px));
+  /* Ocupa exactamente el ancho que le da el MatDialog (width: 620px / maxWidth: 96vw) */
+  width: 100%;
   max-width: 100%;
-  max-height: 90vh;
+  min-width: 0;
+  max-height: calc(100vh - 32px);
   overflow-x: hidden;
   overflow-y: auto;
+  box-sizing: border-box;
   padding: 1.35rem;
   border-radius: 16px;
   background: #ffffff;
-  box-sizing: border-box;
-}
-
-.dialog-card,
-.dialog-card *,
-.dialog-card *::before,
-.dialog-card *::after {
-  box-sizing: border-box;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
 }
 
 .dialog-card__header {
@@ -22,90 +24,40 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.1rem;
-  min-width: 0;
-}
-
-.dialog-card__header > div {
+  margin-bottom: 1rem;
   min-width: 0;
 }
 
 .dialog-card__eyebrow {
   margin: 0 0 0.3rem;
-  color: var(--accent, #f59e0b);
+  color: var(--accent, #ff9e31);
   font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.dialog-card__header h2 {
-  margin: 0;
-  color: var(--text-primary, #1f2937);
-  font-size: 1.3rem;
-}
-
-.dialog-card__description {
-  margin: 0.45rem 0 0;
-  color: var(--text-secondary, #64748b);
-  line-height: 1.45;
-}
-
+.dialog-card__header h2 { margin: 0; color: var(--text-primary, #1f2937); font-size: 1.3rem; }
+.dialog-card__description { margin: 0.45rem 0 0; color: var(--text-secondary, #64748b); line-height: 1.45; }
 .dialog-card__close {
-  width: 2.15rem;
-  min-width: 2.15rem;
-  max-width: 2.15rem;
-  height: 2.15rem;
-  border: 1px solid var(--line-soft, #e5e7eb);
-  border-radius: 8px;
-  background: #ffffff;
-  color: #64748b;
-  font-size: 1.35rem;
-  line-height: 1;
-  cursor: pointer;
-  flex: 0 0 auto;
+  flex: 0 0 auto; width: 2.15rem; height: 2.15rem; border: 1px solid var(--line-soft, #e5e7eb);
+  border-radius: 8px; background: #ffffff; color: #64748b; font-size: 1.35rem; line-height: 1; cursor: pointer;
 }
 
-.dialog-form {
-  display: grid;
-  gap: 1rem;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
+.dialog-form { display: grid; width: 100%; min-width: 0; max-width: 100%; gap: 1rem; box-sizing: border-box; overflow: hidden; }
 .dialog-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;
+  width: 100%; min-width: 0; box-sizing: border-box;
 }
-
-.field {
-  display: grid;
-  gap: 0.45rem;
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-}
-
-.field--full {
-  grid-column: 1 / -1;
-}
-
-.field > span,
-.field > label {
-  color: var(--text-primary, #1f2937);
-  font-weight: 700;
-}
+.field { display: grid; gap: 0.45rem; min-width: 0; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; }
+.field--full { grid-column: 1 / -1; }
+.field > span, .field > label { color: var(--text-primary, #1f2937); font-weight: 700; }
 
 .field input,
 .field select,
 .field textarea,
-.combo,
 .combo__trigger {
+  display: block;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -116,235 +68,65 @@
   color: var(--text-primary, #1f2937);
   outline: none;
   font: inherit;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
-
-.field input,
-.field select,
-.combo__trigger {
-  min-height: 2.75rem;
-  padding: 0.7rem 0.8rem;
-}
-
+.field input, .field select, .combo__trigger { min-height: 2.75rem; padding: 0.7rem 0.8rem; }
 .field textarea {
   display: block;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  min-height: 9rem;
-  max-height: 18rem;
+  height: 9rem;
+  min-height: 7rem;
+  max-height: 22rem;
   padding: 0.8rem;
+  margin: 0;
   line-height: 1.45;
   resize: vertical;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: auto;
+  inline-size: 100%;
+  max-inline-size: 100%;
 }
-
-.field input:focus,
-.field select:focus,
-.field textarea:focus,
-.combo__trigger:focus {
+.field input:focus, .field select:focus, .field textarea:focus, .combo__trigger:focus {
   border-color: var(--accent, #f59e0b);
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.14);
 }
+.field input::placeholder, .field textarea::placeholder { color: #9ca3af; }
+.field__hint { color: #64748b; font-size: 0.8rem; }
 
-.field input::placeholder,
-.field textarea::placeholder {
-  color: #9ca3af;
-}
-
-.field__hint {
-  color: #64748b;
-  font-size: 0.8rem;
-  line-height: 1.35;
-}
-
-.combo {
-  position: relative;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  overflow: visible;
-}
-
-.combo__trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.combo__trigger:disabled {
-  background: #f3f4f6;
-  color: #6b7280;
-  cursor: not-allowed;
-}
-
-.combo__trigger--placeholder {
-  color: #9ca3af;
-}
-
+.combo { position: relative; width: 100%; min-width: 0; }
+.combo__trigger { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; text-align: left; }
+.combo__trigger > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.combo__trigger:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
+.combo__trigger--placeholder { color: #9ca3af; }
 .combo__caret {
-  width: 9px;
-  height: 9px;
-  border-right: 2px solid #94a3b8;
-  border-bottom: 2px solid #94a3b8;
-  transform: rotate(45deg);
-  margin-left: auto;
-  flex: 0 0 auto;
-  transition: transform 0.16s ease;
+  width: 9px; height: 9px; border-right: 2px solid #94a3b8; border-bottom: 2px solid #94a3b8;
+  transform: rotate(45deg); margin-left: auto; flex: 0 0 auto; transition: transform 0.16s ease;
 }
-
-.combo--open .combo__caret {
-  transform: rotate(225deg);
-}
-
+.combo--open .combo__caret { transform: rotate(225deg); }
 .combo__panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  z-index: 1100;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  background: #ffffff;
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 1100;
+  overflow: hidden; border: 1px solid #e5e7eb; border-radius: 14px; background: #ffffff;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
 }
+.combo__search { display: block; width: 100%; min-width: 0; box-sizing: border-box; padding: 12px 14px; border: 0; border-bottom: 1px solid #eef2f7; outline: 0; background: #fff; font: inherit; }
+.combo__list { max-height: 250px; overflow: auto; }
+.combo__option { width: 100%; display: flex; align-items: baseline; gap: 0.55rem; padding: 0.75rem 0.9rem; border: 0; background: #fff; color: #24324a; cursor: pointer; text-align: left; font: inherit; }
+.combo__option:hover { background: #f5f7fb; }
+.combo__option--empty { color: #6b7280; font-weight: 600; border-bottom: 1px solid #f0f2f5; }
+.combo__option-code { flex: 0 0 auto; font-weight: 800; color: #475569; }
+.combo__option-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.combo__empty { padding: 12px 14px; color: #6b7280; font-size: 14px; }
 
-.combo__search {
-  width: 100%;
-  max-width: 100%;
-  padding: 12px 14px;
-  border: none;
-  border-bottom: 1px solid #eef2f7;
-  box-sizing: border-box;
-  outline: none;
-  background: #ffffff;
-  font: inherit;
-}
-
-.combo__list {
-  max-height: 250px;
-  overflow: auto;
-}
-
-.combo__option {
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 0.9rem;
-  border: none;
-  background: #ffffff;
-  color: #24324a;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-}
-
-.combo__option:hover {
-  background: #f5f7fb;
-}
-
-.combo__option--empty {
-  color: #6b7280;
-  font-weight: 600;
-  border-bottom: 1px solid #f0f2f5;
-}
-
-.combo__option-name {
-  width: 100%;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.combo__empty {
-  padding: 12px 14px;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.dialog-error {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0.75rem 0.9rem;
-  border-radius: 8px;
-  background: #fff1f2;
-  color: #be123c;
-}
-
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  flex-wrap: wrap;
-  padding-top: 0.15rem;
-}
-
-.btn-primary,
-.btn-secondary {
-  box-sizing: border-box;
-  min-height: 2.7rem;
-  min-width: 0;
-  max-width: 100%;
-  padding: 0.7rem 1rem;
-  border-radius: 9px;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  flex: 0 0 auto;
-}
-
-.btn-primary {
-  border: 1px solid var(--accent, #f59e0b);
-  background: var(--accent, #f59e0b);
-  color: #ffffff;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  border: 1px solid var(--line-soft, #e5e7eb);
-  background: #f8fafc;
-  color: var(--text-primary, #1f2937);
-}
+.dialog-error { margin: 0; padding: 0.75rem 0.9rem; border-radius: 8px; background: #fff1f2; color: #be123c; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap; width: 100%; box-sizing: border-box; }
+.btn-primary, .btn-secondary { min-height: 2.7rem; padding: 0.7rem 1rem; border-radius: 9px; font: inherit; font-weight: 700; cursor: pointer; box-sizing: border-box; }
+.btn-primary { border: 1px solid var(--accent, #f59e0b); background: var(--accent, #f59e0b); color: #fff; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-secondary { border: 1px solid var(--line-soft, #e5e7eb); background: #f8fafc; color: var(--text-primary, #1f2937); }
 
 @media (max-width: 640px) {
-  .dialog-card {
-    width: calc(100vw - 20px);
-    max-width: calc(100vw - 20px);
-    padding: 1rem;
-  }
-
-  .dialog-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .field--full {
-    grid-column: auto;
-  }
-
-  .dialog-actions {
-    justify-content: stretch;
-  }
-
-  .dialog-actions .btn-primary,
-  .dialog-actions .btn-secondary {
-    flex: 1 1 calc(50% - 0.375rem);
-  }
+  .dialog-card { max-height: calc(100vh - 20px); padding: 1rem; }
+  .dialog-grid { grid-template-columns: 1fr; }
+  .field--full { grid-column: auto; }
+  .dialog-actions > .btn-primary, .dialog-actions > .btn-secondary { flex: 1 1 140px; }
 }

@@ -5,6 +5,7 @@ export interface GrupoDetalleItem {
   detalleValor: number | null;
   grupoId: number | null;
   grupoNombre: string;
+  grupoDescripcion: string;
   estado: string;
 }
 
@@ -15,4 +16,5 @@ export interface GrupoDetalleFiltro {
   Detalle_Valor?: number;
   Grupo_Nombre?: string;
   Estado?: string;
+  Grupo_Descripcion?: string;
 }

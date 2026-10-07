@@ -23,8 +23,7 @@
           id="detalleNombre"
           formControlName="detalleNombre"
           placeholder="Ingrese el nombre o descripción del grupo detalle"
-          rows="6"
-          maxlength="2000"
+          rows="7"
           spellcheck="true"></textarea>
         <small class="field__hint">Puedes ampliar el área de texto desde la esquina inferior derecha.</small>
       </div>
@@ -51,7 +50,7 @@
             <input
               type="text"
               class="combo__search"
-              placeholder="Buscar grupo..."
+              placeholder="Buscar por código o nombre..."
               [value]="grupoBusqueda"
               (input)="onGrupoBusqueda($event)">
 
@@ -68,6 +67,7 @@
                 class="combo__option"
                 *ngFor="let grupo of gruposFiltrados"
                 (click)="seleccionarGrupo(grupo)">
+                <span class="combo__option-code">{{ grupo.grupoCod }}</span>
                 <span class="combo__option-name">{{ grupo.grupoNombre }}</span>
               </button>
 

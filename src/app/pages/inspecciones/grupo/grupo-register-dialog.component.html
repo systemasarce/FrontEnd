@@ -4,7 +4,7 @@
       <p class="dialog-card__eyebrow">Administración</p>
       <h2>{{ esEdicion ? 'Editar Grupo' : 'Nuevo Grupo' }}</h2>
       <p class="dialog-card__description">
-        {{ esEdicion ? 'Actualiza el código, nombre y estado del grupo.' : 'Registra un nuevo grupo.' }}
+        {{ esEdicion ? 'Actualiza el código, nombre, descripción y estado del grupo.' : 'Registra un nuevo grupo.' }}
       </p>
     </div>
 
@@ -21,6 +21,16 @@
       <label class="field">
         <span>Nombre</span>
         <input type="text" formControlName="grupoNombre" placeholder="Ingrese Nombre">
+      </label>
+
+      <label class="field field--full">
+        <span>Descripción</span>
+        <select formControlName="grupoDescripcion">
+          <option value="">Seleccione descripción</option>
+          <option value="INSPECCION PREVENCION">INSPECCION PREVENCION</option>
+          <option value="INSPECCION DE MEDIO AMBIENTE">INSPECCION DE MEDIO AMBIENTE</option>
+          <option value="OBSERVACIONES PLANEADAS">OBSERVACIONES PLANEADAS</option>
+        </select>
       </label>
 
       <label class="field field--full" *ngIf="esEdicion">

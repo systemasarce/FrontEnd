@@ -20,6 +20,7 @@ export class GrupoDetallePageComponent implements OnInit {
     Detalle_Nombre: '',
     Detalle_Valor: undefined,
     Grupo_Nombre: '',
+    Grupo_Descripcion: '',
     Estado: 'A'
   };
 
@@ -103,6 +104,7 @@ export class GrupoDetallePageComponent implements OnInit {
     this.filtros.Detalle_Nombre = '';
     this.filtros.Detalle_Valor = undefined;
     this.filtros.Grupo_Nombre = '';
+    this.filtros.Grupo_Descripcion = '';
     this.filtros.Estado = 'A';
     this.cargarGrupoDetalles();
   }

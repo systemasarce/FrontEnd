@@ -52,7 +52,8 @@ export class GrupoDetalleService {
         detalleValor: this.asNumber(item['Detalle_Valor'] ?? item['detalle_Valor'] ?? item['detalle_valor'] ?? item['Valor'] ?? item['valor']),
         grupoId: this.asNumber(item['Grupo_Id'] ?? item['grupo_Id'] ?? item['grupo_id']),
         grupoNombre: String(item['Grupo_Nombre'] ?? item['grupo_Nombre'] ?? item['grupo_nombre'] ?? '').trim(),
-        estado: String(item['Estado'] ?? item['estado'] ?? '').trim()
+        grupoDescripcion: String(item['Grupo_Descripcion'] ?? item['grupo_Descripcion'] ?? item['grupo_descripcion'] ?? '').trim(),
+                estado: String(item['Estado'] ?? item['estado'] ?? '').trim()
       }))
       .filter((item) => item.detalleId !== null || !!item.detalleCod || !!item.detalleNombre || item.detalleValor !== null || !!item.grupoNombre || !!item.estado);
   }

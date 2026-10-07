@@ -44,6 +44,22 @@
         [(ngModel)]="filtros.Grupo_Nombre">
     </label>
 
+    <label class="filter-field">
+      <span>Descripción</span>
+      <div class="custom-select-wrap">
+        <select
+          class="custom-select"
+          [(ngModel)]="filtros.Grupo_Descripcion"
+          name="grupoDescripcionFiltro">
+          <option value="">Todas</option>
+          <option value="INSPECCION PREVENCION">INSPECCION PREVENCION</option>
+          <option value="INSPECCION DE MEDIO AMBIENTE">INSPECCION DE MEDIO AMBIENTE</option>
+          <option value="OBSERVACIONES PLANEADAS">OBSERVACIONES PLANEADAS</option>
+        </select>
+        <span class="custom-select-arrow"></span>
+      </div>
+    </label>
+
     <label class="filter-field estado-field">
       <span>Estado</span>
       <div class="custom-select-wrap">
@@ -87,6 +103,7 @@
             <th>ID</th>
             <th>Código</th>
             <th>Nombre</th>
+            <th>Descripción</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -97,6 +114,7 @@
             <td>{{ grupo.grupoId ?? '-' }}</td>
             <td>{{ grupo.grupoCod ?? '-' }}</td>
             <td>{{ grupo.grupoNombre || '-' }}</td>
+            <td>{{ grupo.grupoDescripcion || '-' }}</td>
             <td>
               <span
                 class="estado-badge"

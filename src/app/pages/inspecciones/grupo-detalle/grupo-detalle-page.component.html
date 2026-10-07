@@ -41,6 +41,22 @@
       <input type="text" placeholder="Buscar por Grupo" [(ngModel)]="filtros.Grupo_Nombre">
     </label>
 
+    <label class="filter-field">
+      <span>Descripción</span>
+      <div class="custom-select-wrap">
+        <select
+          class="custom-select"
+          [(ngModel)]="filtros.Grupo_Descripcion"
+          name="grupoDescripcionFiltro">
+          <option value="">Todas</option>
+          <option value="INSPECCION PREVENCION">INSPECCION PREVENCION</option>
+          <option value="INSPECCION DE MEDIO AMBIENTE">INSPECCION DE MEDIO AMBIENTE</option>
+          <option value="OBSERVACIONES PLANEADAS">OBSERVACIONES PLANEADAS</option>
+        </select>
+        <span class="custom-select-arrow"></span>
+      </div>
+    </label>
+
     <label class="filter-field estado-field">
       <span>Estado</span>
       <div class="custom-select-wrap">
@@ -52,8 +68,10 @@
       </div>
     </label>
 
-    <button type="button" class="grupo-detalle-filters__search" (click)="buscar()">Buscar</button>
-    <button type="button" class="grupo-detalle-filters__clear" (click)="limpiar()">Limpiar</button>
+    <div class="grupo-detalle-filters__buttons">
+      <button type="button" class="grupo-detalle-filters__search" (click)="buscar()">Buscar</button>
+      <button type="button" class="grupo-detalle-filters__clear" (click)="limpiar()">Limpiar</button>
+    </div>
   </div>
 
   <div *ngIf="cargando" class="state-card">Cargando grupos detalle desde la API...</div>
@@ -69,23 +87,25 @@
       <table class="grupo-detalle-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Valor</th>
+            <th class="col-center">ID</th>
+            <th class="col-center">Código</th>
+            <th class="col-nombre">Nombre</th>
+            <th class="col-center">Valor</th>
             <th>Grupo</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th>Descripción</th>
+            <th class="col-center">Estado</th>
+            <th class="col-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of gruposDetallePaginados; trackBy: trackByGrupoDetalle">
-            <td>{{ item.detalleId ?? '-' }}</td>
-            <td>{{ item.detalleCod || '-' }}</td>
-            <td>{{ item.detalleNombre || '-' }}</td>
-            <td>{{ item.detalleValor ?? '-' }}</td>
+            <td class="col-center">{{ item.detalleId ?? '-' }}</td>
+            <td class="col-center">{{ item.detalleCod || '-' }}</td>
+            <td class="col-nombre">{{ item.detalleNombre || '-' }}</td>
+            <td class="col-center">{{ item.detalleValor ?? '-' }}</td>
             <td>{{ item.grupoNombre || '-' }}</td>
-            <td>
+            <td>{{ item.grupoDescripcion || '-' }}</td>
+            <td class="col-center">
               <span
                 class="estado-badge"
                 [class.estado-badge--activo]="formatEstado(item.estado) === 'Activo'"
@@ -93,7 +113,7 @@
                 {{ formatEstado(item.estado) }}
               </span>
             </td>
-            <td class="table-actions-cell">
+            <td class="table-actions-cell col-center">
               <button type="button" class="table-action" aria-label="Editar Grupo Detalle" (click)="editarGrupoDetalle(item)">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>

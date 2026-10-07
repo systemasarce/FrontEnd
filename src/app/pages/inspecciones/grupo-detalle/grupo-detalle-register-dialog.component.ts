@@ -64,6 +64,7 @@ export class GrupoDetalleRegisterDialogComponent implements OnInit {
         grupoId: detalle.grupoId,
         estado: this.normalizarEstado(detalle.estado)
       });
+      this.sincronizarGrupoSeleccionado();
     }
   }
 

@@ -25,6 +25,7 @@ export class GrupoRegisterDialogComponent implements OnInit {
   readonly form = this.fb.group({
     grupoCod: [null as number | null, [Validators.required, Validators.min(1)]],
     grupoNombre: ['', [Validators.required, Validators.maxLength(255)]],
+    grupoDescripcion: ['', [Validators.required]],
     estado: ['A', [Validators.required]]
   });
 
@@ -52,6 +53,7 @@ export class GrupoRegisterDialogComponent implements OnInit {
     this.form.patchValue({
       grupoCod: this.data?.grupo?.grupoCod ?? null,
       grupoNombre: String(this.data?.grupo?.grupoNombre ?? '').trim(),
+      grupoDescripcion: String(this.data?.grupo?.grupoDescripcion ?? '').trim(),
       estado: this.normalizarEstado(this.data?.grupo?.estado)
     });
   }
@@ -88,6 +90,7 @@ export class GrupoRegisterDialogComponent implements OnInit {
     const payload: RegistrarGrupoRequest = {
       Grupo_Cod: grupoCod,
       Grupo_Nombre: String(this.form.value.grupoNombre ?? '').trim(),
+      Grupo_Descripcion: String(this.form.value.grupoDescripcion ?? '').trim(),
       Usr_Reg: usrReg
     };
 
@@ -123,6 +126,7 @@ export class GrupoRegisterDialogComponent implements OnInit {
       Grupo_Id: id,
       Grupo_Cod: Number(this.form.value.grupoCod),
       Grupo_Nombre: String(this.form.value.grupoNombre ?? '').trim(),
+      Grupo_Descripcion: String(this.form.value.grupoDescripcion ?? '').trim(),
       Estado: this.normalizarEstado(this.form.value.estado),
       Usr_Mod: usrMod
     };
@@ -153,6 +157,10 @@ export class GrupoRegisterDialogComponent implements OnInit {
 
   get grupoNombreCtrl() {
     return this.form.controls.grupoNombre;
+  }
+
+  get grupoDescripcionCtrl() {
+    return this.form.controls.grupoDescripcion;
   }
 
   get estadoCtrl() {

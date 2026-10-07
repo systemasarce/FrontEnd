@@ -8,6 +8,7 @@ export interface RegistrarGrupoRequest {
   Grupo_Cod: number;
   Grupo_Nombre: string;
   Usr_Reg: string;
+  Grupo_Descripcion: string;
 }
 
 export interface ActualizarGrupoRequest {
@@ -16,6 +17,7 @@ export interface ActualizarGrupoRequest {
   Grupo_Nombre: string;
   Estado: string;
   Usr_Mod: string;
+  Grupo_Descripcion: string;
 }
 
 @Injectable({
@@ -25,7 +27,10 @@ export class GrupoService {
   constructor(private readonly apiService: ApiService) {}
 
   listar(filtros: GrupoFiltro = {}): Observable<any> {
-    return this.apiService.getListarGrupo(filtros);
+    return this.apiService.getListarGrupo({
+      ...filtros,
+      Grupo_Descripcion: String(filtros.Grupo_Descripcion ?? '').trim()
+    });
   }
 
 
@@ -52,6 +57,9 @@ export class GrupoService {
         ),
         grupoNombre: String(
           item['Grupo_Nombre'] ?? item['grupo_Nombre'] ?? item['grupo_nombre'] ?? item['Nombre'] ?? item['nombre'] ?? ''
+        ).trim(),
+        grupoDescripcion: String(
+          item['Grupo_Descripcion'] ?? item['grupo_Descripcion'] ?? item['grupo_descripcion'] ?? item['Descripcion'] ?? item['descripcion'] ?? ''
         ).trim(),
         estado: String(item['Estado'] ?? item['estado'] ?? item['Flg_Est'] ?? item['Flg_Estado'] ?? '').trim()
       }))

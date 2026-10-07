@@ -1,4 +1,7 @@
 .grupo-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   display: grid;
   gap: 1.35rem;
   padding: 1.5rem;
@@ -8,6 +11,7 @@
 }
 
 .grupo-card__header {
+  min-width: 0;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -62,13 +66,15 @@
 }
 
 .grupo-filters {
+  min-width: 0;
   display: grid;
-  grid-template-columns: minmax(7rem, 0.6fr) minmax(8rem, 0.8fr) minmax(14rem, 1.4fr) minmax(11rem, 0.9fr) auto auto;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
   align-items: end;
   gap: 1rem;
 }
 
 .filter-field {
+  min-width: 0;
   display: grid;
   gap: 0.45rem;
 }
@@ -81,6 +87,8 @@
 /* Inputs normales */
 .filter-field input {
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 2.75rem;
   padding: 0.7rem 0.8rem;
   border: 1px solid var(--line-soft, #d7dfeb);
@@ -103,12 +111,15 @@
 }
 
 .custom-select-wrap {
+  min-width: 0;
   position: relative;
   width: 100%;
 }
 
 .custom-select {
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 2.75rem;
   padding: 0.7rem 2.2rem 0.7rem 0.8rem;
   border: 1px solid var(--line-soft, #d7dfeb);
@@ -143,6 +154,13 @@
   pointer-events: none;
 }
 
+.grupo-filters__search,
+.grupo-filters__clear {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .grupo-filters__search {
   border: 1px solid var(--accent, #ff9e31);
   background: var(--accent, #ff9e31);
@@ -175,6 +193,7 @@
 }
 
 .table-shell {
+  min-width: 0;
   overflow-x: hidden;
   border: 1px solid var(--line-soft, #d7dfeb);
   border-radius: 12px;
@@ -184,7 +203,7 @@
 .grupo-table {
   width: 100%;
   min-width: 0;
-  table-layout: auto;
+  table-layout: fixed;
   border-collapse: collapse;
 }
 
@@ -275,12 +294,8 @@
     grid-template-columns: 1fr;
   }
 
-  .table-shell {
-    overflow-x: auto;
-  }
-
   .grupo-table {
-    min-width: 30rem;
+    min-width: 42rem;
   }
 }
 // ── Paginación ───────────────────────────────────────────────────
@@ -341,5 +356,36 @@
     color: #aaa;
     font-size: 0.85rem;
     user-select: none;
+  }
+}
+@media (max-width: 1100px) {
+  .grupo-card__header {
+    flex-wrap: wrap;
+  }
+
+  .grupo-card__actions {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .grupo-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .grupo-card {
+    padding: 1rem;
+  }
+
+  .grupo-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .grupo-table th,
+  .grupo-table td {
+    padding: 0.7rem;
+    word-break: break-word;
   }
 }
